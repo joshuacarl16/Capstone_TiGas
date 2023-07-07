@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:tigas_application/widgets/bottom_navbar.dart';
+import 'package:tigas_application/screens/login_screen.dart';
 
 class ProfilePage extends StatelessWidget {
   final int selectedTab;
@@ -19,9 +19,19 @@ class ProfilePage extends StatelessWidget {
             ],
           ),
         ),
-      ),
-      bottomNavigationBar: NavBar(
-        selectedTab: selectedTab,
+        child: Center(
+          child: IconButton(
+            icon: Icon(Icons.logout),
+            onPressed: () => {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: ((context) => LoginScreen()),
+                ),
+              ),
+            },
+          ),
+        ),
       ),
     );
   }

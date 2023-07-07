@@ -1,73 +1,74 @@
+// ignore_for_file: must_be_immutable
+
 import 'package:flutter/material.dart';
+import 'package:salomon_bottom_bar/salomon_bottom_bar.dart';
+import 'package:tigas_application/screens/ads_screen.dart';
 import 'package:tigas_application/screens/camera_screen.dart';
 import 'package:tigas_application/screens/homepage_screen.dart';
-import 'package:tigas_application/screens/profile_screen.dart';
+import 'package:tigas_application/widgets/side_bar.dart';
 
 class NavBar extends StatefulWidget {
-  final int selectedTab;
+  int selectedTab;
 
-  const NavBar({super.key, required this.selectedTab});
+  NavBar({Key? key, required this.selectedTab}) : super(key: key);
 
   @override
   State<NavBar> createState() => _NavBarState();
 }
 
+final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
 class _NavBarState extends State<NavBar> {
   final List<Widget> _screens = [
-    HomePage(
-      selectedTab: 0,
-    ),
+    HomePage(selectedTab: 0),
     CameraScreen(),
-    ProfilePage(
-      selectedTab: 2,
-    ),
+    CommercialPage(selectedTab: 2),
   ];
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(vertical: 14),
-      decoration: BoxDecoration(
-        color: Colors.grey[300],
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(16),
+    return Scaffold(
+      key: _scaffoldKey,
+      appBar: AppBar(
+        centerTitle: true,
+        title: Image.asset(
+          'assets/TiGas.png',
+          fit: BoxFit.contain,
+          height: 140,
+        ),
+        backgroundColor: Color(0xFF609966),
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.menu),
+          onPressed: () => _scaffoldKey.currentState?.openDrawer(),
         ),
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          navBarItem(Icons.local_gas_station, 0),
-          navBarItem(Icons.camera, 1),
-          navBarItem(Icons.account_circle_outlined, 2),
+      drawer: DrawerContent(),
+      body: _screens[widget.selectedTab],
+      bottomNavigationBar: SalomonBottomBar(
+        currentIndex: widget.selectedTab,
+        onTap: (index) {
+          setState(() {
+            widget.selectedTab = index;
+          });
+        },
+        items: [
+          SalomonBottomBarItem(
+            icon: Icon(Icons.local_gas_station),
+            title: Text("Home"),
+            selectedColor: Color(0xFF175124),
+          ),
+          SalomonBottomBarItem(
+            icon: Icon(Icons.camera),
+            title: Text("Camera"),
+            selectedColor: Colors.teal,
+          ),
+          SalomonBottomBarItem(
+            icon: Icon(Icons.flag),
+            title: Text("Promos"),
+            selectedColor: Colors.red,
+          ),
         ],
-      ),
-    );
-  }
-
-  Widget navBarItem(IconData icon, int index) {
-    final isSelected = widget.selectedTab == index;
-    return GestureDetector(
-      onTap: () {
-        setState(() {});
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => _screens[index]),
-        );
-      },
-      child: Container(
-        padding: EdgeInsets.symmetric(vertical: 10, horizontal: 26),
-        decoration: BoxDecoration(
-          color: isSelected ? Color(0xFF175124) : Colors.transparent,
-          borderRadius: BorderRadius.circular(24),
-        ),
-        child: Row(
-          children: [
-            Icon(
-              icon,
-              color: isSelected ? Colors.white : Colors.black,
-            ),
-          ],
-        ),
       ),
     );
   }

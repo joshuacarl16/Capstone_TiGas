@@ -1,13 +1,12 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:flutter/material.dart';
-
-import '../widgets/bottom_navbar.dart';
+import 'package:tigas_application/widgets/station_card.dart';
 
 class HomePage extends StatelessWidget {
   final int selectedTab;
 
-  const HomePage({Key? key, required this.selectedTab});
+  HomePage({super.key, required this.selectedTab});
 
   @override
   Widget build(BuildContext context) {
@@ -91,28 +90,13 @@ class HomePage extends StatelessWidget {
                 itemCount: 15,
                 itemBuilder: (context, index) {
                   // Replace with your item builder logic
-                  return Padding(
-                    padding: const EdgeInsets.all(10.0),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.grey[300],
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      padding: EdgeInsets.all(50.0),
-                      child: Text(
-                        'Placeholder.............',
-                        style: TextStyle(
-                            color: Colors.black, fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                  );
+                  return StationCard();
                 },
               ),
             ),
           ],
         ),
       ),
-      bottomNavigationBar: NavBar(selectedTab: selectedTab),
     );
   }
 }
