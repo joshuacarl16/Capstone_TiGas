@@ -1,6 +1,8 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:flutter/material.dart';
+import 'package:tigas_application/models/station_list.dart';
+import 'package:tigas_application/models/station_model.dart';
 import 'package:tigas_application/widgets/station_card.dart';
 import 'package:tigas_application/widgets/station_info.dart';
 
@@ -114,11 +116,19 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
         child: ListView.builder(
-          itemCount: 15,
+          itemCount: stations.length,
           itemBuilder: (context, index) {
-            // Replace with your item builder logic
+            Station station = stations[index];
             return ListTile(
-              title: StationCard(),
+              title: StationCard(
+                imagePath: station.imagePath,
+                brand: station.brand,
+                address: station.address,
+                distance: station.distance,
+                gasTypes: station.gasTypes,
+                gasTypeInfo: station.gasTypeInfo,
+                services: station.services,
+              ),
               onTap: () {
                 showModalBottomSheet(
                     context: context,

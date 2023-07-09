@@ -18,6 +18,8 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(seedColor: Color(0xFF609966)),
         ),
-        home: LoadingScreen());
+        home: HomePage(
+          selectedTab: 0,
+        ));
   }
 }
