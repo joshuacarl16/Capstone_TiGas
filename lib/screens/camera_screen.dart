@@ -218,7 +218,7 @@ class _CameraScreenState extends State<CameraScreen>
           await _textRecognizer.processImage(inputImage);
 
       List<TextBlock> blocks = recognizedText.blocks
-        ..sort((a, b) => a.boundingBox!.top.compareTo(b.boundingBox!.top));
+        ..sort((a, b) => a.boundingBox.top.compareTo(b.boundingBox!.top));
 
       StringBuffer buffer = StringBuffer();
 
