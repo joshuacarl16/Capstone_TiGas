@@ -46,6 +46,7 @@ dependencies:
   permission_handler: ^10.4.1
   riverpod: ^2.3.6
   salomon_bottom_bar: ^3.3.2
+  image_picker: ^0.8.4+4
 
 flutter_launcher_icons:
   android: true
