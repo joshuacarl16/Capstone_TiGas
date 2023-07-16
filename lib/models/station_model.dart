@@ -1,3 +1,5 @@
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+
 class Station {
   final String imagePath;
   final String brand;
@@ -5,7 +7,7 @@ class Station {
   final String distance;
   final List<String> gasTypes;
   final Map<String, String> gasTypeInfo;
-  final List<String> services;
+  final List<FaIcon> services;
 
   Station({
     required this.imagePath,

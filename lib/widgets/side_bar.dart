@@ -1,5 +1,9 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:tigas_application/auth/firebase_auth.dart';
 import 'package:tigas_application/screens/login_screen.dart';
+import 'package:tigas_application/admin/admin_dashboard.dart';
 
 class DrawerContent extends StatelessWidget {
   const DrawerContent({super.key});
@@ -11,10 +15,10 @@ class DrawerContent extends StatelessWidget {
         children: [
           DrawerHeader(
             decoration: BoxDecoration(color: Color(0xFF609966)),
-            child: Column(
+            child: Row(
               children: [
                 Container(
-                  padding: EdgeInsets.all(0),
+                  padding: EdgeInsets.all(4),
                   decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       border: Border.all(color: Colors.white, width: 2)),
@@ -23,9 +27,9 @@ class DrawerContent extends StatelessWidget {
                     radius: 40,
                   ),
                 ),
-                SizedBox(height: 8),
+                SizedBox(width: 8),
                 Text(
-                  'Admin Char',
+                  FirebaseAuth.instance.currentUser!.displayName ?? '',
                   style: TextStyle(fontSize: 18, color: Colors.white),
                 )
               ],
@@ -48,6 +52,10 @@ class DrawerContent extends StatelessWidget {
 
   void _navigateToPage(BuildContext context, String item) {
     switch (item) {
+      case 'Admin':
+        Navigator.push(
+            context, MaterialPageRoute(builder: (context) => AdminDashboard()));
+        break;
       case 'About':
         break;
       case 'Contact':
@@ -55,8 +63,7 @@ class DrawerContent extends StatelessWidget {
       case 'Settings':
         break;
       case 'Sign Out':
-        Navigator.push(
-            context, MaterialPageRoute(builder: (context) => LoginScreen()));
+        context.read<FirebaseAuthMethods>().signOut(context);
         break;
     }
   }
@@ -88,6 +95,7 @@ class SidebarItems extends StatelessWidget {
 }
 
 final List<String> _menuItems = <String>[
+  'Admin',
   'About',
   'Contact',
   'Settings',

@@ -65,8 +65,8 @@ class _CameraScreenState extends State<CameraScreen>
             begin: Alignment.topCenter,
             end: Alignment.center,
             colors: [
-              Color(0xFF609966), // Start color
-              Color(0xFF175124), // End color
+              Color(0xFF609966),
+              Color(0xFF175124),
             ],
           ),
         ),
@@ -75,7 +75,6 @@ class _CameraScreenState extends State<CameraScreen>
           builder: (context, snapshot) {
             return Stack(
               children: [
-                //Show camera feed behind everything
                 if (_isPermissionGranted)
                   FutureBuilder<List<CameraDescription>>(
                     future: availableCameras(),
@@ -242,51 +241,3 @@ class _CameraScreenState extends State<CameraScreen>
     }
   }
 }
-
-//   Future<void> _scanImage() async {
-//     if (_cameraController == null) return;
-
-//     final navigator = Navigator.of(context);
-
-//     try {
-//       final pictureFile = await _cameraController!.takePicture();
-
-//       final croppedFile = await ImageCropper().cropImage(
-//           sourcePath: pictureFile.path,
-//           compressFormat: ImageCompressFormat.jpg,
-//           compressQuality: 100,
-//           uiSettings: [
-//             AndroidUiSettings(
-//                 toolbarTitle: 'Confirm Submission',
-//                 toolbarColor: Color(0xFF609966),
-//                 toolbarWidgetColor: Colors.white,
-//                 initAspectRatio: CropAspectRatioPreset.original,
-//                 lockAspectRatio: false),
-//             IOSUiSettings(
-//               title: 'Confirm Submission',
-//             ),
-//           ]);
-
-//       if (croppedFile == null) {
-//         return;
-//       }
-
-//       final file = File(croppedFile.path);
-
-//       final inputImage = InputImage.fromFile(file);
-//       final recognizedText = await _textRecognizer.processImage(inputImage);
-
-//       await navigator.push(
-//         MaterialPageRoute(
-//           builder: (context) => ResultScreen(text: recognizedText.text),
-//         ),
-//       );
-//     } catch (e) {
-//       ScaffoldMessenger.of(context).showSnackBar(
-//         const SnackBar(
-//           content: Text('An error occured while scanning text'),
-//         ),
-//       );
-//     }
-//   }
-// }

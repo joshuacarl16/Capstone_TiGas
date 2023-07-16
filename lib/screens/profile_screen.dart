@@ -14,8 +14,8 @@ class ProfilePage extends StatelessWidget {
             begin: Alignment.topCenter,
             end: Alignment.center,
             colors: [
-              Color(0xFF609966), // Start color
-              Color(0xFF175124), // End color
+              Color(0xFF609966),
+              Color(0xFF175124),
             ],
           ),
         ),

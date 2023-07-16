@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "878287150120",
+    "project_id": "tigas-2939a",
+    "storage_bucket": "tigas-2939a.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:878287150120:android:6bf24e4e190f40de75291d",
+        "android_client_info": {
+          "package_name": "com.example.tigas_application"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "878287150120-a93op8vs5890llid96825sn3pvh9jblr.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC2eOy3eCX53Ee1nk3Uk7OWIOV2KXoFDIU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "878287150120-a93op8vs5890llid96825sn3pvh9jblr.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

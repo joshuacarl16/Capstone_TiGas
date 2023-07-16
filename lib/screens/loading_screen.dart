@@ -1,63 +1,5 @@
-// import 'package:flutter/material.dart';
-// import 'dart:async';
-
-// import 'homepage_screen.dart';
-
-// class LoadingScreen extends StatefulWidget {
-//   @override
-//   _LoadingScreenState createState() => _LoadingScreenState();
-// }
-
-// class _LoadingScreenState extends State<LoadingScreen> {
-//   @override
-//   void initState() {
-//     super.initState();
-//     startTimer();
-//   }
-
-//   void startTimer() {
-//     Timer(Duration(seconds: 3), () {
-//       Navigator.pushReplacement(
-//         context,
-//         MaterialPageRoute(
-//           builder: (context) => HomePage(selectedTab: 0),
-//         ),
-//       );
-//     });
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       body: Container(
-//         decoration: BoxDecoration(
-//           gradient: LinearGradient(
-//             begin: Alignment.topCenter,
-//             end: Alignment.center,
-//             colors: [
-//               Color(0xFF609966), // Start color
-//               Color(0xFF175124), // End color
-//             ],
-//           ),
-//         ),
-//         child: Center(
-//           child: Stack(
-//             alignment: Alignment.bottomCenter,
-//             children: [
-//               Container(
-//                 width: 300,
-//                 height: 300,
-//                 child: Image.asset('assets/TiGas.png'),
-//               ),
-//             ],
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-// }
-
 import 'package:flutter/material.dart';
+import 'package:tigas_application/main.dart';
 import 'package:tigas_application/screens/login_screen.dart';
 import 'dart:async';
 
@@ -96,7 +38,7 @@ class _LoadingScreenState extends State<LoadingScreen>
         context,
         PageRouteBuilder(
           pageBuilder: (context, animation, secondaryAnimation) =>
-              LoginScreen(),
+              const AuthWrapper(),
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
             return FadeTransition(
               opacity: animation,
@@ -118,8 +60,8 @@ class _LoadingScreenState extends State<LoadingScreen>
             begin: Alignment.topCenter,
             end: Alignment.center,
             colors: [
-              Color(0xFF609966), // Start color
-              Color(0xFF175124), // End color
+              Color(0xFF609966),
+              Color(0xFF175124),
             ],
           ),
         ),

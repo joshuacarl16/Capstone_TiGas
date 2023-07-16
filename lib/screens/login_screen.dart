@@ -1,9 +1,32 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:tigas_application/auth/firebase_auth.dart';
 import 'package:tigas_application/screens/register_screen.dart';
-import 'package:tigas_application/widgets/bottom_navbar.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends StatefulWidget {
+  @override
+  _LoginScreenState createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+
+  @override
+  void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
+
+  void loginUser() {
+    context.read<FirebaseAuthMethods>().loginWithEmail(
+        email: emailController.text,
+        password: passwordController.text,
+        context: context);
+  }
+
   @override
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
@@ -18,8 +41,8 @@ class LoginScreen extends StatelessWidget {
             begin: Alignment.topCenter,
             end: Alignment.center,
             colors: [
-              Color(0xFF609966), // Start color
-              Color(0xFF175124), // End color
+              Color(0xFF609966),
+              Color(0xFF175124),
             ],
           ),
         ),
@@ -71,7 +94,7 @@ class LoginScreen extends StatelessWidget {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    "Username",
+                                    "Email",
                                     style: GoogleFonts.inter(
                                       fontSize: screenHeight * 0.018,
                                       color: Colors.grey[700],
@@ -82,9 +105,10 @@ class LoginScreen extends StatelessWidget {
                                     style: TextStyle(
                                       fontSize: screenHeight * 0.02,
                                     ),
+                                    controller: emailController,
                                     decoration: InputDecoration(
-                                      labelText: 'Username',
-                                      hintText: 'pulanghasang',
+                                      labelText: 'Email',
+                                      hintText: 'somethingsomething@gmail.com',
                                       prefixIcon: Icon(Icons.mail),
                                       border: OutlineInputBorder(),
                                     ),
@@ -102,9 +126,11 @@ class LoginScreen extends StatelessWidget {
                                     style: TextStyle(
                                       fontSize: screenHeight * 0.02,
                                     ),
+                                    controller: passwordController,
                                     obscureText: true,
                                     decoration: InputDecoration(
                                       labelText: 'Password',
+                                      hintText: '*******',
                                       prefixIcon: Icon(Icons.lock),
                                       border: OutlineInputBorder(),
                                     ),
@@ -124,15 +150,7 @@ class LoginScreen extends StatelessWidget {
                                           vertical: screenHeight * 0.025,
                                         ),
                                       ),
-                                      onPressed: () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) =>
-                                                NavBar(selectedTab: 0),
-                                          ),
-                                        );
-                                      },
+                                      onPressed: loginUser,
                                       child: Text(
                                         'LOGIN',
                                         style: TextStyle(
@@ -204,186 +222,3 @@ class LoginScreen extends StatelessWidget {
     );
   }
 }
-
-
-
-// import 'package:flutter/material.dart';
-// import 'package:tigas_application/screens/register_screen.dart';
-// import 'package:tigas_application/widgets/bottom_navbar.dart';
-// import 'package:google_fonts/google_fonts.dart';
-
-// class LoginScreen extends StatelessWidget {
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       resizeToAvoidBottomInset: false,
-//       body: Container(
-//         decoration: BoxDecoration(
-//           gradient: LinearGradient(
-//             begin: Alignment.topCenter,
-//             end: Alignment.center,
-//             colors: [
-//               Color(0xFF609966), // Start color
-//               Color(0xFF175124), // End color
-//             ],
-//           ),
-//         ),
-//         child: Column(
-//           mainAxisAlignment: MainAxisAlignment.end,
-//           children: [
-//             Column(
-//               mainAxisAlignment: MainAxisAlignment.end,
-//               children: [
-//                 Stack(
-//                   children: [
-//                     Container(
-//                       height: 535,
-//                       width: double.infinity,
-//                       decoration: const BoxDecoration(
-//                         color: Colors.white,
-//                         borderRadius: BorderRadius.only(
-//                           topLeft: Radius.circular(40),
-//                           topRight: Radius.circular(40),
-//                         ),
-//                       ),
-//                       child: Padding(
-//                         padding: const EdgeInsets.fromLTRB(30, 20, 30, 20),
-//                         child: Column(
-//                           crossAxisAlignment: CrossAxisAlignment.start,
-//                           children: [
-//                             Text(
-//                               "Log In",
-//                               style: GoogleFonts.inter(
-//                                 fontSize: 40,
-//                                 fontWeight: FontWeight.bold,
-//                                 color: Colors.grey,
-//                               ),
-//                             ),
-//                             const SizedBox(
-//                               height: 20,
-//                             ),
-//                             Padding(
-//                               padding: const EdgeInsets.fromLTRB(15, 0, 0, 20),
-//                               child: Column(
-//                                 crossAxisAlignment: CrossAxisAlignment.start,
-//                                 children: [
-//                                   Text(
-//                                     "Email",
-//                                     style: GoogleFonts.inter(
-//                                       fontSize: 18,
-//                                       color: Colors.grey[700],
-//                                     ),
-//                                   ),
-//                                   const SizedBox(
-//                                     height: 10,
-//                                   ),
-//                                   TextField(
-//                                     decoration: InputDecoration(
-//                                       labelText: 'Email Address',
-//                                       hintText: 'example@gmail.com',
-//                                       prefixIcon: Icon(Icons.mail),
-//                                       border: OutlineInputBorder(),
-//                                     ),
-//                                   ),
-//                                   const SizedBox(
-//                                     height: 20,
-//                                   ),
-//                                   Text(
-//                                     "Password",
-//                                     style: GoogleFonts.inter(
-//                                       fontSize: 18,
-//                                       color: Colors.grey[700],
-//                                     ),
-//                                   ),
-//                                   const SizedBox(
-//                                     height: 10,
-//                                   ),
-//                                   const TextField(
-//                                     obscureText: true,
-//                                     decoration: InputDecoration(
-//                                       labelText: 'Password',
-//                                       prefixIcon: Icon(Icons.lock),
-//                                       border: OutlineInputBorder(),
-//                                     ),
-//                                   ),
-//                                   const SizedBox(
-//                                     height: 40,
-//                                   ),
-//                                   Center(
-//                                     child: ElevatedButton(
-//                                         style: ElevatedButton.styleFrom(
-//                                             shape: RoundedRectangleBorder(
-//                                               borderRadius:
-//                                                   BorderRadius.circular(30.0),
-//                                             ),
-//                                             elevation: 3,
-//                                             padding: EdgeInsets.symmetric(
-//                                                 horizontal: 135, vertical: 20)),
-//                                         onPressed: () {
-//                                           Navigator.push(
-//                                             context,
-//                                             MaterialPageRoute(
-//                                                 builder: (context) =>
-//                                                     NavBar(selectedTab: 0)),
-//                                           );
-//                                         },
-//                                         child: Text('LOGIN')),
-//                                   ),
-//                                   const SizedBox(
-//                                     height: 12,
-//                                   ),
-//                                   Padding(
-//                                     padding:
-//                                         const EdgeInsets.fromLTRB(35, 0, 0, 0),
-//                                     child: Row(
-//                                       children: [
-//                                         Text(
-//                                           "Don't have an account?",
-//                                           style: GoogleFonts.inter(
-//                                             fontSize: 15,
-//                                             color: Colors.grey[700],
-//                                           ),
-//                                         ),
-//                                         TextButton(
-//                                           child: Text(
-//                                             "Sign Up",
-//                                             style: GoogleFonts.inter(
-//                                               fontSize: 15,
-//                                               color: Colors.green,
-//                                             ),
-//                                           ),
-//                                           onPressed: () => Navigator.push(
-//                                             context,
-//                                             MaterialPageRoute(
-//                                                 builder: (context) =>
-//                                                     RegisScreen()),
-//                                           ),
-//                                         ),
-//                                       ],
-//                                     ),
-//                                   ),
-//                                 ],
-//                               ),
-//                             ),
-//                           ],
-//                         ),
-//                       ),
-//                     ),
-//                     Transform.translate(
-//                       offset: const Offset(0, -300),
-//                       child: Image.asset(
-//                         'assets/TiGas.png',
-//                         scale: 1.5,
-//                         width: double.infinity,
-//                       ),
-//                     ),
-//                   ],
-//                 )
-//               ],
-//             ),
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-// }

@@ -1,3 +1,6 @@
+import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+
 import 'station_model.dart';
 
 List<Station> stations = [
@@ -12,7 +15,12 @@ List<Station> stations = [
       'Diesel': '56.78',
       'Premium': '90.12',
     },
-    services: ['Air', 'Water', 'Oil', 'Restroom'],
+    services: [
+      FaIcon(FontAwesomeIcons.wind, color: Colors.green[700]),
+      FaIcon(FontAwesomeIcons.droplet, color: Colors.green[700]),
+      FaIcon(FontAwesomeIcons.oilCan, color: Colors.green[700]),
+      FaIcon(FontAwesomeIcons.restroom, color: Colors.green[700]),
+    ],
   ),
   Station(
     imagePath: 'assets/petron.png',
@@ -25,7 +33,12 @@ List<Station> stations = [
       'Diesel': '56.78',
       'Premium': '90.12',
     },
-    services: ['Air', 'Water', 'Oil', 'Restroom'],
+    services: [
+      FaIcon(FontAwesomeIcons.wind, color: Colors.green[700]),
+      FaIcon(FontAwesomeIcons.droplet, color: Colors.green[700]),
+      FaIcon(FontAwesomeIcons.oilCan, color: Colors.green[700]),
+      FaIcon(FontAwesomeIcons.restroom, color: Colors.green[700]),
+    ],
   ),
   Station(
     imagePath: 'assets/caltex.png',
@@ -38,7 +51,12 @@ List<Station> stations = [
       'Diesel': '56.78',
       'Premium': '90.12',
     },
-    services: ['Air', 'Water', 'Oil', 'Restroom'],
+    services: [
+      FaIcon(FontAwesomeIcons.wind, color: Colors.green[700]),
+      FaIcon(FontAwesomeIcons.droplet, color: Colors.green[700]),
+      FaIcon(FontAwesomeIcons.oilCan, color: Colors.green[700]),
+      FaIcon(FontAwesomeIcons.restroom, color: Colors.green[700]),
+    ],
   ),
   Station(
     imagePath: 'assets/seaoil.png',
@@ -51,7 +69,12 @@ List<Station> stations = [
       'Diesel': '56.78',
       'Premium': '90.12',
     },
-    services: ['Air', 'Water', 'Oil', 'Restroom'],
+    services: [
+      FaIcon(FontAwesomeIcons.wind, color: Colors.green[700]),
+      FaIcon(FontAwesomeIcons.droplet, color: Colors.green[700]),
+      FaIcon(FontAwesomeIcons.oilCan, color: Colors.green[700]),
+      FaIcon(FontAwesomeIcons.restroom, color: Colors.green[700]),
+    ],
   ),
   Station(
     imagePath: 'assets/total.png',
@@ -64,7 +87,12 @@ List<Station> stations = [
       'Diesel': '56.78',
       'Premium': '90.12',
     },
-    services: ['Air', 'Water', 'Oil', 'Restroom'],
+    services: [
+      FaIcon(FontAwesomeIcons.wind, color: Colors.green[700]),
+      FaIcon(FontAwesomeIcons.droplet, color: Colors.green[700]),
+      FaIcon(FontAwesomeIcons.oilCan, color: Colors.green[700]),
+      FaIcon(FontAwesomeIcons.restroom, color: Colors.green[700]),
+    ],
   ),
   Station(
     imagePath: 'assets/shell.png',
@@ -77,7 +105,12 @@ List<Station> stations = [
       'Diesel': '56.78',
       'Premium': '90.12',
     },
-    services: ['Air', 'Water', 'Oil', 'Restroom'],
+    services: [
+      FaIcon(FontAwesomeIcons.wind, color: Colors.green[700]),
+      FaIcon(FontAwesomeIcons.droplet, color: Colors.green[700]),
+      FaIcon(FontAwesomeIcons.oilCan, color: Colors.green[700]),
+      FaIcon(FontAwesomeIcons.restroom, color: Colors.green[700]),
+    ],
   ),
   Station(
     imagePath: 'assets/petron.png',
@@ -90,7 +123,12 @@ List<Station> stations = [
       'Diesel': '56.78',
       'Premium': '90.12',
     },
-    services: ['Air', 'Water', 'Oil', 'Restroom'],
+    services: [
+      FaIcon(FontAwesomeIcons.wind, color: Colors.green[700]),
+      FaIcon(FontAwesomeIcons.droplet, color: Colors.green[700]),
+      FaIcon(FontAwesomeIcons.oilCan, color: Colors.green[700]),
+      FaIcon(FontAwesomeIcons.restroom, color: Colors.green[700]),
+    ],
   ),
   Station(
     imagePath: 'assets/caltex.png',
@@ -103,7 +141,12 @@ List<Station> stations = [
       'Diesel': '56.78',
       'Premium': '90.12',
     },
-    services: ['Air', 'Water', 'Oil', 'Restroom'],
+    services: [
+      FaIcon(FontAwesomeIcons.wind, color: Colors.green[700]),
+      FaIcon(FontAwesomeIcons.droplet, color: Colors.green[700]),
+      FaIcon(FontAwesomeIcons.oilCan, color: Colors.green[700]),
+      FaIcon(FontAwesomeIcons.restroom, color: Colors.green[700]),
+    ],
   ),
   Station(
     imagePath: 'assets/seaoil.png',
@@ -116,7 +159,12 @@ List<Station> stations = [
       'Diesel': '56.78',
       'Premium': '90.12',
     },
-    services: ['Air', 'Water', 'Oil', 'Restroom'],
+    services: [
+      FaIcon(FontAwesomeIcons.wind, color: Colors.green[700]),
+      FaIcon(FontAwesomeIcons.droplet, color: Colors.green[700]),
+      FaIcon(FontAwesomeIcons.oilCan, color: Colors.green[700]),
+      FaIcon(FontAwesomeIcons.restroom, color: Colors.green[700]),
+    ],
   ),
   Station(
     imagePath: 'assets/total.png',
@@ -129,6 +177,11 @@ List<Station> stations = [
       'Diesel': '56.78',
       'Premium': '90.12',
     },
-    services: ['Air', 'Water', 'Oil', 'Restroom'],
+    services: [
+      FaIcon(FontAwesomeIcons.wind, color: Colors.green[700]),
+      FaIcon(FontAwesomeIcons.droplet, color: Colors.green[700]),
+      FaIcon(FontAwesomeIcons.oilCan, color: Colors.green[700]),
+      FaIcon(FontAwesomeIcons.restroom, color: Colors.green[700]),
+    ],
   )
 ];

@@ -14,7 +14,7 @@ class _MapScreenState extends State<MapScreen> {
       body: Container(
         child: Center(
           child: Text(
-            'Sike wa pay map!',
+            'wa pa!',
             style: TextStyle(fontSize: 100),
           ),
         ),

@@ -1,10 +1,13 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:tigas_application/models/station_list.dart';
 import 'package:tigas_application/models/station_model.dart';
 import 'package:tigas_application/widgets/station_card.dart';
 import 'package:tigas_application/widgets/station_info.dart';
+import 'package:flutter_google_places/flutter_google_places.dart';
+import 'package:google_maps_webservice/places.dart';
 
 class HomePage extends StatefulWidget {
   final int selectedTab;
@@ -16,6 +19,73 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  List<String> services = ['Air', 'Water', 'Oil', 'Restroom'];
+  List<bool> serviceSelections = List<bool>.filled(4, false);
+  final _places =
+      GoogleMapsPlaces(apiKey: "AIzaSyDDGzL8DvSecRgC6cZIyU1WpeS-MU2Xzrw");
+
+  void _filterServices() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Filter Services'),
+          content: SingleChildScrollView(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxHeight: MediaQuery.of(context).size.height * 0.25,
+              ),
+              child: Column(
+                children: services.asMap().entries.map((entry) {
+                  return CheckboxListTile(
+                    title: Text(entry.value),
+                    value: serviceSelections[entry.key],
+                    onChanged: (value) {
+                      setState(() {
+                        serviceSelections[entry.key] = value!;
+                      });
+                    },
+                  );
+                }).toList(),
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              child: const Text('Apply'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _handlePressButton() async {
+    Prediction? p = await PlacesAutocomplete.show(
+      context: context,
+      apiKey: "AIzaSyDDGzL8DvSecRgC6cZIyU1WpeS-MU2Xzrw",
+    );
+    displayPrediction(p, _places);
+  }
+
+  Future<Null> displayPrediction(
+      Prediction? p, GoogleMapsPlaces? places) async {
+    if (p != null) {
+      PlacesDetailsResponse detail =
+          await _places!.getDetailsByPlaceId(p.placeId!);
+
+      var placeId = p.placeId;
+      double lat = detail.result.geometry!.location.lat;
+      double lng = detail.result.geometry!.location.lng;
+
+      print(lat);
+      print(lng);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -40,6 +110,7 @@ class _HomePageState extends State<HomePage> {
                   Padding(
                     padding: EdgeInsets.all(2 * unitHeightValue),
                     child: TextField(
+                      onTap: _handlePressButton,
                       decoration: InputDecoration(
                           labelText: 'Current Location',
                           filled: true,
@@ -61,17 +132,26 @@ class _HomePageState extends State<HomePage> {
                             items: [
                               DropdownMenuItem(
                                 value: 'station1',
-                                child: Text('Gas Station 1'),
+                                child: Text('Shell'),
                               ),
                               DropdownMenuItem(
                                 value: 'station2',
-                                child: Text('Gas Station 2'),
+                                child: Text('Petron'),
                               ),
-                              // Add more dropdown items as needed
+                              DropdownMenuItem(
+                                value: 'station3',
+                                child: Text('Caltex'),
+                              ),
+                              DropdownMenuItem(
+                                value: 'station4',
+                                child: Text('Seaoil'),
+                              ),
+                              DropdownMenuItem(
+                                value: 'station5',
+                                child: Text('Total'),
+                              ),
                             ],
-                            onChanged: (value) {
-                              // Handle dropdown value change
-                            },
+                            onChanged: (value) {},
                           ),
                         ),
                         SizedBox(width: 2 * unitWidthValue),
@@ -85,16 +165,27 @@ class _HomePageState extends State<HomePage> {
                             items: [
                               DropdownMenuItem(
                                 value: 'type1',
-                                child: Text('Gas Type 1'),
+                                child: Text('Regular'),
                               ),
                               DropdownMenuItem(
                                 value: 'type2',
-                                child: Text('Gas Type 2'),
+                                child: Text('Diesel'),
+                              ),
+                              DropdownMenuItem(
+                                value: 'type3',
+                                child: Text('Premium'),
                               ),
                             ],
                             onChanged: (value) {},
                           ),
                         ),
+                        SizedBox(width: 2 * unitWidthValue),
+                        IconButton(
+                            onPressed: _filterServices,
+                            icon: FaIcon(
+                              FontAwesomeIcons.filter,
+                              color: Colors.white,
+                            ))
                       ],
                     ),
                   ),
@@ -110,8 +201,8 @@ class _HomePageState extends State<HomePage> {
             begin: Alignment.topCenter,
             end: Alignment.center,
             colors: [
-              Color(0xFF609966), // Start color
-              Color(0xFF175124), // End color
+              Color(0xFF609966),
+              Color(0xFF175124),
             ],
           ),
         ),

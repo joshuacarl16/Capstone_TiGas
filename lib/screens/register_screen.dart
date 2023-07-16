@@ -1,8 +1,49 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:tigas_application/auth/firebase_auth.dart';
+import 'package:tigas_application/widgets/show_snackbar.dart';
 import 'login_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class RegisScreen extends StatelessWidget {
+class RegisScreen extends StatefulWidget {
+  @override
+  _RegisScreenState createState() => _RegisScreenState();
+}
+
+class _RegisScreenState extends State<RegisScreen> {
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController displayNameController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  final TextEditingController confirmPasswordController =
+      TextEditingController();
+
+  @override
+  void dispose() {
+    emailController.dispose();
+    displayNameController.dispose();
+    passwordController.dispose();
+    confirmPasswordController.dispose();
+    super.dispose();
+  }
+
+  void registerUser() async {
+    if (passwordController.text != confirmPasswordController.text) {
+      showSnackBar(context, 'Passwords do not match!');
+    } else {
+      context.read<FirebaseAuthMethods>().signUpWithEmail(
+            email: emailController.text,
+            password: passwordController.text,
+            context: context,
+            displayName: displayNameController.text,
+          );
+      emailController.clear();
+      displayNameController.clear();
+      passwordController.clear();
+      confirmPasswordController.clear();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
@@ -17,8 +58,8 @@ class RegisScreen extends StatelessWidget {
             begin: Alignment.topCenter,
             end: Alignment.center,
             colors: [
-              Color(0xFF609966), // Start color
-              Color(0xFF175124), // End color
+              Color(0xFF609966),
+              Color(0xFF175124),
             ],
           ),
         ),
@@ -76,6 +117,7 @@ class RegisScreen extends StatelessWidget {
                                         style: TextStyle(
                                           fontSize: screenHeight * 0.02,
                                         ),
+                                        controller: emailController,
                                         decoration: InputDecoration(
                                           labelText: 'Email Address',
                                           hintText: 'example@gmail.com',
@@ -88,8 +130,9 @@ class RegisScreen extends StatelessWidget {
                                         style: TextStyle(
                                           fontSize: screenHeight * 0.02,
                                         ),
+                                        controller: displayNameController,
                                         decoration: InputDecoration(
-                                          labelText: 'Username',
+                                          labelText: 'Display Name',
                                           hintText: 'farggaming',
                                           prefixIcon: Icon(
                                               Icons.account_circle_rounded),
@@ -101,6 +144,7 @@ class RegisScreen extends StatelessWidget {
                                         style: TextStyle(
                                           fontSize: screenHeight * 0.02,
                                         ),
+                                        controller: passwordController,
                                         obscureText: true,
                                         decoration: InputDecoration(
                                           labelText: 'Password',
@@ -113,6 +157,7 @@ class RegisScreen extends StatelessWidget {
                                         style: TextStyle(
                                           fontSize: screenHeight * 0.02,
                                         ),
+                                        controller: confirmPasswordController,
                                         obscureText: true,
                                         decoration: InputDecoration(
                                           labelText: 'Confirm Password',
@@ -138,9 +183,7 @@ class RegisScreen extends StatelessWidget {
                                         vertical: screenHeight * 0.025,
                                       ),
                                     ),
-                                    onPressed: () {
-                                      Navigator.pop(context);
-                                    },
+                                    onPressed: registerUser,
                                     child: Text(
                                       'REGISTER',
                                       style: TextStyle(
@@ -209,193 +252,3 @@ class RegisScreen extends StatelessWidget {
     );
   }
 }
-
-
-// import 'package:flutter/material.dart';
-// import 'login_screen.dart';
-// import 'package:google_fonts/google_fonts.dart';
-
-// class RegisScreen extends StatelessWidget {
-//   @override
-//   Widget build(BuildContext context) {
-//     Size screenSize = MediaQuery.of(context).size;
-//     Orientation orientation = MediaQuery.of(context).orientation;
-
-//     return Scaffold(
-//       resizeToAvoidBottomInset: false,
-//       body: Container(
-//         decoration: const BoxDecoration(
-//           gradient: LinearGradient(
-//             begin: Alignment.topCenter,
-//             end: Alignment.center,
-//             colors: [
-//               Color(0xFF609966), // Start color
-//               Color(0xFF175124), // End color
-//             ],
-//           ),
-//         ),
-//         child: Column(
-//           mainAxisAlignment: MainAxisAlignment.end,
-//           // padding: const EdgeInsets.fromLTRB(0, 400, 0, 0),
-//           // shrinkWrap: true,
-//           // reverse: true,
-//           children: [
-//             Stack(
-//               children: [
-//                 Column(
-//                   mainAxisAlignment: MainAxisAlignment.end,
-//                   children: [
-//                     Stack(
-//                       children: [
-//                         Container(
-//                           height: 535,
-//                           width: double.infinity,
-//                           decoration: const BoxDecoration(
-//                             color: Colors.white,
-//                             borderRadius: BorderRadius.only(
-//                               topLeft: Radius.circular(40),
-//                               topRight: Radius.circular(40),
-//                             ),
-//                           ),
-//                           child: Padding(
-//                             padding: const EdgeInsets.fromLTRB(30, 20, 30, 20),
-//                             child: Column(
-//                               crossAxisAlignment: CrossAxisAlignment.start,
-//                               children: [
-//                                 Text(
-//                                   "Register",
-//                                   style: GoogleFonts.inter(
-//                                     fontSize: 40,
-//                                     fontWeight: FontWeight.bold,
-//                                     color: Colors.grey,
-//                                   ),
-//                                 ),
-//                                 const SizedBox(
-//                                   height: 20,
-//                                 ),
-//                                 const Padding(
-//                                   padding: EdgeInsets.fromLTRB(15, 0, 0, 20),
-//                                   child: Column(
-//                                     crossAxisAlignment:
-//                                         CrossAxisAlignment.start,
-//                                     children: [
-//                                       TextField(
-//                                         decoration: InputDecoration(
-//                                           labelText: 'Email Address',
-//                                           hintText: 'example@gmail.com',
-//                                           prefixIcon: Icon(Icons.mail),
-//                                           border: OutlineInputBorder(),
-//                                         ),
-//                                       ),
-//                                       SizedBox(
-//                                         height: 20,
-//                                       ),
-//                                       TextField(
-//                                         decoration: InputDecoration(
-//                                           labelText: 'Username',
-//                                           hintText: 'farggaming',
-//                                           prefixIcon: Icon(
-//                                               Icons.account_circle_rounded),
-//                                           border: OutlineInputBorder(),
-//                                         ),
-//                                       ),
-//                                       SizedBox(
-//                                         height: 20,
-//                                       ),
-//                                       TextField(
-//                                         obscureText: true,
-//                                         decoration: InputDecoration(
-//                                           labelText: 'Password',
-//                                           prefixIcon: Icon(Icons.lock),
-//                                           border: OutlineInputBorder(),
-//                                         ),
-//                                       ),
-//                                       SizedBox(
-//                                         height: 20,
-//                                       ),
-//                                       TextField(
-//                                         obscureText: true,
-//                                         decoration: InputDecoration(
-//                                           labelText: 'Confirm Password',
-//                                           prefixIcon: Icon(Icons.lock),
-//                                           border: OutlineInputBorder(),
-//                                         ),
-//                                       ),
-//                                       SizedBox(
-//                                         height: 20,
-//                                       ),
-//                                     ],
-//                                   ),
-//                                 ),
-//                                 Center(
-//                                   child: ElevatedButton(
-//                                       style: ElevatedButton.styleFrom(
-//                                           shape: RoundedRectangleBorder(
-//                                             borderRadius:
-//                                                 BorderRadius.circular(30.0),
-//                                           ),
-//                                           elevation: 3,
-//                                           padding: EdgeInsets.symmetric(
-//                                               horizontal: 128, vertical: 20)),
-//                                       onPressed: () {
-//                                         Navigator.pop(context);
-//                                       },
-//                                       child: Text('REGISTER')),
-//                                 ),
-//                                 const SizedBox(
-//                                   height: 12,
-//                                 ),
-//                                 Padding(
-//                                   padding:
-//                                       const EdgeInsets.fromLTRB(35, 0, 0, 0),
-//                                   child: Row(
-//                                     children: [
-//                                       Text(
-//                                         "Already have an account?",
-//                                         style: GoogleFonts.inter(
-//                                           fontSize: 15,
-//                                           color: Colors.grey[700],
-//                                         ),
-//                                       ),
-//                                       TextButton(
-//                                         child: Text(
-//                                           "Login here",
-//                                           style: GoogleFonts.inter(
-//                                             fontSize: 15,
-//                                             color: Colors.green,
-//                                           ),
-//                                         ),
-//                                         onPressed: () => Navigator.push(
-//                                           context,
-//                                           MaterialPageRoute(
-//                                               builder: (context) =>
-//                                                   LoginScreen()),
-//                                         ),
-//                                       ),
-//                                     ],
-//                                   ),
-//                                 ),
-//                               ],
-//                             ),
-//                           ),
-//                         ),
-//                         Transform.translate(
-//                           offset: const Offset(0, -300),
-//                           child: Image.asset(
-//                             'assets/TiGas.png',
-//                             scale: 1.5,
-//                             width: double.infinity,
-//                           ),
-//                         ),
-//                       ],
-//                     )
-//                   ],
-//                 ),
-//               ],
-//             ),
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-// }
