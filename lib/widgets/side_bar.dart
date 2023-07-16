@@ -54,7 +54,7 @@ class DrawerContent extends StatelessWidget {
     switch (item) {
       case 'Admin':
         Navigator.push(
-            context, MaterialPageRoute(builder: (context) => AdminDashboard()));
+            context, MaterialPageRoute(builder: (context) => MainDashboard()));
         break;
       case 'About':
         break;
