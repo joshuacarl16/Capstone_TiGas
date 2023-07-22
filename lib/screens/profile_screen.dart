@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:tigas_application/screens/login_screen.dart';
+import 'package:tigas_application/styles/styles.dart';
 
 class ProfilePage extends StatelessWidget {
   final int selectedTab;
@@ -9,16 +10,7 @@ class ProfilePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.center,
-            colors: [
-              Color(0xFF609966),
-              Color(0xFF175124),
-            ],
-          ),
-        ),
+        decoration: getGradientDecoration(),
         child: Center(
           child: IconButton(
             icon: Icon(Icons.logout),

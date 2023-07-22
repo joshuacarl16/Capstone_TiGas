@@ -3,6 +3,8 @@ import 'package:tigas_application/main.dart';
 import 'package:tigas_application/screens/login_screen.dart';
 import 'dart:async';
 
+import 'package:tigas_application/styles/styles.dart';
+
 class LoadingScreen extends StatefulWidget {
   @override
   _LoadingScreenState createState() => _LoadingScreenState();
@@ -55,16 +57,7 @@ class _LoadingScreenState extends State<LoadingScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.center,
-            colors: [
-              Color(0xFF609966),
-              Color(0xFF175124),
-            ],
-          ),
-        ),
+        decoration: getGradientDecoration(),
         child: Center(
           child: FadeTransition(
             opacity: _fadeAnimation!,

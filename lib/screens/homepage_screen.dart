@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:tigas_application/models/station_list.dart';
 import 'package:tigas_application/models/station_model.dart';
+import 'package:tigas_application/styles/styles.dart';
 import 'package:tigas_application/widgets/station_card.dart';
 import 'package:tigas_application/widgets/station_info.dart';
 import 'package:flutter_google_places/flutter_google_places.dart';
@@ -196,16 +197,7 @@ class _HomePageState extends State<HomePage> {
         ];
       },
       body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.center,
-            colors: [
-              Color(0xFF609966),
-              Color(0xFF175124),
-            ],
-          ),
-        ),
+        decoration: getGradientDecoration(),
         child: ListView.builder(
           itemCount: stations.length,
           itemBuilder: (context, index) {

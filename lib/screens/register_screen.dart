@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tigas_application/auth/firebase_auth.dart';
+import 'package:tigas_application/styles/styles.dart';
 import 'package:tigas_application/widgets/show_snackbar.dart';
 import 'login_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -15,8 +16,7 @@ class _RegisScreenState extends State<RegisScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController displayNameController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  final TextEditingController confirmPasswordController =
-      TextEditingController();
+  final TextEditingController confirmPasswordController = TextEditingController();
 
   @override
   void dispose() {
@@ -53,16 +53,7 @@ class _RegisScreenState extends State<RegisScreen> {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.center,
-            colors: [
-              Color(0xFF609966),
-              Color(0xFF175124),
-            ],
-          ),
-        ),
+        decoration: getGradientDecoration(),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
@@ -118,12 +109,7 @@ class _RegisScreenState extends State<RegisScreen> {
                                           fontSize: screenHeight * 0.02,
                                         ),
                                         controller: emailController,
-                                        decoration: InputDecoration(
-                                          labelText: 'Email Address',
-                                          hintText: 'example@gmail.com',
-                                          prefixIcon: Icon(Icons.mail),
-                                          border: OutlineInputBorder(),
-                                        ),
+                                        decoration: getEmailInputStyle(),
                                       ),
                                       SizedBox(height: screenHeight * 0.03),
                                       TextField(
@@ -184,12 +170,7 @@ class _RegisScreenState extends State<RegisScreen> {
                                       ),
                                     ),
                                     onPressed: registerUser,
-                                    child: Text(
-                                      'REGISTER',
-                                      style: TextStyle(
-                                        fontSize: screenHeight * 0.025,
-                                      ),
-                                    ),
+                                    child: getRegisterButtonStyle(screenHeight),
                                   ),
                                 ),
                                 SizedBox(height: screenHeight * 0.02),

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:tigas_application/auth/firebase_auth.dart';
 import 'package:tigas_application/screens/register_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:tigas_application/styles/styles.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -36,16 +37,7 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.center,
-            colors: [
-              Color(0xFF609966),
-              Color(0xFF175124),
-            ],
-          ),
-        ),
+        decoration: getGradientDecoration(),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
@@ -95,10 +87,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 children: [
                                   Text(
                                     "Email",
-                                    style: GoogleFonts.inter(
-                                      fontSize: screenHeight * 0.018,
-                                      color: Colors.grey[700],
-                                    ),
+                                    style: getEmailTextStyle(screenHeight)
                                   ),
                                   SizedBox(height: screenHeight * 0.01),
                                   TextField(
@@ -106,20 +95,12 @@ class _LoginScreenState extends State<LoginScreen> {
                                       fontSize: screenHeight * 0.02,
                                     ),
                                     controller: emailController,
-                                    decoration: InputDecoration(
-                                      labelText: 'Email',
-                                      hintText: 'somethingsomething@gmail.com',
-                                      prefixIcon: Icon(Icons.mail),
-                                      border: OutlineInputBorder(),
-                                    ),
+                                    decoration: getEmailInputStyle(),
                                   ),
                                   SizedBox(height: screenHeight * 0.02),
                                   Text(
                                     "Password",
-                                    style: GoogleFonts.inter(
-                                      fontSize: screenHeight * 0.018,
-                                      color: Colors.grey[700],
-                                    ),
+                                    style: getPasswordTextStyle(screenHeight)
                                   ),
                                   SizedBox(height: screenHeight * 0.01),
                                   TextField(
@@ -128,12 +109,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     ),
                                     controller: passwordController,
                                     obscureText: true,
-                                    decoration: InputDecoration(
-                                      labelText: 'Password',
-                                      hintText: '*******',
-                                      prefixIcon: Icon(Icons.lock),
-                                      border: OutlineInputBorder(),
-                                    ),
+                                    decoration: getPasswordInputStyle(),
                                   ),
                                   SizedBox(height: screenHeight * 0.04),
                                   Center(
@@ -179,13 +155,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                           ),
                                         ),
                                         TextButton(
-                                          child: Text(
-                                            "Sign Up",
-                                            style: GoogleFonts.inter(
-                                              fontSize: screenHeight * 0.018,
-                                              color: Colors.green,
-                                            ),
-                                          ),
+                                          child: getLoginButtonStyle(screenHeight),
                                           onPressed: () => Navigator.push(
                                             context,
                                             MaterialPageRoute(
