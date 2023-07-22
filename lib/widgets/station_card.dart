@@ -117,12 +117,10 @@ class StationCard extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: List<Widget>.generate(gasTypes.length * 2 - 1, (index) {
         if (index % 2 == 0) {
-          // even index, build gas type info
           String type = gasTypes[index ~/ 2];
           return _buildGasTypeInfo(
               type, gasTypeInfo[type]!, unitHeightValue, unitWidthValue);
         } else {
-          // odd index, build divider
           return _buildDivider(unitHeightValue);
         }
       }),
@@ -175,19 +173,4 @@ class StationCard extends StatelessWidget {
       ]
     ];
   }
-
-  // Row _buildServiceIcon(IconData icon, Color color, String label,
-  //     double unitWidthValue, double unitHeightValue) {
-  //   return Row(
-  //     children: [
-  //       FaIcon(icon, color: color, size: 2.4 * unitHeightValue),
-  //       Text(
-  //         label,
-  //         style: TextStyle(
-  //             fontWeight: FontWeight.bold, fontSize: 1.6 * unitHeightValue),
-  //       ),
-  //       SizedBox(width: 1.2 * unitWidthValue),
-  //     ],
-  //   );
-  // }
 }

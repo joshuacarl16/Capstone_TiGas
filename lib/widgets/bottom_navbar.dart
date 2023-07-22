@@ -38,10 +38,6 @@ class _NavBarState extends State<NavBar> {
         ),
         backgroundColor: Color(0xFF609966),
         elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.menu),
-          onPressed: () => _scaffoldKey.currentState?.openDrawer(),
-        ),
       ),
       drawer: DrawerContent(),
       body: _screens[widget.selectedTab],

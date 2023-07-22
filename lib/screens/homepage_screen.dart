@@ -4,10 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:tigas_application/models/station_list.dart';
 import 'package:tigas_application/models/station_model.dart';
+import 'package:tigas_application/screens/set_location.dart';
+import 'package:tigas_application/widgets/show_snackbar.dart';
 import 'package:tigas_application/widgets/station_card.dart';
 import 'package:tigas_application/widgets/station_info.dart';
-import 'package:flutter_google_places/flutter_google_places.dart';
-import 'package:google_maps_webservice/places.dart';
 
 class HomePage extends StatefulWidget {
   final int selectedTab;
@@ -21,70 +21,8 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   List<String> services = ['Air', 'Water', 'Oil', 'Restroom'];
   List<bool> serviceSelections = List<bool>.filled(4, false);
-  final _places =
-      GoogleMapsPlaces(apiKey: "AIzaSyDDGzL8DvSecRgC6cZIyU1WpeS-MU2Xzrw");
-
-  void _filterServices() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Filter Services'),
-          content: SingleChildScrollView(
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                maxHeight: MediaQuery.of(context).size.height * 0.25,
-              ),
-              child: Column(
-                children: services.asMap().entries.map((entry) {
-                  return CheckboxListTile(
-                    title: Text(entry.value),
-                    value: serviceSelections[entry.key],
-                    onChanged: (value) {
-                      setState(() {
-                        serviceSelections[entry.key] = value!;
-                      });
-                    },
-                  );
-                }).toList(),
-              ),
-            ),
-          ),
-          actions: [
-            TextButton(
-              child: const Text('Apply'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _handlePressButton() async {
-    Prediction? p = await PlacesAutocomplete.show(
-      context: context,
-      apiKey: "AIzaSyDDGzL8DvSecRgC6cZIyU1WpeS-MU2Xzrw",
-    );
-    displayPrediction(p, _places);
-  }
-
-  Future<Null> displayPrediction(
-      Prediction? p, GoogleMapsPlaces? places) async {
-    if (p != null) {
-      PlacesDetailsResponse detail =
-          await _places!.getDetailsByPlaceId(p.placeId!);
-
-      var placeId = p.placeId;
-      double lat = detail.result.geometry!.location.lat;
-      double lng = detail.result.geometry!.location.lng;
-
-      print(lat);
-      print(lng);
-    }
-  }
+  TextEditingController currentLocController = TextEditingController();
+  String? location;
 
   @override
   Widget build(BuildContext context) {
@@ -110,11 +48,40 @@ class _HomePageState extends State<HomePage> {
                   Padding(
                     padding: EdgeInsets.all(2 * unitHeightValue),
                     child: TextField(
-                      onTap: _handlePressButton,
+                      readOnly: true,
+                      controller: currentLocController,
+                      onTap: () async {
+                        final selectedLocation = await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: ((context) => SetLocationScreen()),
+                            ));
+                        if (selectedLocation != null) {
+                          setState(() {
+                            location = selectedLocation;
+                            currentLocController.text = selectedLocation;
+                          });
+                        }
+                      },
                       decoration: InputDecoration(
-                          labelText: 'Current Location',
-                          filled: true,
-                          fillColor: Colors.grey[300]),
+                        labelText: 'Current Location',
+                        filled: true,
+                        fillColor: Colors.grey[300],
+                        suffixIcon: IconButton(
+                          icon: Icon(Icons.search),
+                          onPressed: () {
+                            currentLocController.clear();
+                            if (location != null) {
+                              showSnackBar(
+                                  context, 'Location set to $location');
+
+                              setState(() {});
+                            } else {
+                              showSnackBar(context, 'No location selected');
+                            }
+                          },
+                        ),
+                      ),
                     ),
                   ),
                   Padding(
@@ -242,5 +209,44 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
     ));
+  }
+
+  void _filterServices() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Filter Services'),
+          content: SingleChildScrollView(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxHeight: MediaQuery.of(context).size.height * 0.25,
+              ),
+              child: Column(
+                children: services.asMap().entries.map((entry) {
+                  return CheckboxListTile(
+                    title: Text(entry.value),
+                    value: serviceSelections[entry.key],
+                    onChanged: (value) {
+                      setState(() {
+                        serviceSelections[entry.key] = value!;
+                      });
+                    },
+                  );
+                }).toList(),
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              child: const Text('Apply'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 }
