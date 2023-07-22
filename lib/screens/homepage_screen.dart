@@ -4,12 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:tigas_application/models/station_list.dart';
 import 'package:tigas_application/models/station_model.dart';
-<<<<<<< HEAD
 import 'package:tigas_application/styles/styles.dart';
-=======
 import 'package:tigas_application/screens/set_location.dart';
 import 'package:tigas_application/widgets/show_snackbar.dart';
->>>>>>> fea328c5f24b8026929f6ecc6f8932351d81b6ea
 import 'package:tigas_application/widgets/station_card.dart';
 import 'package:tigas_application/widgets/station_info.dart';
 
