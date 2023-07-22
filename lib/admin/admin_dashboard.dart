@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:tigas_application/admin_widgets/post_advertisements.dart';
-import 'package:tigas_application/admin_widgets/price_services.dart';
 import 'package:tigas_application/screens/loading_screen.dart';
 
-class MainDashboard extends StatefulWidget {
-  const MainDashboard({super.key});
+import '../admin_widgets/price_services.dart';
 
+class MainDashboard extends StatefulWidget {
   @override
   _MainDashboardState createState() => _MainDashboardState();
 }
@@ -22,14 +22,14 @@ class _MainDashboardState extends State<MainDashboard> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        title: Text('Admin Dashboard'),
         backgroundColor: Colors.blue,
-        title: const Text('Admin Dashboard'),
       ),
       drawer: Drawer(
         child: ListView(
           padding: EdgeInsets.zero,
           children: <Widget>[
-            const DrawerHeader(
+            DrawerHeader(
               decoration: BoxDecoration(
                 color: Colors.blue,
               ),
@@ -42,8 +42,8 @@ class _MainDashboardState extends State<MainDashboard> {
               ),
             ),
             ListTile(
-              leading: const Icon(Icons.ad_units),
-              title: const Text('Post Advertisement'),
+              leading: Icon(Icons.ad_units),
+              title: Text('Post Advertisement'),
               onTap: () {
                 setState(() {
                   _selectedIndex = 0;
@@ -52,8 +52,8 @@ class _MainDashboardState extends State<MainDashboard> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.edit),
-              title: const Text('Modify Price & Services'),
+              leading: Icon(Icons.edit),
+              title: Text('Modify Price & Services'),
               onTap: () {
                 setState(() {
                   _selectedIndex = 1;
@@ -62,13 +62,14 @@ class _MainDashboardState extends State<MainDashboard> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.logout),
-              title: const Text('Back to User View'),
+              leading: Icon(Icons.arrow_back_ios_new),
+              title: Text('Back to User View'),
               onTap: () {
                 Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => LoadingScreen()),
-                );
+                    context,
+                    MaterialPageRoute(
+                      builder: ((context) => LoadingScreen()),
+                    ));
               },
             ),
           ],

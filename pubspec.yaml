@@ -48,12 +48,13 @@ dependencies:
   http: ^1.1.0
   image: ^4.0.17
   image_cropper: ^5.0.0
-  image_picker: ^0.8.4+4
+  image_picker: ^0.8.4
   latlong2: ^0.8.1
   permission_handler: ^10.4.1
   provider: ^6.0.5
   riverpod: ^2.3.6
   salomon_bottom_bar: ^3.3.2
+  shared_preferences: ^2.0.8
   url_launcher: ^6.1.12
 
 dependency_overrides:
