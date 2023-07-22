@@ -1,5 +1,12 @@
 import 'package:flutter/material.dart';
+<<<<<<< HEAD
 import '../admin_widgets/post_advertisments.dart';
+=======
+import 'package:image_picker/image_picker.dart';
+import 'package:tigas_application/admin_widgets/post_advertisements.dart';
+import 'package:tigas_application/screens/loading_screen.dart';
+
+>>>>>>> fea328c5f24b8026929f6ecc6f8932351d81b6ea
 import '../admin_widgets/price_services.dart';
 
 class MainDashboard extends StatefulWidget {
@@ -8,9 +15,8 @@ class MainDashboard extends StatefulWidget {
 }
 
 class _MainDashboardState extends State<MainDashboard> {
-  int _selectedIndex = 0; // Keep track of the selected index
+  int _selectedIndex = 0;
 
-  // List of widget screens
   final List<Widget> _screens = [
     PostAdvertisement(),
     ModifyPriceServices(),
@@ -21,6 +27,7 @@ class _MainDashboardState extends State<MainDashboard> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Admin Dashboard'),
+        backgroundColor: Colors.blue,
       ),
       drawer: Drawer(
         child: ListView(
@@ -58,6 +65,17 @@ class _MainDashboardState extends State<MainDashboard> {
                 Navigator.pop(context);
               },
             ),
+            ListTile(
+              leading: Icon(Icons.arrow_back_ios_new),
+              title: Text('Back to User View'),
+              onTap: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: ((context) => LoadingScreen()),
+                    ));
+              },
+            ),
           ],
         ),
       ),
@@ -65,5 +83,3 @@ class _MainDashboardState extends State<MainDashboard> {
     );
   }
 }
-
-

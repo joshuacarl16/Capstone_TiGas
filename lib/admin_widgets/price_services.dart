@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-
 class ModifyPriceServices extends StatefulWidget {
   @override
   _ModifyPriceServicesState createState() => _ModifyPriceServicesState();
@@ -73,6 +72,8 @@ class _ModifyPriceServicesState extends State<ModifyPriceServices> {
                         _gasPrices[_selectedGasType] = _priceController.text;
                       });
                     },
+                    style:
+                        ElevatedButton.styleFrom(backgroundColor: Colors.blue),
                     child: Text('Update Price'),
                   ),
                   Text('Gasoline Price: ₱${_gasPrices['Gasoline']}'),

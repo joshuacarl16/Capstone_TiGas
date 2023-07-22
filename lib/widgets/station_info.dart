@@ -1,8 +1,9 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:tigas_application/screens/map_screen.dart';
+import 'package:tigas_application/gmaps/google_map.dart';
 
 class StationInfo extends StatelessWidget {
   const StationInfo({super.key});
@@ -16,17 +17,6 @@ class StationInfo extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 30.0),
       child: Stack(
         children: [
-          Positioned(
-            right: 16,
-            top: 16,
-            child: ClipRRect(
-              child: Image.asset(
-                'assets/shell.png',
-                height: 60,
-                width: 60,
-              ),
-            ),
-          ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -41,19 +31,22 @@ class StationInfo extends StatelessWidget {
             ],
           ),
           Positioned(
-            right: 16,
-            bottom: 16,
-            child: FloatingActionButton(
+            bottom: 10,
+            right: 10,
+            child: FloatingActionButton.extended(
                 backgroundColor: Color(0xFF175124),
                 onPressed: () {
-                  // Navigator.push(
-                  //   context,
-                  //   MaterialPageRoute(
-                  //     builder: (context) => MapScreen(),
-                  //   ),
-                  // );
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => GMaps(
+                        destination: '10.302085285784946, 123.91036554493864',
+                      ),
+                    ),
+                  );
                 },
-                child: Icon(Icons.drive_eta)),
+                label: Text('Get Route'),
+                icon: Icon(FontAwesomeIcons.route)),
           ),
         ],
       ),

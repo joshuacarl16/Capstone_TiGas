@@ -23,27 +23,28 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
-        providers: [
-          Provider<FirebaseAuthMethods>(
-            create: (_) => FirebaseAuthMethods(FirebaseAuth.instance),
-          ),
-          StreamProvider(
-              create: (context) =>
-                  context.read<FirebaseAuthMethods>().authState,
-              initialData: null),
-        ],
-        child: MaterialApp(
-            title: 'TiGas',
-            debugShowCheckedModeBanner: false,
-            theme: ThemeData(
-              colorScheme: ColorScheme.fromSeed(seedColor: Color(0xFF609966)),
-            ),
-            home: MainDashboard()));
+      providers: [
+        Provider<FirebaseAuthMethods>(
+          create: (_) => FirebaseAuthMethods(FirebaseAuth.instance),
+        ),
+        StreamProvider(
+            create: (context) => context.read<FirebaseAuthMethods>().authState,
+            initialData: null),
+      ],
+      child: MaterialApp(
+        title: 'TiGas',
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: Color(0xFF609966)),
+        ),
+        home: LoadingScreen(),
+      ),
+    );
   }
 }
 
-class AuthWrapper extends StatelessWidget {
-  const AuthWrapper({super.key});
+class IsAuthenticated extends StatelessWidget {
+  const IsAuthenticated({super.key});
 
   @override
   Widget build(BuildContext context) {
