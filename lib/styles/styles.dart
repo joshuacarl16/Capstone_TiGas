@@ -64,3 +64,10 @@ Text getRegisterButtonStyle(double screenHeight) {
     ),
   );
 }
+
+
+
+// FaIcon(FontAwesomeIcons.wind, color: Colors.green[700]),
+//       FaIcon(FontAwesomeIcons.droplet, color: Colors.green[700]),
+//       FaIcon(FontAwesomeIcons.oilCan, color: Colors.green[700]),
+//       FaIcon(FontAwesomeIcons.restroom, color: Colors.green[700]),

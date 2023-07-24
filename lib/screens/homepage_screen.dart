@@ -1,5 +1,7 @@
 // ignore_for_file: prefer_const_constructors
 
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:tigas_application/models/station_list.dart';
@@ -9,6 +11,7 @@ import 'package:tigas_application/screens/set_location.dart';
 import 'package:tigas_application/widgets/show_snackbar.dart';
 import 'package:tigas_application/widgets/station_card.dart';
 import 'package:tigas_application/widgets/station_info.dart';
+import 'package:http/http.dart' as http;
 
 class HomePage extends StatefulWidget {
   final int selectedTab;
@@ -23,7 +26,32 @@ class _HomePageState extends State<HomePage> {
   List<String> services = ['Air', 'Water', 'Oil', 'Restroom'];
   List<bool> serviceSelections = List<bool>.filled(4, false);
   TextEditingController currentLocController = TextEditingController();
+  List<Station> station = [];
   String? location;
+
+  Future<List<Station>> fetchStations() async {
+    final response =
+        await http.get(Uri.parse('http://127.0.0.1:8000/stations/'));
+    if (response.statusCode == 200) {
+      List jsonResponse =
+          jsonDecode(response.body); // Add this line to inspect the response
+      return jsonResponse
+          .map((item) => Station.fromMap(item as Map<String, dynamic>))
+          .toList();
+    } else {
+      throw Exception('Failed to load stations');
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    fetchStations().then((value) {
+      setState(() {
+        station = value;
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -166,18 +194,18 @@ class _HomePageState extends State<HomePage> {
       body: Container(
         decoration: getGradientDecoration(),
         child: ListView.builder(
-          itemCount: stations.length,
+          itemCount: station.length,
           itemBuilder: (context, index) {
-            Station station = stations[index];
+            Station stations = station[index];
             return ListTile(
               title: StationCard(
-                imagePath: station.imagePath,
-                brand: station.brand,
-                address: station.address,
-                distance: station.distance,
-                gasTypes: station.gasTypes,
-                gasTypeInfo: station.gasTypeInfo,
-                services: station.services,
+                imagePath: stations.imagePath,
+                brand: stations.brand,
+                address: stations.address,
+                distance: '',
+                gasTypes: stations.gasTypes,
+                gasTypeInfo: stations.gasTypeInfo,
+                services: stations.services,
               ),
               onTap: () {
                 showModalBottomSheet(

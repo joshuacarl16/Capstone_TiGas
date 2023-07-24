@@ -9,9 +9,9 @@ class StationCard extends StatelessWidget {
   final String distance;
   final List<String> gasTypes;
   final Map<String, String> gasTypeInfo;
-  final List<FaIcon> services;
+  final List<String> services;
 
-  const StationCard({
+  StationCard({
     Key? key,
     required this.imagePath,
     required this.brand,
@@ -21,6 +21,13 @@ class StationCard extends StatelessWidget {
     required this.gasTypeInfo,
     required this.services,
   }) : super(key: key);
+
+  final Map<String, FaIcon> servicesIcons = {
+    "Air": FaIcon(FontAwesomeIcons.wind, color: Colors.green[700]),
+    "Water": FaIcon(FontAwesomeIcons.droplet, color: Colors.green[700]),
+    "Oil": FaIcon(FontAwesomeIcons.oilCan, color: Colors.green[700]),
+    "Restroom": FaIcon(FontAwesomeIcons.restroom, color: Colors.green[700]),
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -165,12 +172,13 @@ class StationCard extends StatelessWidget {
   List<Widget> _buildServicesIcons(
       double unitWidthValue, double unitHeightValue) {
     return [
-      for (var icon in services) ...[
-        icon,
-        SizedBox(
-          width: 5 * unitWidthValue,
-        )
-      ]
+      for (var serviceName in services)
+        if (servicesIcons.containsKey(serviceName)) ...[
+          servicesIcons[serviceName]!,
+          SizedBox(
+            width: 5 * unitWidthValue,
+          ),
+        ]
     ];
   }
 }

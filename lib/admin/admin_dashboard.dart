@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tigas_application/admin_widgets/add_station.dart';
 // import 'package:image_picker/image_picker.dart';
 import 'package:tigas_application/admin_widgets/post_advertisements.dart';
 import 'package:tigas_application/screens/loading_screen.dart';
@@ -15,6 +16,7 @@ class _MainDashboardState extends State<MainDashboard> {
   final List<Widget> _screens = [
     PostAdvertisement(),
     ModifyPriceServices(),
+    AddStation()
   ];
 
   @override
@@ -56,6 +58,16 @@ class _MainDashboardState extends State<MainDashboard> {
               onTap: () {
                 setState(() {
                   _selectedIndex = 1;
+                });
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.edit),
+              title: Text('Add Station'),
+              onTap: () {
+                setState(() {
+                  _selectedIndex = 2;
                 });
                 Navigator.pop(context);
               },
