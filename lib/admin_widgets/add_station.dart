@@ -46,7 +46,8 @@ class _AddStationState extends State<AddStation> {
 
   Future<http.Response> createStation() {
     return http.post(
-      Uri.parse('http://127.0.0.1:8000/stations/create/'),
+      Uri.parse('http://192.168.1.4:8000/stations/create/'),
+      // Uri.parse('http://127.0.0.1:8000/stations/create/'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
@@ -73,7 +74,8 @@ class _AddStationState extends State<AddStation> {
 
   Future<List<Station>> fetchStations() async {
     final response =
-        await http.get(Uri.parse('http://127.0.0.1:8000/stations/'));
+        await http.get(Uri.parse('http://192.168.1.4:8000/stations/')); //phone
+    // await http.get(Uri.parse('http://127.0.0.1:8000/stations/')); //web
     if (response.statusCode == 200) {
       List jsonResponse =
           jsonDecode(response.body); // Add this line to inspect the response
@@ -87,7 +89,8 @@ class _AddStationState extends State<AddStation> {
 
   Future<http.Response> deleteStation(int id) {
     return http.delete(
-      Uri.parse('http://127.0.0.1:8000/stations/$id/delete/'),
+      Uri.parse('http://192.168.1.4:8000/stations/$id/delete/'),
+      //  Uri.parse('http://127.0.0.1:8000/stations/$id/delete/'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
@@ -246,6 +249,10 @@ class _AddStationState extends State<AddStation> {
                         // then parse the JSON.
                         print('Station created successfully');
                         showSnackBar(context, 'Station Created Successfully');
+                        List<Station> updatedStations = await fetchStations();
+                        setState(() {
+                          station = updatedStations;
+                        });
                       } else {
                         // If the server returns an unexpected response,
                         // then throw an exception.

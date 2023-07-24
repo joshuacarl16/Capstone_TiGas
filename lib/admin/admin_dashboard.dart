@@ -63,8 +63,8 @@ class _MainDashboardState extends State<MainDashboard> {
               },
             ),
             ListTile(
-              leading: Icon(Icons.edit),
-              title: Text('Add Station'),
+              leading: Icon(Icons.local_gas_station_rounded),
+              title: Text('Add/Delete Station'),
               onTap: () {
                 setState(() {
                   _selectedIndex = 2;

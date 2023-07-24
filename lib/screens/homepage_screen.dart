@@ -1,17 +1,15 @@
 // ignore_for_file: prefer_const_constructors
 
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:tigas_application/models/station_list.dart';
+import 'package:provider/provider.dart';
 import 'package:tigas_application/models/station_model.dart';
+import 'package:tigas_application/providers/station_provider.dart';
 import 'package:tigas_application/styles/styles.dart';
 import 'package:tigas_application/screens/set_location.dart';
 import 'package:tigas_application/widgets/show_snackbar.dart';
 import 'package:tigas_application/widgets/station_card.dart';
 import 'package:tigas_application/widgets/station_info.dart';
-import 'package:http/http.dart' as http;
 
 class HomePage extends StatefulWidget {
   final int selectedTab;
@@ -29,28 +27,32 @@ class _HomePageState extends State<HomePage> {
   List<Station> station = [];
   String? location;
 
-  Future<List<Station>> fetchStations() async {
-    final response =
-        await http.get(Uri.parse('http://127.0.0.1:8000/stations/'));
-    if (response.statusCode == 200) {
-      List jsonResponse =
-          jsonDecode(response.body); // Add this line to inspect the response
-      return jsonResponse
-          .map((item) => Station.fromMap(item as Map<String, dynamic>))
-          .toList();
-    } else {
-      throw Exception('Failed to load stations');
-    }
-  }
+  // Future<List<Station>> fetchStations() async {
+  //   final response =
+  //       await http.get(Uri.parse('http://192.168.1.4:8000/stations/')); // phone
+  //   // await http.get(Uri.parse('http://127.0.0.1:8000/stations/')); //web
+  //   if (response.statusCode == 200) {
+  //     List jsonResponse =
+  //         jsonDecode(response.body); // Add this line to inspect the response
+  //     return jsonResponse
+  //         .map((item) => Station.fromMap(item as Map<String, dynamic>))
+  //         .toList();
+  //   } else {
+  //     throw Exception('Failed to load stations');
+  //   }
+  // }
 
   @override
   void initState() {
     super.initState();
-    fetchStations().then((value) {
-      setState(() {
-        station = value;
-      });
-    });
+
+    Provider.of<StationProvider>(context, listen: false).fetchStations();
+
+    // .then((value) {
+    //   setState(() {
+    //     station = value;
+    //   });
+    // });
   }
 
   @override
@@ -193,40 +195,48 @@ class _HomePageState extends State<HomePage> {
       },
       body: Container(
         decoration: getGradientDecoration(),
-        child: ListView.builder(
-          itemCount: station.length,
-          itemBuilder: (context, index) {
-            Station stations = station[index];
-            return ListTile(
-              title: StationCard(
-                imagePath: stations.imagePath,
-                brand: stations.brand,
-                address: stations.address,
-                distance: '',
-                gasTypes: stations.gasTypes,
-                gasTypeInfo: stations.gasTypeInfo,
-                services: stations.services,
-              ),
-              onTap: () {
-                showModalBottomSheet(
-                    context: context,
-                    backgroundColor: Colors.transparent,
-                    builder: (BuildContext context) {
-                      return ClipRRect(
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(2 * unitHeightValue),
-                          topRight: Radius.circular(2 * unitHeightValue),
-                        ),
-                        child: Container(
-                            height: 55 * unitHeightValue,
-                            width: 100 * unitWidthValue,
-                            child: StationInfo()),
-                      );
-                    });
-              },
-            );
-          },
-        ),
+        child: Consumer<StationProvider>(
+            builder: (context, stationProvider, child) {
+          return ListView.builder(
+            itemCount: stationProvider.stations.length,
+            itemBuilder: (context, index) {
+              Station stations = stationProvider.stations[index];
+              return ListTile(
+                title: StationCard(
+                  imagePath: stations.imagePath,
+                  brand: stations.brand,
+                  address: stations.address,
+                  distance: '',
+                  gasTypes: stations.gasTypes,
+                  gasTypeInfo: stations.gasTypeInfo,
+                  services: stations.services,
+                ),
+                onTap: () {
+                  showModalBottomSheet(
+                      context: context,
+                      backgroundColor: Colors.transparent,
+                      builder: (BuildContext context) {
+                        return ClipRRect(
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(2 * unitHeightValue),
+                            topRight: Radius.circular(2 * unitHeightValue),
+                          ),
+                          child: Container(
+                              height: 55 * unitHeightValue,
+                              width: 100 * unitWidthValue,
+                              child: StationInfo(
+                                station: stations,
+                                gasTypeInfo: stations.gasTypeInfo,
+                                gasTypes: stations.gasTypes,
+                                services: stations.services,
+                              )),
+                        );
+                      });
+                },
+              );
+            },
+          );
+        }),
       ),
     ));
   }

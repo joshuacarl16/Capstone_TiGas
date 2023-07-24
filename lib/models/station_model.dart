@@ -2,7 +2,6 @@
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class Station {
   final int id;
@@ -13,6 +12,7 @@ class Station {
   final List<String> gasTypes;
   final Map<String, String> gasTypeInfo;
   final List<String> services;
+  final DateTime updated;
 
   Station({
     required this.id,
@@ -23,6 +23,7 @@ class Station {
     required this.gasTypes,
     required this.gasTypeInfo,
     required this.services,
+    required this.updated,
   });
 
   Station copyWith({
@@ -34,6 +35,7 @@ class Station {
     List<String>? gasTypes,
     Map<String, String>? gasTypeInfo,
     List<String>? services,
+    DateTime? updated,
   }) {
     return Station(
       id: id ?? this.id,
@@ -44,6 +46,7 @@ class Station {
       gasTypes: gasTypes ?? this.gasTypes,
       gasTypeInfo: gasTypeInfo ?? this.gasTypeInfo,
       services: services ?? this.services,
+      updated: updated ?? this.updated,
     );
   }
 
@@ -57,6 +60,7 @@ class Station {
       gasTypes: List<String>.from(map['gasTypes']),
       gasTypeInfo: Map<String, String>.from(map['gasTypeInfo']),
       services: List<String>.from(map['services']),
+      updated: DateTime.parse(map['updated']),
     );
   }
 
@@ -70,6 +74,7 @@ class Station {
       'gasTypes': gasTypes,
       'gasTypeInfo': gasTypeInfo,
       'services': services,
+      'updated': updated.toIso8601String(),
     };
   }
 
@@ -80,7 +85,7 @@ class Station {
 
   @override
   String toString() {
-    return 'Station(id: $id, imagePath: $imagePath, brand: $brand, address: $address, distance: $distance, gasTypes: $gasTypes, gasTypeInfo: $gasTypeInfo, services: $services)';
+    return 'Station(id: $id, imagePath: $imagePath, brand: $brand, address: $address, distance: $distance, gasTypes: $gasTypes, gasTypeInfo: $gasTypeInfo, services: $services, updated: $updated,)';
   }
 
   @override
@@ -94,7 +99,8 @@ class Station {
         other.distance == distance &&
         listEquals(other.gasTypes, gasTypes) &&
         mapEquals(other.gasTypeInfo, gasTypeInfo) &&
-        listEquals(other.services, services);
+        listEquals(other.services, services) &&
+        other.updated == updated;
   }
 
   @override
@@ -106,6 +112,7 @@ class Station {
         distance.hashCode ^
         gasTypes.hashCode ^
         gasTypeInfo.hashCode ^
-        services.hashCode;
+        services.hashCode ^
+        updated.hashCode;
   }
 }
