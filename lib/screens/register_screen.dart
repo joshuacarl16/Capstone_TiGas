@@ -15,7 +15,8 @@ class _RegisScreenState extends State<RegisScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController displayNameController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  final TextEditingController confirmPasswordController = TextEditingController();
+  final TextEditingController confirmPasswordController =
+      TextEditingController();
 
   @override
   void dispose() {
@@ -83,12 +84,14 @@ class _RegisScreenState extends State<RegisScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  "Register",
-                                  style: GoogleFonts.inter(
-                                    fontSize: screenHeight * 0.06,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.grey,
+                                Center(
+                                  child: Text(
+                                    "Register",
+                                    style: GoogleFonts.inter(
+                                      fontSize: screenHeight * 0.06,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.grey,
+                                    ),
                                   ),
                                 ),
                                 SizedBox(height: screenHeight * 0.04),

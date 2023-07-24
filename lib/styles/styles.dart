@@ -40,7 +40,6 @@ TextStyle getPasswordTextStyle(double screenHeight) {
 InputDecoration getPasswordInputStyle() {
   return InputDecoration(
     labelText: 'Password',
-    hintText: '*******',
     prefixIcon: Icon(Icons.lock),
     border: OutlineInputBorder(),
   );
@@ -61,7 +60,7 @@ Text getRegisterButtonStyle(double screenHeight) {
     'REGISTER',
     style: GoogleFonts.inter(
       fontSize: screenHeight * 0.025,
-      color: Colors.green,
+      color: Colors.white,
     ),
   );
 }

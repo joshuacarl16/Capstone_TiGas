@@ -66,12 +66,14 @@ class _LoginScreenState extends State<LoginScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              "Log In",
-                              style: GoogleFonts.inter(
-                                fontSize: screenHeight * 0.06,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.grey,
+                            Center(
+                              child: Text(
+                                "Log In",
+                                style: GoogleFonts.inter(
+                                  fontSize: screenHeight * 0.06,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.grey,
+                                ),
                               ),
                             ),
                             SizedBox(height: screenHeight * 0.04),
@@ -85,10 +87,8 @@ class _LoginScreenState extends State<LoginScreen> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    "Email",
-                                    style: getEmailTextStyle(screenHeight)
-                                  ),
+                                  Text("Email",
+                                      style: getEmailTextStyle(screenHeight)),
                                   SizedBox(height: screenHeight * 0.01),
                                   TextField(
                                     style: TextStyle(
@@ -98,10 +98,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                     decoration: getEmailInputStyle(),
                                   ),
                                   SizedBox(height: screenHeight * 0.02),
-                                  Text(
-                                    "Password",
-                                    style: getPasswordTextStyle(screenHeight)
-                                  ),
+                                  Text("Password",
+                                      style:
+                                          getPasswordTextStyle(screenHeight)),
                                   SizedBox(height: screenHeight * 0.01),
                                   TextField(
                                     style: TextStyle(
@@ -155,7 +154,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                           ),
                                         ),
                                         TextButton(
-                                          child: getLoginButtonStyle(screenHeight),
+                                          child:
+                                              getLoginButtonStyle(screenHeight),
                                           onPressed: () => Navigator.push(
                                             context,
                                             MaterialPageRoute(
@@ -165,6 +165,21 @@ class _LoginScreenState extends State<LoginScreen> {
                                           ),
                                         ),
                                       ],
+                                    ),
+                                  ),
+                                  SizedBox(height: screenHeight * 0.01),
+                                  Center(
+                                    child: TextButton(
+                                      onPressed: () {
+                                        // Add functionality for "Forgot Password" here
+                                      },
+                                      child: Text(
+                                        "Forgot Password?",
+                                        style: GoogleFonts.inter(
+                                          fontSize: screenHeight * 0.018,
+                                          color: Colors.green,
+                                        ),
+                                      ),
                                     ),
                                   ),
                                 ],
