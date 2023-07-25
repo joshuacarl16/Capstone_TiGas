@@ -1,12 +1,9 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from rest_framework import viewsets
-from .models import Station
-from .serializers import StationSerializer
-
-# class StationViewSet(viewsets.ModelViewSet):
-#     queryset = Station.objects.all()
-#     serializer_class = StationSerializer
+from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework import status
+from .models import Station, Advertisement
+from .serializers import StationSerializer, AdvertisementSerializer
 
 @api_view(['GET'])
 def getStations(request):
@@ -53,3 +50,37 @@ def deleteStation(request, pk):
     station = Station.objects.get(id=pk)
     station.delete()
     return Response('Station deleted')
+
+@api_view(['POST'])
+def uploadImage(request):
+    parser_classes = (MultiPartParser, FormParser,)
+    serializer = AdvertisementSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    else:
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+@api_view(['GET'])
+def getImages(request):
+    advertisements = Advertisement.objects.all()
+    serializer = AdvertisementSerializer(advertisements, many=True)
+    return Response(serializer.data)
+
+@api_view(['GET'])
+def getImage(request, pk):
+    try:
+        advertisement = Advertisement.objects.get(id=pk)
+        serializer = AdvertisementSerializer(advertisement, many=False)
+        return Response(serializer.data)
+    except Advertisement.DoesNotExist:
+        return Response({'error': 'Advertisement does not exist'}, status=status.HTTP_404_NOT_FOUND)
+
+@api_view(['DELETE'])
+def deleteImage(request, pk):
+    try:
+        advertisement = Advertisement.objects.get(id=pk)
+        advertisement.delete()
+        return Response({'message': 'Advertisement deleted successfully'}, status=status.HTTP_200_OK)
+    except Advertisement.DoesNotExist:
+        return Response({'error': 'Advertisement does not exist'}, status=status.HTTP_404_NOT_FOUND)

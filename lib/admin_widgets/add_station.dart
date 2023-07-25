@@ -96,8 +96,8 @@ class _AddStationState extends State<AddStation> {
 
   Future<http.Response> deleteStation(int id) {
     return http.delete(
-      Uri.parse('http://192.168.1.4:8000/stations/$id/delete/'),
-      //  Uri.parse('http://127.0.0.1:8000/stations/$id/delete/'),
+      // Uri.parse('http://192.168.1.4:8000/stations/$id/delete/'), // used for external device
+      Uri.parse('http://127.0.0.1:8000/stations/$id/delete/'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },

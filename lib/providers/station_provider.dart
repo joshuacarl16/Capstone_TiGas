@@ -26,7 +26,8 @@ class StationProvider with ChangeNotifier {
 
   Future<void> fetchStations() async {
     final response =
-        await http.get(Uri.parse('http://192.168.1.4:8000/stations/'));
+        await http.get(Uri.parse('http://127.0.0.1:8000/stations/'));
+    // await http.get(Uri.parse('http://192.168.1.4:8000/stations/')); // used for external device
     if (response.statusCode == 200) {
       List jsonResponse = jsonDecode(response.body);
       List<Station> fetchedStations = jsonResponse

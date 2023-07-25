@@ -13,3 +13,9 @@ class Station(models.Model):
 
     class Meta:
         ordering = ['-updated']
+
+class Advertisement(models.Model):
+    updated = models.DateTimeField(auto_now=True)
+    created = models.DateTimeField(auto_now_add=True)
+    image = models.ImageField(upload_to='advertisements/')
+    caption = models.CharField(max_length=255)
