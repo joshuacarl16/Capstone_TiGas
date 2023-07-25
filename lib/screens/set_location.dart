@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:tigas_application/gmaps/autocomplete_prediction.dart';
@@ -77,9 +78,13 @@ class _SetLocationScreenState extends State<SetLocationScreen> {
                     }
                     Position position = await Geolocator.getCurrentPosition(
                         desiredAccuracy: LocationAccuracy.high);
-                    String latLng =
-                        "${position.latitude}, ${position.longitude}";
-                    Navigator.pop(context, latLng);
+                    List<Placemark> placemarks = await placemarkFromCoordinates(
+                        position.latitude, position.longitude);
+                    Placemark place = placemarks[0];
+                    String placeName = '${place.locality}, ${place.country}';
+                    // String latLng =
+                    //     "${position.latitude}, ${position.longitude}";
+                    Navigator.pop(context, placeName);
                   },
                   icon: Icon(Icons.my_location),
                   label: Text('Use my Current Location'),

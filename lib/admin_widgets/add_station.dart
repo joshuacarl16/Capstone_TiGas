@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:tigas_application/models/station_model.dart';
 import 'package:http/http.dart' as http;
+import 'package:tigas_application/screens/set_location.dart';
 import 'dart:convert';
 
 import 'package:tigas_application/widgets/show_snackbar.dart';
@@ -14,7 +15,7 @@ class AddStation extends StatefulWidget {
 
 class _AddStationState extends State<AddStation> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  String? imagePath, brand, address, gasTypes, gasTypeInfo, services;
+  String? imagePath, brand, address, gasTypes, gasTypeInfo;
   double? distance;
   List<Station> station = [];
   int? id;
@@ -44,7 +45,14 @@ class _AddStationState extends State<AddStation> {
     'Seaoil'
   ];
 
-  Future<http.Response> createStation() {
+  Map<String, bool> services = {
+    'Air': false,
+    'Water': false,
+    'Oil': false,
+    'Restroom': false,
+  };
+
+  Future<http.Response> createStation(List<String> selectedServices) {
     return http.post(
       Uri.parse('http://192.168.1.4:8000/stations/create/'),
       // Uri.parse('http://127.0.0.1:8000/stations/create/'),
@@ -66,8 +74,7 @@ class _AddStationState extends State<AddStation> {
           }
           return map;
         }),
-        'services':
-            servicesController.text.split(',').map((e) => e.trim()).toList(),
+        'services': selectedServices
       }),
     );
   }
@@ -117,6 +124,49 @@ class _AddStationState extends State<AddStation> {
         station = value;
       });
     });
+  }
+
+  Future<String?> _showServicesDialog() {
+    return showDialog<String?>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Services'),
+          content: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Container(
+                width: double.maxFinite,
+                child: ListView(
+                  shrinkWrap: true,
+                  children: services.keys.map((String key) {
+                    return CheckboxListTile(
+                      title: Text(key),
+                      value: services[key],
+                      onChanged: (bool? value) {
+                        setState(() {
+                          services[key] = value!;
+                        });
+                      },
+                    );
+                  }).toList(),
+                ),
+              );
+            },
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Done'),
+              onPressed: () {
+                Navigator.of(context).pop(services.entries
+                    .where((entry) => entry.value)
+                    .map((entry) => entry.key)
+                    .join(', '));
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -173,6 +223,18 @@ class _AddStationState extends State<AddStation> {
                   TextFormField(
                     controller: addressController,
                     decoration: InputDecoration(labelText: 'Address'),
+                    onTap: () async {
+                      final selectedLocation = await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: ((context) => SetLocationScreen()),
+                          ));
+                      if (selectedLocation != null) {
+                        setState(() {
+                          addressController.text = selectedLocation;
+                        });
+                      }
+                    },
                     onSaved: (value) {
                       address = value;
                     },
@@ -227,23 +289,26 @@ class _AddStationState extends State<AddStation> {
                     },
                   ),
                   TextFormField(
+                    readOnly: true,
                     controller: servicesController,
                     decoration: InputDecoration(labelText: 'Services'),
-                    onSaved: (value) {
-                      services = value;
-                    },
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter services';
+                    onTap: () async {
+                      final selectedServices = await _showServicesDialog();
+                      if (selectedServices != null) {
+                        servicesController.text = selectedServices;
                       }
-                      return null;
                     },
                   ),
                   SizedBox(height: 20),
                   ElevatedButton(
                     onPressed: () async {
+                      List<String> selectedServices = services.entries
+                          .where((entry) => entry.value)
+                          .map((entry) => entry.key)
+                          .toList();
                       // Call the API to create a new station
-                      final http.Response response = await createStation();
+                      final http.Response response =
+                          await createStation(selectedServices);
                       if (response.statusCode == 200) {
                         // If the server returns a 200 OK response,
                         // then parse the JSON.

@@ -14,45 +14,24 @@ import 'package:tigas_application/widgets/station_info.dart';
 class HomePage extends StatefulWidget {
   final int selectedTab;
 
-  HomePage({super.key, required this.selectedTab});
+  const HomePage({super.key, required this.selectedTab});
 
   @override
   _HomePageState createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-  List<String> services = ['Air', 'Water', 'Oil', 'Restroom'];
-  List<bool> serviceSelections = List<bool>.filled(4, false);
   TextEditingController currentLocController = TextEditingController();
   List<Station> station = [];
   String? location;
-
-  // Future<List<Station>> fetchStations() async {
-  //   final response =
-  //       await http.get(Uri.parse('http://192.168.1.4:8000/stations/')); // phone
-  //   // await http.get(Uri.parse('http://127.0.0.1:8000/stations/')); //web
-  //   if (response.statusCode == 200) {
-  //     List jsonResponse =
-  //         jsonDecode(response.body); // Add this line to inspect the response
-  //     return jsonResponse
-  //         .map((item) => Station.fromMap(item as Map<String, dynamic>))
-  //         .toList();
-  //   } else {
-  //     throw Exception('Failed to load stations');
-  //   }
-  // }
+  String? selectedStation;
+  List<String> services = ['Air', 'Water', 'Oil', 'Restroom'];
+  List<bool> serviceSelections = List<bool>.filled(4, false);
 
   @override
   void initState() {
     super.initState();
-
     Provider.of<StationProvider>(context, listen: false).fetchStations();
-
-    // .then((value) {
-    //   setState(() {
-    //     station = value;
-    //   });
-    // });
   }
 
   @override
@@ -99,7 +78,8 @@ class _HomePageState extends State<HomePage> {
                         filled: true,
                         fillColor: Colors.grey[300],
                         suffixIcon: IconButton(
-                          icon: Icon(Icons.search),
+                          color: Colors.green[400],
+                          icon: Icon(Icons.edit_location_outlined),
                           onPressed: () {
                             currentLocController.clear();
                             if (location != null) {
@@ -127,63 +107,55 @@ class _HomePageState extends State<HomePage> {
                               filled: true,
                               fillColor: Colors.grey[300],
                             ),
-                            items: [
+                            items: const [
                               DropdownMenuItem(
-                                value: 'station1',
+                                value: null,
+                                child: Text('Show All'),
+                              ),
+                              DropdownMenuItem(
+                                value: 'Shell',
                                 child: Text('Shell'),
                               ),
                               DropdownMenuItem(
-                                value: 'station2',
+                                value: 'Petron',
                                 child: Text('Petron'),
                               ),
                               DropdownMenuItem(
-                                value: 'station3',
+                                value: 'Caltex',
                                 child: Text('Caltex'),
                               ),
                               DropdownMenuItem(
-                                value: 'station4',
+                                value: 'Seaoil',
                                 child: Text('Seaoil'),
                               ),
                               DropdownMenuItem(
-                                value: 'station5',
+                                value: 'Total',
                                 child: Text('Total'),
                               ),
+                              DropdownMenuItem(
+                                value: 'Phoenix',
+                                child: Text('Phoenix'),
+                              ),
                             ],
-                            onChanged: (value) {},
+                            onChanged: (value) {
+                              setState(() {
+                                selectedStation = value;
+                              });
+                            },
                           ),
                         ),
                         SizedBox(width: 2 * unitWidthValue),
-                        Expanded(
-                          child: DropdownButtonFormField<String>(
-                            decoration: InputDecoration(
-                              labelText: 'Gas Type',
-                              filled: true,
-                              fillColor: Colors.grey[300],
-                            ),
-                            items: [
-                              DropdownMenuItem(
-                                value: 'type1',
-                                child: Text('Regular'),
-                              ),
-                              DropdownMenuItem(
-                                value: 'type2',
-                                child: Text('Diesel'),
-                              ),
-                              DropdownMenuItem(
-                                value: 'type3',
-                                child: Text('Premium'),
-                              ),
-                            ],
-                            onChanged: (value) {},
+                        FloatingActionButton(
+                          shape: RoundedRectangleBorder(
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(6))),
+                          backgroundColor: Colors.grey[300],
+                          onPressed: _filterServices,
+                          child: FaIcon(
+                            FontAwesomeIcons.filterCircleXmark,
+                            color: Colors.green[400],
                           ),
-                        ),
-                        SizedBox(width: 2 * unitWidthValue),
-                        IconButton(
-                            onPressed: _filterServices,
-                            icon: FaIcon(
-                              FontAwesomeIcons.filter,
-                              color: Colors.white,
-                            ))
+                        )
                       ],
                     ),
                   ),
@@ -197,44 +169,65 @@ class _HomePageState extends State<HomePage> {
         decoration: getGradientDecoration(),
         child: Consumer<StationProvider>(
             builder: (context, stationProvider, child) {
-          return ListView.builder(
-            itemCount: stationProvider.stations.length,
-            itemBuilder: (context, index) {
-              Station stations = stationProvider.stations[index];
-              return ListTile(
-                title: StationCard(
-                  imagePath: stations.imagePath,
-                  brand: stations.brand,
-                  address: stations.address,
-                  distance: '',
-                  gasTypes: stations.gasTypes,
-                  gasTypeInfo: stations.gasTypeInfo,
-                  services: stations.services,
-                ),
-                onTap: () {
-                  showModalBottomSheet(
-                      context: context,
-                      backgroundColor: Colors.transparent,
-                      builder: (BuildContext context) {
-                        return ClipRRect(
-                          borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(2 * unitHeightValue),
-                            topRight: Radius.circular(2 * unitHeightValue),
-                          ),
-                          child: Container(
-                              height: 55 * unitHeightValue,
-                              width: 100 * unitWidthValue,
-                              child: StationInfo(
-                                station: stations,
-                                gasTypeInfo: stations.gasTypeInfo,
-                                gasTypes: stations.gasTypes,
-                                services: stations.services,
-                              )),
-                        );
-                      });
-                },
-              );
-            },
+          return RefreshIndicator(
+            onRefresh: () =>
+                Provider.of<StationProvider>(context, listen: false)
+                    .fetchStations(),
+            child: ListView.builder(
+              itemCount: stationProvider.stations
+                  .where((station) =>
+                      (selectedStation == null ||
+                          station.brand == selectedStation) &&
+                      serviceSelections.asMap().entries.every((entry) {
+                        return !entry.value ||
+                            station.services.contains(services[entry.key]);
+                      }))
+                  .length,
+              itemBuilder: (context, index) {
+                Station stations = stationProvider.stations
+                    .where((station) =>
+                        (selectedStation == null ||
+                            station.brand == selectedStation) &&
+                        serviceSelections.asMap().entries.every((entry) {
+                          return !entry.value ||
+                              station.services.contains(services[entry.key]);
+                        }))
+                    .toList()[index];
+                return ListTile(
+                  title: StationCard(
+                    imagePath: stations.imagePath,
+                    brand: stations.brand,
+                    address: stations.address,
+                    distance: '',
+                    gasTypes: stations.gasTypes,
+                    gasTypeInfo: stations.gasTypeInfo,
+                    services: stations.services,
+                  ),
+                  onTap: () {
+                    showModalBottomSheet(
+                        context: context,
+                        backgroundColor: Colors.transparent,
+                        builder: (BuildContext context) {
+                          return ClipRRect(
+                            borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(2 * unitHeightValue),
+                              topRight: Radius.circular(2 * unitHeightValue),
+                            ),
+                            child: Container(
+                                height: 55 * unitHeightValue,
+                                width: 100 * unitWidthValue,
+                                child: StationInfo(
+                                  station: stations,
+                                  gasTypeInfo: stations.gasTypeInfo,
+                                  gasTypes: stations.gasTypes,
+                                  services: stations.services,
+                                )),
+                          );
+                        });
+                  },
+                );
+              },
+            ),
           );
         }),
       ),
@@ -242,39 +235,45 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _filterServices() {
+    List<bool> tempSelections = List.from(serviceSelections);
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Filter Services'),
-          content: SingleChildScrollView(
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                maxHeight: MediaQuery.of(context).size.height * 0.25,
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter dialogSetState) {
+            return AlertDialog(
+              title: const Text('Filter Services'),
+              content: ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxHeight: MediaQuery.of(context).size.height * 0.3,
+                ),
+                child: Column(
+                  children: services.asMap().entries.map((entry) {
+                    return CheckboxListTile(
+                      title: Text(entry.value),
+                      value: tempSelections[entry.key],
+                      onChanged: (value) {
+                        dialogSetState(() {
+                          tempSelections[entry.key] = value!;
+                        });
+                      },
+                    );
+                  }).toList(),
+                ),
               ),
-              child: Column(
-                children: services.asMap().entries.map((entry) {
-                  return CheckboxListTile(
-                    title: Text(entry.value),
-                    value: serviceSelections[entry.key],
-                    onChanged: (value) {
-                      setState(() {
-                        serviceSelections[entry.key] = value!;
-                      });
-                    },
-                  );
-                }).toList(),
-              ),
-            ),
-          ),
-          actions: [
-            TextButton(
-              child: const Text('Apply'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
+              actions: <Widget>[
+                TextButton(
+                  onPressed: () {
+                    setState(() {
+                      serviceSelections = tempSelections;
+                    });
+                    Navigator.of(context).pop();
+                  },
+                  child: Text('Apply'),
+                )
+              ],
+            );
+          },
         );
       },
     );

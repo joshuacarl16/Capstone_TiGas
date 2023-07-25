@@ -19,6 +19,7 @@ from django.contrib import admin
 from rest_framework.routers import DefaultRouter
 from backend import views
 
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('stations/', views.getStations),
