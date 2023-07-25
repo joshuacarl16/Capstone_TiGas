@@ -1,12 +1,22 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
+import 'dart:convert';
 import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
+import 'package:tigas_application/widgets/show_snackbar.dart';
 
 class Advertisement {
   final String text;
   final XFile image;
+  final DateTime updated;
 
-  Advertisement({required this.text, required this.image});
+  Advertisement({
+    required this.text,
+    required this.image,
+    required this.updated,
+  });
 }
 
 class PostAdvertisement extends StatefulWidget {
@@ -17,6 +27,7 @@ class PostAdvertisement extends StatefulWidget {
 class _PostAdvertisementState extends State<PostAdvertisement> {
   final TextEditingController _adController = TextEditingController();
   List<Advertisement> postedAds = [];
+  XFile? pickedImage;
 
   @override
   Widget build(BuildContext context) {
@@ -54,46 +65,69 @@ class _PostAdvertisementState extends State<PostAdvertisement> {
                     XFile? image =
                         await _picker.pickImage(source: ImageSource.gallery);
 
-                    if (image != null && _adController.text.isNotEmpty) {
+                    if (image != null) {
                       setState(() {
-                        postedAds.add(Advertisement(
-                            text: _adController.text, image: image));
-                        _adController.clear(); // Clear the text after posting
+                        pickedImage = image;
                       });
                     }
                   },
                   style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
-                  child: Text('Pick Image and Upload'),
+                  child: Text('Pick Image'),
                 ),
-              ],
-            ),
-          ),
+                SizedBox(
+                  height: 10,
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    if (pickedImage != null && _adController.text.isNotEmpty) {
+                      Uri uri =
+                          Uri.parse("http://127.0.0.1:8000/upload_image/");
+                      // Uri.parse("http://192.168.1.4:8000/upload_image/"); //used for external device
+                      var request = http.MultipartRequest('POST', uri);
+                      request.files.add(
+                        await http.MultipartFile.fromPath(
+                            'image', pickedImage!.path),
+                      );
 
-          // Display posted images
-          Expanded(
-            child: ListView.builder(
-              itemCount: postedAds.length,
-              itemBuilder: (context, index) {
-                Advertisement ad = postedAds[index];
-                return Card(
-                  child: Column(
-                    children: [
-                      Text(ad.text),
-                      SizedBox(
-                        height: 10,
-                      ),
-                      Image.file(
-                        File(ad.image.path),
-                        errorBuilder: (BuildContext context, Object exception,
-                            StackTrace? stackTrace) {
-                          // If image can't load, show a placeholder
-                          return Icon(Icons.error);
-                        },
-                      ),
-                    ],
-                  ),
-                );
-              },
+                      request.fields['caption'] = _adController.text;
+
+                      var response = await request.send();
+
+                      if (response.statusCode == 201) {
+                        // Check the status code for a success response
+                        print("Uploaded successfully");
+
+                        // Assuming the response contains a field 'updated' with the timestamp
+                        var responseData =
+                            await response.stream.bytesToString();
+                        var decodedData = jsonDecode(responseData);
+                        DateTime updated =
+                            DateTime.parse(decodedData['updated']);
+
+                        setState(() {
+                          postedAds.add(Advertisement(
+                              text: _adController.text,
+                              image: pickedImage!,
+                              updated: updated));
+                          _adController.clear();
+                        });
+                        showSnackBar(context, 'Image uploaded');
+                      } else {
+                        print("Upload failed");
+                      }
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
+                  child: Text('Upload Image'),
+                ),
+                SizedBox(
+                  height: 10,
+                ),
+                // Display the picked image
+                pickedImage == null
+                    ? Text('No image selected.')
+                    : Image.file(File(pickedImage!.path)),
+              ],
             ),
           ),
         ],
