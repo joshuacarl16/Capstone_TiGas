@@ -26,6 +26,7 @@ class GMapsState extends State<GMaps> {
   String? location;
   Marker? _currentLocationMarker;
   BitmapDescriptor? currentLocationIcon;
+  List<Marker> gasStationMarkers = [];
 
   Set<Polyline> _polylines = Set<Polyline>();
   int _polylineIdCounter = 1;
@@ -65,6 +66,7 @@ class GMapsState extends State<GMaps> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       getRoute(widget.destination);
+      getGasStations();
     });
     loadMarkers();
   }
@@ -73,11 +75,12 @@ class GMapsState extends State<GMaps> {
     var markers = <Marker>{};
 
     for (var i = 0; i < points.length; i++) {
-      markers.add(Marker(
-          markerId: MarkerId('marker$i'),
-          position: points[i],
-          infoWindow: InfoWindow(title: 'Gas Station $i'),
-          icon: customIcons[i % customIcons.length]));
+      markers.addAll(gasStationMarkers);
+      // markers.add(Marker(
+      //     markerId: MarkerId('marker$i'),
+      //     position: points[i],
+      //     infoWindow: InfoWindow(title: 'Gas Station $i'),
+      //     icon: customIcons[i % customIcons.length]));
     }
     if (_currentLocationMarker != null) {
       markers.add(_currentLocationMarker!);
@@ -165,6 +168,27 @@ class GMapsState extends State<GMaps> {
       (southwest.latitude + northeast.latitude) / 2,
       (southwest.longitude + northeast.longitude) / 2,
     );
+  }
+
+  Future<void> getGasStations() async {
+    try {
+      List<Map<String, dynamic>> gasStations =
+          await LocationService().getGasStations();
+
+      for (var station in gasStations) {
+        Marker marker = Marker(
+          markerId: MarkerId(station['place_id']),
+          position: station['location'],
+          infoWindow: InfoWindow(title: station['name']),
+          icon:
+              BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
+        );
+
+        gasStationMarkers.add(marker);
+      }
+    } catch (e) {
+      print(e.toString());
+    }
   }
 
   @override

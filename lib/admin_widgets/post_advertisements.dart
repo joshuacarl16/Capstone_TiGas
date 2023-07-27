@@ -81,8 +81,9 @@ class _PostAdvertisementState extends State<PostAdvertisement> {
                   onPressed: () async {
                     if (pickedImage != null && _adController.text.isNotEmpty) {
                       Uri uri =
-                          Uri.parse("http://127.0.0.1:8000/upload_image/");
-                      // Uri.parse("http://192.168.1.4:8000/upload_image/"); //used for external device
+                          // Uri.parse("http://127.0.0.1:8000/upload_image/");
+                          Uri.parse(
+                              "http://192.168.1.10:8000/upload_image/"); //used for external device
                       var request = http.MultipartRequest('POST', uri);
                       request.files.add(
                         await http.MultipartFile.fromPath(

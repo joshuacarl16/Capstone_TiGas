@@ -25,16 +25,19 @@ class _CommercialPageState extends State<CommercialPage> {
   }
 
   Future<void> fetchAdvertisements() async {
-    final response = await http.get(Uri.parse('http://127.0.0.1:8000/images/'));
-    // await http.get(Uri.parse('http://192.168.1.4:8000/images/')); //used for external device
+    final response =
+        // await http.get(Uri.parse('http://127.0.0.1:8000/images/'));
+        await http.get(Uri.parse(
+            'http://192.168.1.10:8000/images/')); //used for external device
 
     if (response.statusCode == 200) {
       List<dynamic> ads = json.decode(response.body);
       setState(() {
         advertisements = ads
             .map<Map<String, dynamic>>((ad) => {
-                  'image': 'http://127.0.0.1:8000${ad['image']}',
-                  // 'image': 'http://192.168.1.4:8000${ad['image']}', //used for external device
+                  // 'image': 'http://127.0.0.1:8000${ad['image']}',
+                  'image':
+                      'http://192.168.1.10:8000${ad['image']}', //used for external device
                   'caption': ad['caption'],
                   'updated': convertTime(ad['updated'])
                 })

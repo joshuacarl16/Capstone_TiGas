@@ -1,52 +1,67 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 
 class Station {
   final int id;
-  final String imagePath;
-  final String brand;
+  final String? imagePath;
+  final String name;
   final String address;
-  final double distance;
-  final List<String> gasTypes;
-  final Map<String, String> gasTypeInfo;
-  final List<String> services;
+  final double? distance;
+  final List<String>? gasTypes;
+  final Map<String, String>? gasTypeInfo;
+  final List<String>? services;
   final DateTime updated;
+  final double latitude;
+  final double longitude;
+  final String place_id;
+  final Map<String, dynamic>? opening_hours;
 
   Station({
     required this.id,
-    required this.imagePath,
-    required this.brand,
+    this.imagePath,
+    required this.name,
     required this.address,
-    required this.distance,
-    required this.gasTypes,
-    required this.gasTypeInfo,
-    required this.services,
+    this.distance,
+    this.gasTypes,
+    this.gasTypeInfo,
+    this.services,
     required this.updated,
+    required this.latitude,
+    required this.longitude,
+    required this.place_id,
+    this.opening_hours,
   });
 
   Station copyWith({
     int? id,
     String? imagePath,
-    String? brand,
+    String? name,
     String? address,
     double? distance,
     List<String>? gasTypes,
     Map<String, String>? gasTypeInfo,
     List<String>? services,
     DateTime? updated,
+    double? latitude,
+    double? longitude,
+    String? place_id,
+    Map<String, dynamic>? opening_hours,
   }) {
     return Station(
       id: id ?? this.id,
       imagePath: imagePath ?? this.imagePath,
-      brand: brand ?? this.brand,
+      name: name ?? this.name,
       address: address ?? this.address,
       distance: distance ?? this.distance,
       gasTypes: gasTypes ?? this.gasTypes,
       gasTypeInfo: gasTypeInfo ?? this.gasTypeInfo,
       services: services ?? this.services,
       updated: updated ?? this.updated,
+      latitude: latitude ?? this.latitude,
+      longitude: longitude ?? this.longitude,
+      place_id: place_id ?? this.place_id,
+      opening_hours: opening_hours ?? this.opening_hours,
     );
   }
 
@@ -54,13 +69,25 @@ class Station {
     return Station(
       id: map['id'],
       imagePath: map['imagePath'],
-      brand: map['brand'],
+      name: map['name'],
       address: map['address'],
-      distance: (map['distance'] as num).toDouble(),
-      gasTypes: List<String>.from(map['gasTypes']),
-      gasTypeInfo: Map<String, String>.from(map['gasTypeInfo']),
-      services: List<String>.from(map['services']),
+      distance:
+          map['distance'] != null ? (map['distance'] as num).toDouble() : null,
+      gasTypes:
+          map['gasTypes'] != null ? List<String>.from(map['gasTypes']) : null,
+      gasTypeInfo: map['gasTypeInfo'] != null
+          ? Map<String, String>.from(map['gasTypeInfo'])
+          : null,
+      services: map['services'] != null
+          ? (map['services'] as List<dynamic>).cast<String>()
+          : null,
       updated: DateTime.parse(map['updated']),
+      latitude: (map['latitude'] as num).toDouble(),
+      longitude: (map['longitude'] as num).toDouble(),
+      place_id: map['place_id'],
+      opening_hours: map['opening_hours'] != null
+          ? Map<String, dynamic>.from(map['opening_hours'])
+          : null,
     );
   }
 
@@ -68,51 +95,89 @@ class Station {
     return {
       'id': id,
       'imagePath': imagePath,
-      'brand': brand,
+      'name': name,
       'address': address,
       'distance': distance,
       'gasTypes': gasTypes,
       'gasTypeInfo': gasTypeInfo,
       'services': services,
       'updated': updated.toIso8601String(),
+      'latitude': latitude,
+      'longitude': longitude,
+      'place_id': place_id,
+      'opening_hours': opening_hours,
     };
   }
 
   String toJson() => json.encode(toMap());
 
-  factory Station.fromJson(String source) =>
-      Station.fromMap(json.decode(source) as Map<String, dynamic>);
-
-  @override
-  String toString() {
-    return 'Station(id: $id, imagePath: $imagePath, brand: $brand, address: $address, distance: $distance, gasTypes: $gasTypes, gasTypeInfo: $gasTypeInfo, services: $services, updated: $updated,)';
+  factory Station.fromJson(String source) {
+    final Map<String, dynamic> map = json.decode(source);
+    return Station(
+      id: map['id'],
+      imagePath: map['imagePath'],
+      name: map['name'],
+      address: map['address'],
+      distance:
+          map['distance'] != null ? (map['distance'] as num).toDouble() : null,
+      gasTypes: map['gasTypes'] != null
+          ? (map['gasTypes'] as String).split(', ')
+          : null,
+      gasTypeInfo: map['gasTypeInfo'] != null
+          ? Map<String, String>.from(map['gasTypeInfo'])
+          : null,
+      services: map['services'] != null
+          ? (map['services'] as String).split(', ')
+          : null,
+      updated: DateTime.parse(map['updated']),
+      latitude: (map['latitude'] as num).toDouble(),
+      longitude: (map['longitude'] as num).toDouble(),
+      place_id: map['place_id'],
+      opening_hours: map['opening_hours'] != null
+          ? Map<String, dynamic>.from(map['opening_hours'])
+          : null,
+    );
   }
 
   @override
-  bool operator ==(covariant Station other) {
+  String toString() {
+    return 'Station(id: $id, imagePath: $imagePath, name: $name, address: $address, distance: $distance, gasTypes: $gasTypes, gasTypeInfo: $gasTypeInfo, services: $services, updated: $updated, latitude: $latitude, longitude: $longitude, place_id: $place_id, opening_hours: $opening_hours)';
+  }
+
+  @override
+  bool operator ==(Object other) {
     if (identical(this, other)) return true;
 
-    return other.id == id &&
+    return other is Station &&
+        other.id == id &&
         other.imagePath == imagePath &&
-        other.brand == brand &&
+        other.name == name &&
         other.address == address &&
         other.distance == distance &&
         listEquals(other.gasTypes, gasTypes) &&
         mapEquals(other.gasTypeInfo, gasTypeInfo) &&
         listEquals(other.services, services) &&
-        other.updated == updated;
+        other.updated == updated &&
+        other.latitude == latitude &&
+        other.longitude == longitude &&
+        other.place_id == place_id &&
+        mapEquals(other.opening_hours, opening_hours);
   }
 
   @override
   int get hashCode {
     return id.hashCode ^
-        imagePath.hashCode ^
-        brand.hashCode ^
+        (imagePath?.hashCode ?? 0) ^
+        name.hashCode ^
         address.hashCode ^
-        distance.hashCode ^
-        gasTypes.hashCode ^
-        gasTypeInfo.hashCode ^
-        services.hashCode ^
-        updated.hashCode;
+        (distance?.hashCode ?? 0) ^
+        (gasTypes?.hashCode ?? 0) ^
+        (gasTypeInfo?.hashCode ?? 0) ^
+        (services?.hashCode ?? 0) ^
+        updated.hashCode ^
+        latitude.hashCode ^
+        longitude.hashCode ^
+        place_id.hashCode ^
+        (opening_hours?.hashCode ?? 0);
   }
 }

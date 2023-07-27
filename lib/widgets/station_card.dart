@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
+import 'package:tigas_application/models/station_model.dart';
+import 'package:tigas_application/providers/station_provider.dart';
 
 class StationCard extends StatelessWidget {
   final String imagePath;
@@ -10,6 +13,7 @@ class StationCard extends StatelessWidget {
   final List<String> gasTypes;
   final Map<String, String> gasTypeInfo;
   final List<String> services;
+  final Station station;
 
   StationCard({
     Key? key,
@@ -20,6 +24,7 @@ class StationCard extends StatelessWidget {
     required this.gasTypes,
     required this.gasTypeInfo,
     required this.services,
+    required this.station,
   }) : super(key: key);
 
   final Map<String, FaIcon> servicesIcons = {
@@ -44,25 +49,6 @@ class StationCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(2.2 * unitWidthValue),
         child: Stack(
           children: [
-            Center(
-              child: Container(
-                margin: EdgeInsets.only(top: 1.6 * unitHeightValue),
-                decoration: BoxDecoration(
-                    border: Border.all(
-                        width: 0.4 * unitWidthValue, color: Colors.grey[500]!),
-                    borderRadius: BorderRadius.circular(20)),
-                child: Padding(
-                  padding:
-                      EdgeInsets.symmetric(horizontal: 0.6 * unitWidthValue),
-                  child: Text(
-                    distance,
-                    style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 1.6 * unitHeightValue),
-                  ),
-                ),
-              ),
-            ),
             Positioned(
               right: 3 * unitWidthValue,
               top: -2 * unitHeightValue,
@@ -82,21 +68,24 @@ class StationCard extends StatelessWidget {
                   Stack(
                     children: [
                       Container(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(brand,
-                                style: GoogleFonts.ubuntu(
-                                    fontSize: 3 * unitHeightValue,
-                                    fontWeight: FontWeight.bold)),
-                            Text(
-                              address,
-                              style: GoogleFonts.catamaran(
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.grey[600],
-                                  fontSize: 1.6 * unitHeightValue),
-                            ),
-                          ],
+                        child: Padding(
+                          padding: EdgeInsets.only(right: 16 * unitWidthValue),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(brand,
+                                  style: GoogleFonts.ubuntu(
+                                      fontSize: 3 * unitHeightValue,
+                                      fontWeight: FontWeight.bold)),
+                              Text(
+                                address,
+                                style: GoogleFonts.catamaran(
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.grey[600],
+                                    fontSize: 1.6 * unitHeightValue),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ],
@@ -105,11 +94,38 @@ class StationCard extends StatelessWidget {
                     height: unitHeightValue,
                   ),
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
                     children:
                         _buildServicesIcons(unitWidthValue, unitHeightValue),
                   ),
                   SizedBox(height: unitHeightValue),
-                  _buildGasTypes(unitHeightValue, unitWidthValue),
+                  Center(
+                      child: _buildGasTypes(unitHeightValue, unitWidthValue)),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.green[700],
+                      borderRadius: BorderRadius.only(
+                        bottomLeft: Radius.circular(2.2 * unitWidthValue),
+                        bottomRight: Radius.circular(2.2 * unitWidthValue),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          Provider.of<StationProvider>(context, listen: false)
+                                      .getDistanceToStation(station) !=
+                                  null
+                              ? '${Provider.of<StationProvider>(context, listen: false).getDistanceToStation(station)!.toStringAsFixed(2)} km'
+                              : '',
+                          style: GoogleFonts.exo2(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 20,
+                              color: Colors.white),
+                        ),
+                      ],
+                    ),
+                  )
                 ],
               ),
             ),
@@ -119,18 +135,24 @@ class StationCard extends StatelessWidget {
     );
   }
 
-  Row _buildGasTypes(double unitHeightValue, double unitWidthValue) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: List<Widget>.generate(gasTypes.length * 2 - 1, (index) {
-        if (index % 2 == 0) {
-          String type = gasTypes[index ~/ 2];
-          return _buildGasTypeInfo(
-              type, gasTypeInfo[type]!, unitHeightValue, unitWidthValue);
-        } else {
-          return _buildDivider(unitHeightValue);
-        }
-      }),
+  Widget _buildGasTypes(double unitHeightValue, double unitWidthValue) {
+    return GestureDetector(
+      onTap: () {},
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: List<Widget>.generate(gasTypes.length * 2 - 1, (index) {
+            if (index % 2 == 0) {
+              String type = gasTypes[index ~/ 2];
+              return _buildGasTypeInfo(
+                  type, gasTypeInfo[type]!, unitHeightValue, unitWidthValue);
+            } else {
+              return _buildDivider(unitHeightValue);
+            }
+          }),
+        ),
+      ),
     );
   }
 
@@ -159,7 +181,7 @@ class StationCard extends StatelessWidget {
 
   Container _buildDivider(double unitHeightValue) {
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 2 * unitHeightValue),
+      margin: EdgeInsets.symmetric(horizontal: 1 * unitHeightValue),
       height: 7 * unitHeightValue,
       child: VerticalDivider(
         color: Colors.black,
@@ -171,6 +193,10 @@ class StationCard extends StatelessWidget {
 
   List<Widget> _buildServicesIcons(
       double unitWidthValue, double unitHeightValue) {
+    for (var serviceName in services) {
+      if (!servicesIcons.containsKey(serviceName)) {}
+    }
+
     return [
       for (var serviceName in services)
         if (servicesIcons.containsKey(serviceName)) ...[

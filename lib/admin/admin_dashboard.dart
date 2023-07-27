@@ -16,7 +16,7 @@ class _MainDashboardState extends State<MainDashboard> {
   final List<Widget> _screens = [
     PostAdvertisement(),
     ModifyPriceServices(),
-    AddStation()
+    EditStation()
   ];
 
   @override
@@ -64,7 +64,7 @@ class _MainDashboardState extends State<MainDashboard> {
             ),
             ListTile(
               leading: Icon(Icons.local_gas_station_rounded),
-              title: Text('Add/Delete Station'),
+              title: Text('Edit/Delete Station'),
               onTap: () {
                 setState(() {
                   _selectedIndex = 2;

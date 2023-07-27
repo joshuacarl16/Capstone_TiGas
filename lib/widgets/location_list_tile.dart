@@ -8,7 +8,7 @@ class LocationListTile extends StatelessWidget {
   }) : super(key: key);
 
   final String location;
-  final VoidCallback press;
+  final Future Function() press;
 
   @override
   Widget build(BuildContext context) {

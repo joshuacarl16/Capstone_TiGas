@@ -218,14 +218,31 @@ class _CameraScreenState extends State<CameraScreen>
 
       List<TextBlock> blocks = recognizedText.blocks
         ..sort((a, b) => a.boundingBox.top.compareTo(b.boundingBox.top));
-      // ..sort((a, b) => a.boundingBox.top.compareTo(b.boundingBox!.top));
-      StringBuffer buffer = StringBuffer();
+      // StringBuffer buffer = StringBuf
+
+      List<String> prices = [];
 
       for (var block in blocks) {
-        buffer.writeln(block.text);
+        RegExp regExp = RegExp(r'\d+\.\d+');
+        var matches = regExp.allMatches(block.text);
+        matches.forEach((match) {
+          prices.add(match.group(0)!);
+        });
+        // String numOnly = block.text.replaceAll(RegExp(r'\D'), '');
+        // buffer.writeln(numOnly);
+        // buffer.writeln(block.text);
       }
 
-      String text = buffer.toString();
+      // String text = buffer.toString();
+      // if (prices.length != 3) {
+      //   throw Exception('Expected 3 prices but got ${prices.length}');
+      // }
+
+      String regular = prices[0];
+      String diesel = prices[1];
+      String premium = prices[2];
+
+      String text = 'Regular: $regular\n Diesel: $diesel\n Premium: $premium';
 
       await navigator.push(
         MaterialPageRoute(
@@ -234,8 +251,8 @@ class _CameraScreenState extends State<CameraScreen>
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('An error occured while scanning text'),
+        SnackBar(
+          content: Text('An error occured while scanning text: $e'),
         ),
       );
     }

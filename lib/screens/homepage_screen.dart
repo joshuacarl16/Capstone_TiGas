@@ -7,7 +7,6 @@ import 'package:tigas_application/models/station_model.dart';
 import 'package:tigas_application/providers/station_provider.dart';
 import 'package:tigas_application/styles/styles.dart';
 import 'package:tigas_application/screens/set_location.dart';
-import 'package:tigas_application/widgets/show_snackbar.dart';
 import 'package:tigas_application/widgets/station_card.dart';
 import 'package:tigas_application/widgets/station_info.dart';
 
@@ -77,21 +76,6 @@ class _HomePageState extends State<HomePage> {
                         labelText: 'Current Location',
                         filled: true,
                         fillColor: Colors.grey[300],
-                        suffixIcon: IconButton(
-                          color: Colors.green[400],
-                          icon: Icon(Icons.edit_location_outlined),
-                          onPressed: () {
-                            currentLocController.clear();
-                            if (location != null) {
-                              showSnackBar(
-                                  context, 'Location set to $location');
-
-                              setState(() {});
-                            } else {
-                              showSnackBar(context, 'No location selected');
-                            }
-                          },
-                        ),
                       ),
                     ),
                   ),
@@ -125,6 +109,10 @@ class _HomePageState extends State<HomePage> {
                                 child: Text('Caltex'),
                               ),
                               DropdownMenuItem(
+                                value: 'Jetti',
+                                child: Text('Jetti'),
+                              ),
+                              DropdownMenuItem(
                                 value: 'Seaoil',
                                 child: Text('Seaoil'),
                               ),
@@ -139,7 +127,12 @@ class _HomePageState extends State<HomePage> {
                             ],
                             onChanged: (value) {
                               setState(() {
-                                selectedStation = value;
+                                if (value == 'Seaoil') {
+                                  value = value!.toUpperCase();
+                                  selectedStation = value;
+                                } else {
+                                  selectedStation = value;
+                                }
                               });
                             },
                           ),
@@ -169,39 +162,43 @@ class _HomePageState extends State<HomePage> {
         decoration: getGradientDecoration(),
         child: Consumer<StationProvider>(
             builder: (context, stationProvider, child) {
+          List<Station> filteredStations = stationProvider.stations
+              .where((station) =>
+                  (selectedStation == null ||
+                      station.name.contains(selectedStation ?? '')) &&
+                  serviceSelections.asMap().entries.every((entry) {
+                    return !entry.value ||
+                        station.services!.contains(services[entry.key]);
+                  }))
+              .toList();
+          filteredStations.sort((a, b) {
+            var distanceA = stationProvider.getDistanceToStation(a);
+            var distanceB = stationProvider.getDistanceToStation(b);
+
+            if (distanceA == null || distanceB == null) {
+              return 0; // or whatever value makes sense in your context
+            }
+
+            return distanceA.compareTo(distanceB);
+          });
           return RefreshIndicator(
             onRefresh: () =>
                 Provider.of<StationProvider>(context, listen: false)
                     .fetchStations(),
             child: ListView.builder(
-              itemCount: stationProvider.stations
-                  .where((station) =>
-                      (selectedStation == null ||
-                          station.brand == selectedStation) &&
-                      serviceSelections.asMap().entries.every((entry) {
-                        return !entry.value ||
-                            station.services.contains(services[entry.key]);
-                      }))
-                  .length,
+              itemCount: filteredStations.length,
               itemBuilder: (context, index) {
-                Station stations = stationProvider.stations
-                    .where((station) =>
-                        (selectedStation == null ||
-                            station.brand == selectedStation) &&
-                        serviceSelections.asMap().entries.every((entry) {
-                          return !entry.value ||
-                              station.services.contains(services[entry.key]);
-                        }))
-                    .toList()[index];
+                Station station = filteredStations[index];
                 return ListTile(
                   title: StationCard(
-                    imagePath: stations.imagePath,
-                    brand: stations.brand,
-                    address: stations.address,
-                    distance: '',
-                    gasTypes: stations.gasTypes,
-                    gasTypeInfo: stations.gasTypeInfo,
-                    services: stations.services,
+                    imagePath: station.imagePath.toString(),
+                    brand: station.name,
+                    address: station.address,
+                    distance: station.distance.toString(),
+                    gasTypes: station.gasTypes ?? [],
+                    gasTypeInfo: station.gasTypeInfo!,
+                    services: station.services ?? [],
+                    station: station,
                   ),
                   onTap: () {
                     showModalBottomSheet(
@@ -217,10 +214,10 @@ class _HomePageState extends State<HomePage> {
                                 height: 55 * unitHeightValue,
                                 width: 100 * unitWidthValue,
                                 child: StationInfo(
-                                  station: stations,
-                                  gasTypeInfo: stations.gasTypeInfo,
-                                  gasTypes: stations.gasTypes,
-                                  services: stations.services,
+                                  station: station,
+                                  gasTypeInfo: station.gasTypeInfo ?? {},
+                                  gasTypes: station.gasTypes ?? [],
+                                  services: station.services ?? [],
                                 )),
                           );
                         });

@@ -1,4 +1,10 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:tigas_application/models/station_model.dart';
+import 'package:tigas_application/providers/station_provider.dart';
+import 'package:tigas_application/widgets/show_snackbar.dart';
 
 class ModifyPriceServices extends StatefulWidget {
   @override
@@ -7,26 +13,108 @@ class ModifyPriceServices extends StatefulWidget {
 
 class _ModifyPriceServicesState extends State<ModifyPriceServices> {
   final TextEditingController _priceController = TextEditingController();
-  String _selectedGasType = 'Gasoline'; // Default selection
-  final Map<String, String> _gasPrices = {
-    'Gasoline': '',
-    'Diesel': ''
+  String? _selectedGasType;
+  Station? _selectedStation;
+  Map<String, String> _gasPrices = {
+    'Regular': '',
+    'Diesel': '',
+    'Premium': ''
   }; // Default prices
 
-  Map<String, bool> services = {
-    'Oil': false,
-    'Water': false,
-    'Air': false,
-    'CR': false,
-  };
+  Map<String, bool> services = {};
+
+  @override
+  void initState() {
+    super.initState();
+    Provider.of<StationProvider>(context, listen: false)
+        .fetchStations()
+        .then((_) {
+      if (mounted) {
+        // Get reference to the provider
+        var stationProvider =
+            Provider.of<StationProvider>(context, listen: false);
+
+        // If there are any stations, set the selected station to the first one
+        if (stationProvider.stations.isNotEmpty) {
+          setState(() {
+            _selectedStation = stationProvider.stations.first;
+            _gasPrices = {...?_selectedStation?.gasTypeInfo};
+            services = {
+              for (var service in ['Oil', 'Water', 'Air', 'Restroom'])
+                service: _selectedStation!.services!.contains(service)
+            };
+          });
+        }
+      }
+    });
+  }
+
+  Future<void> updateGasPrice() async {
+    if (_selectedStation != null && _selectedGasType != null) {
+      var url = Uri.parse(
+          // 'http://127.0.0.1:8000/stations/${_selectedStation!.id}/update/');
+          'http://192.168.1.10:8000/stations/${_selectedStation!.id}/update/'); //for external device
+      var newGasPrice = {_selectedGasType: _priceController.text};
+      var oldGasTypeInfo = _selectedStation!.gasTypeInfo ?? {};
+      var newGasTypeInfo = {...oldGasTypeInfo, ...newGasPrice};
+
+      var response = await http.patch(url,
+          body: json.encode({'gasTypeInfo': newGasTypeInfo}),
+          headers: {"Content-Type": "application/json"});
+
+      if (response.statusCode != 200) {
+        throw Exception('Failed to update gas price');
+      }
+    }
+  }
+
+  Future<void> updateServices() async {
+    if (_selectedStation != null) {
+      var url = Uri.parse(
+          // 'http://127.0.0.1:8000/stations/${_selectedStation!.id}/update/');
+          'http://192.168.1.10:8000/stations/${_selectedStation!.id}/update/'); //for external device
+      var availableServices =
+          services.keys.where((key) => services[key]!).toList();
+
+      var response = await http.patch(url,
+          body: json.encode({'services': availableServices}),
+          headers: {"Content-Type": "application/json"});
+
+      if (response.statusCode != 200) {
+        throw Exception('Failed to update services');
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    var stationProvider = Provider.of<StationProvider>(context);
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Column(
           children: [
+            DropdownButton<Station>(
+              value: _selectedStation,
+              onChanged: (Station? newValue) {
+                setState(() {
+                  _selectedStation = newValue;
+                  _gasPrices =
+                      Map<String, String>.from(_selectedStation!.gasTypeInfo!);
+                  services = {
+                    for (var service in ['Oil', 'Water', 'Air', 'Restroom'])
+                      service: _selectedStation!.services!.contains(service)
+                  };
+                });
+              },
+              items: stationProvider.stations
+                  .map<DropdownMenuItem<Station>>((Station station) {
+                return DropdownMenuItem<Station>(
+                  value: station,
+                  child: Text(station.address),
+                );
+              }).toList(),
+            ),
             // Gas Price Section
             Container(
               padding: EdgeInsets.all(8.0),
@@ -45,14 +133,14 @@ class _ModifyPriceServicesState extends State<ModifyPriceServices> {
                     value: _selectedGasType,
                     onChanged: (String? newValue) {
                       setState(() {
-                        _selectedGasType = newValue!;
+                        _selectedGasType = newValue;
                       });
                     },
-                    items: <String>['Gasoline', 'Diesel']
-                        .map<DropdownMenuItem<String>>((String value) {
+                    items: <String>['Regular', 'Diesel', 'Premium']
+                        .map<DropdownMenuItem<String>>((String gasType) {
                       return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(value),
+                        value: gasType,
+                        child: Text(gasType),
                       );
                     }).toList(),
                   ),
@@ -67,21 +155,77 @@ class _ModifyPriceServicesState extends State<ModifyPriceServices> {
                     height: 10,
                   ),
                   ElevatedButton(
-                    onPressed: () {
+                    onPressed: () async {
                       setState(() {
-                        _gasPrices[_selectedGasType] = _priceController.text;
+                        if (_priceController.text.isNotEmpty &&
+                            _selectedGasType != null) {
+                          _gasPrices[_selectedGasType!] = _priceController.text;
+                        }
                       });
+                      await updateGasPrice();
+                      showSnackBar(context, 'Station Prices Updated');
                     },
                     style:
                         ElevatedButton.styleFrom(backgroundColor: Colors.blue),
-                    child: Text('Update Price'),
+                    child: Text('Update Prices'),
                   ),
-                  Text('Gasoline Price: ₱${_gasPrices['Gasoline']}'),
-                  Text('Diesel Price: ₱${_gasPrices['Diesel']}'),
+                  SizedBox(
+                    height: 20,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('Regular Price: ₱${_gasPrices['Regular']}'),
+                      if (_selectedGasType == 'Regular')
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 8.0, vertical: 4.0),
+                          decoration: BoxDecoration(
+                            color: Colors.blueAccent.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(8.0),
+                          ),
+                          child: Text('Updated: ₱${_priceController.text}',
+                              style: TextStyle(fontWeight: FontWeight.bold)),
+                        ),
+                    ],
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('Diesel Price: ₱${_gasPrices['Diesel']}'),
+                      if (_selectedGasType == 'Diesel')
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 8.0, vertical: 4.0),
+                          decoration: BoxDecoration(
+                            color: Colors.blueAccent.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(8.0),
+                          ),
+                          child: Text('Updated: ₱${_priceController.text}',
+                              style: TextStyle(fontWeight: FontWeight.bold)),
+                        ),
+                    ],
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('Premium Price: ₱${_gasPrices['Premium']}'),
+                      if (_selectedGasType == 'Premium')
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 8.0, vertical: 4.0),
+                          decoration: BoxDecoration(
+                            color: Colors.blueAccent.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(8.0),
+                          ),
+                          child: Text('Updated: ₱${_priceController.text}',
+                              style: TextStyle(fontWeight: FontWeight.bold)),
+                        ),
+                    ],
+                  ),
                 ],
               ),
             ),
-
             SizedBox(height: 20.0),
 
             // Service Availability Section
@@ -109,6 +253,15 @@ class _ModifyPriceServicesState extends State<ModifyPriceServices> {
                       },
                     );
                   }).toList(),
+                  ElevatedButton(
+                    onPressed: () async {
+                      await updateServices();
+                      showSnackBar(context, 'Station Services Updated');
+                    },
+                    style:
+                        ElevatedButton.styleFrom(backgroundColor: Colors.blue),
+                    child: Text('Update Services'),
+                  ),
                 ],
               ),
             ),

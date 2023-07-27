@@ -23,27 +23,48 @@ def createStation(request):
 
     station = Station.objects.create(
         imagePath=data['imagePath'],
-        brand=data['brand'],
+        name=data['name'],
         address=data['address'],
         distance=data['distance'],
         gasTypes=data['gasTypes'],
         gasTypeInfo=data['gasTypeInfo'],
-        services=data['services']
+        services=data['services'],
+        place_id=data['place_id'],
+        latitude=data['latitude'],
+        longitude=data['longitude'],
+        opening_hours=data['opening_hours'],
     )
     serializer = StationSerializer(station, many=False)
     return Response(serializer.data)
 
-@api_view(['PUT'])
+
+@api_view(['PATCH'])
 def updateStation(request, pk):
-    data = request.data
+    try:
+        station = Station.objects.get(id=pk)
+    except Station.DoesNotExist:
+        return Response({'error': 'Station does not exist'}, status=404)
 
-    station = Station.objects.get(id=pk)
-
-    serializer = StationSerializer(station, data=request.data)
+    serializer = StationSerializer(station, data=request.data, partial=True)
     if serializer.is_valid():
         serializer.save()
+        return Response(serializer.data)
 
-    return Response(serializer.data)
+    return Response(serializer.errors, status=400)
+
+@api_view(['PATCH'])
+def updateStation(request, pk):
+    try:
+        station = Station.objects.get(id=pk)
+    except Station.DoesNotExist:
+        return Response({'error': 'Station does not exist'}, status=404)
+
+    serializer = StationSerializer(station, data=request.data, partial=True) # Note `partial=True`
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data)
+
+    return Response(serializer.errors, status=400)
 
 @api_view(['DELETE'])
 def deleteStation(request, pk):

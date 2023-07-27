@@ -5,7 +5,9 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:tigas_application/gmaps/autocomplete_prediction.dart';
 import 'package:tigas_application/gmaps/network_utility.dart';
 import 'package:tigas_application/gmaps/place_auto_complete_response.dart';
+import 'package:tigas_application/models/user_location.dart';
 import 'package:tigas_application/widgets/location_list_tile.dart';
+import 'package:tigas_application/widgets/show_snackbar.dart';
 
 class SetLocationScreen extends StatefulWidget {
   const SetLocationScreen({super.key});
@@ -82,8 +84,10 @@ class _SetLocationScreenState extends State<SetLocationScreen> {
                         position.latitude, position.longitude);
                     Placemark place = placemarks[0];
                     String placeName = '${place.locality}, ${place.country}';
-                    // String latLng =
-                    //     "${position.latitude}, ${position.longitude}";
+
+                    UserLocation()
+                        .updateLocation(position.latitude, position.longitude);
+
                     Navigator.pop(context, placeName);
                   },
                   icon: Icon(Icons.my_location),
@@ -108,9 +112,20 @@ class _SetLocationScreenState extends State<SetLocationScreen> {
                   itemCount: placePredictions.length,
                   itemBuilder: (context, index) => LocationListTile(
                       location: placePredictions[index].description!,
-                      press: () {
-                        Navigator.pop(
-                            context, placePredictions[index].description);
+                      press: () async {
+                        String selectedLocation =
+                            placePredictions[index].description!;
+                        List<Location> locations =
+                            await locationFromAddress(selectedLocation);
+                        if (locations.isNotEmpty) {
+                          UserLocation().updateLocation(
+                              locations.first.latitude,
+                              locations.first.longitude);
+
+                          Navigator.pop(context, selectedLocation);
+                        } else {
+                          showSnackBar(context, 'No coordinates returned');
+                        }
                       }),
                 ),
               )

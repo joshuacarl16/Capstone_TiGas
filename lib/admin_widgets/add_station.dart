@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:tigas_application/models/station_model.dart';
 import 'package:http/http.dart' as http;
 import 'package:tigas_application/screens/set_location.dart';
@@ -6,27 +7,36 @@ import 'dart:convert';
 
 import 'package:tigas_application/widgets/show_snackbar.dart';
 
-class AddStation extends StatefulWidget {
-  AddStation({Key? key}) : super(key: key);
+class EditStation extends StatefulWidget {
+  EditStation({Key? key}) : super(key: key);
 
   @override
-  _AddStationState createState() => _AddStationState();
+  _EditStationState createState() => _EditStationState();
 }
 
-class _AddStationState extends State<AddStation> {
+class _EditStationState extends State<EditStation> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   String? imagePath, brand, address, gasTypes, gasTypeInfo;
   double? distance;
-  List<Station> station = [];
+  double? latitude;
+  double? longitude;
+  List<Station> stations = [];
   int? id;
+  Map<String, String> gasTypePrices = {};
+  Station? currentStation;
+  String? selectedAddress;
+  String? selectedImagePath;
+  List<String> selectedGasTypes = [];
+  bool stationsLoaded = false;
+  Map<String, TextEditingController> gasTypePriceControllers = {};
 
   final TextEditingController imagePathController = TextEditingController();
-  final TextEditingController brandController = TextEditingController();
-  final TextEditingController addressController = TextEditingController();
   final TextEditingController distanceController = TextEditingController();
   final TextEditingController gasTypesController = TextEditingController();
   final TextEditingController gasTypeInfoController = TextEditingController();
   final TextEditingController servicesController = TextEditingController();
+  final TextEditingController addressController = TextEditingController();
+  final TextEditingController gasTypePriceController = TextEditingController();
 
   List<String> imagePaths = [
     'assets/shell.png',
@@ -34,7 +44,9 @@ class _AddStationState extends State<AddStation> {
     'assets/petron.png',
     'assets/phoenix.png',
     'assets/total.png',
-    'assets/seaoil.png'
+    'assets/seaoil.png',
+    'assets/jetti.png',
+    'assets/easygas.png'
   ];
   List<String> brands = [
     'Shell',
@@ -45,6 +57,32 @@ class _AddStationState extends State<AddStation> {
     'Seaoil'
   ];
 
+  Map<String, List<String>> brandGasTypes = {
+    'assets/shell.png': [
+      'FuelSave Unleaded',
+      'V-Power Gasoline',
+      'FuelSave Diesel',
+      'V-Power Diesel'
+    ],
+    'assets/caltex.png': ['Silver', 'Platinum', 'Diesel'],
+    'assets/petron.png': [
+      'Blaze 100 Euro 6',
+      'XCS',
+      'Xtra Advance',
+      'Turbo Diesel',
+      'Diesel Max'
+    ],
+    'assets/phoenix.png': ['Diesel', 'Super', 'Premium 95', 'Premium 98'],
+    'assets/jetti.png': ['DieselMaster', 'Accelrate', 'JX Premium'],
+    'assets/total.png': ['Excellium Unleaded', 'Excellium Diesel'],
+    'assets/seaoil.png': [
+      'Extreme 97',
+      'Extreme 95',
+      'Extreme U',
+      'Extreme Diesel'
+    ],
+  };
+
   Map<String, bool> services = {
     'Air': false,
     'Water': false,
@@ -52,52 +90,55 @@ class _AddStationState extends State<AddStation> {
     'Restroom': false,
   };
 
-  Future<http.Response> createStation(List<String> selectedServices) {
-    return http.post(
-      Uri.parse('http://192.168.1.4:8000/stations/create/'),
-      // Uri.parse('http://127.0.0.1:8000/stations/create/'),
+  Future<http.Response> updateStation(Station station) {
+    Map<String, dynamic> requestBody = {
+      'imagePath': selectedImagePath,
+      'distance': double.tryParse(distanceController.text) ?? 0.0,
+      'gasTypes': selectedGasTypes,
+      'gasTypeInfo': gasTypePrices,
+      'services': services.entries
+          .where((entry) => entry.value)
+          .map((entry) => entry.key)
+          .toList(),
+    };
+
+    return http.patch(
+      Uri.parse(
+          'http://192.168.1.10:8000/stations/${station.id}/update/'), // used for external device
+      // Uri.parse('http://127.0.0.1:8000/stations/${station.id}/update/'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
-      body: jsonEncode(<String, dynamic>{
-        'imagePath': imagePathController.text,
-        'brand': brandController.text,
-        'address': addressController.text,
-        'distance': double.tryParse(distanceController.text),
-        'gasTypes':
-            gasTypesController.text.split(',').map((e) => e.trim()).toList(),
-        'gasTypeInfo':
-            gasTypeInfoController.text.split(',').fold({}, (map, item) {
-          var parts = item.split(':');
-          if (parts.length == 2) {
-            map[parts[0].trim()] = parts[1].trim();
-          }
-          return map;
-        }),
-        'services': selectedServices
-      }),
+      body: jsonEncode(requestBody),
     );
   }
 
-  Future<List<Station>> fetchStations() async {
+  Future<List<Station>> fetchAllStationsDetails() async {
     final response =
-        await http.get(Uri.parse('http://192.168.1.4:8000/stations/')); //phone
-    // await http.get(Uri.parse('http://127.0.0.1:8000/stations/')); //web
+        await http.get(Uri.parse('http://192.168.1.10:8000/stations/'));
+    // await http.get(Uri.parse('http://127.0.0.1:8000/stations/'));
+
     if (response.statusCode == 200) {
-      List jsonResponse =
-          jsonDecode(response.body); // Add this line to inspect the response
-      return jsonResponse
-          .map((item) => Station.fromMap(item as Map<String, dynamic>))
-          .toList();
+      // Parse the response body as a list of dynamic objects (JSON)
+      final List<dynamic> jsonResponse = jsonDecode(response.body);
+
+      // Map each dynamic object to a Station object using the fromMap constructor
+      List<Station> stations =
+          jsonResponse.map((dynamic item) => Station.fromMap(item)).toList();
+
+      return stations;
     } else {
-      throw Exception('Failed to load stations');
+      // If the server returned an error response, throw an exception with the status code and response body
+      throw Exception(
+          'Failed to load stations. Status code: ${response.statusCode}. Response: ${response.body}');
     }
   }
 
   Future<http.Response> deleteStation(int id) {
     return http.delete(
-      // Uri.parse('http://192.168.1.4:8000/stations/$id/delete/'), // used for external device
-      Uri.parse('http://127.0.0.1:8000/stations/$id/delete/'),
+      Uri.parse(
+          'http://192.168.1.10:8000/stations/$id/delete/'), // used for external device
+      // Uri.parse('http://127.0.0.1:8000/stations/$id/delete/'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
@@ -107,8 +148,6 @@ class _AddStationState extends State<AddStation> {
   @override
   void dispose() {
     imagePathController.dispose();
-    brandController.dispose();
-    addressController.dispose();
     distanceController.dispose();
     gasTypesController.dispose();
     gasTypeInfoController.dispose();
@@ -119,11 +158,16 @@ class _AddStationState extends State<AddStation> {
   @override
   void initState() {
     super.initState();
-    fetchStations().then((value) {
+    fetchAllStationsDetails().then((value) {
       setState(() {
-        station = value;
+        stations = value;
+        stationsLoaded = true;
       });
     });
+  }
+
+  void onStationSelected(int id) {
+    fetchAllStationsDetails();
   }
 
   Future<String?> _showServicesDialog() {
@@ -180,8 +224,37 @@ class _AddStationState extends State<AddStation> {
               key: _formKey,
               child: Column(
                 children: [
-                  DropdownButtonFormField(
+                  DropdownButtonFormField<int>(
+                    decoration: InputDecoration(labelText: 'Address'),
+                    value: id,
+                    items: stationsLoaded
+                        ? stations.map((Station station) {
+                            return DropdownMenuItem<int>(
+                              value: station.id,
+                              child: Text(station.address),
+                            );
+                          }).toList()
+                        : [],
+                    onChanged: (newValue) {
+                      setState(() {
+                        id = newValue;
+                        currentStation = stations.firstWhere(
+                          (station) => station.id == newValue,
+                        );
+                        selectedAddress = currentStation?.address;
+                        addressController.text = selectedAddress ?? '';
+                      });
+                    },
+                    validator: (value) {
+                      if (value == null) {
+                        return 'Please select an address';
+                      }
+                      return null;
+                    },
+                  ),
+                  DropdownButtonFormField<String>(
                     decoration: InputDecoration(labelText: 'Image'),
+                    value: selectedImagePath,
                     items: imagePaths.map((String value) {
                       return DropdownMenuItem<String>(
                         value: value,
@@ -190,8 +263,17 @@ class _AddStationState extends State<AddStation> {
                     }).toList(),
                     onChanged: (newValue) {
                       setState(() {
-                        imagePathController.text = newValue.toString();
+                        selectedImagePath = newValue;
+                        selectedGasTypes = brandGasTypes[newValue ?? ''] ?? [];
+                        gasTypesController.text = selectedGasTypes.join(', ');
+                        gasTypePriceControllers = Map.fromIterable(
+                          selectedGasTypes,
+                          key: (gasType) => gasType,
+                          value: (gasType) => TextEditingController(
+                              text: gasTypePrices[gasType] ?? ''),
+                        );
                       });
+                      onStationSelected(id!);
                     },
                     validator: (value) {
                       if (value == null || value.isEmpty) {
@@ -200,62 +282,15 @@ class _AddStationState extends State<AddStation> {
                       return null;
                     },
                   ),
-                  DropdownButtonFormField(
-                    decoration: InputDecoration(labelText: 'Brand'),
-                    items: brands.map((String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(value),
-                      );
-                    }).toList(),
-                    onChanged: (newValue) {
-                      setState(() {
-                        brandController.text = newValue.toString();
-                      });
-                    },
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please select a brand';
-                      }
-                      return null;
-                    },
-                  ),
-                  TextFormField(
-                    controller: addressController,
-                    decoration: InputDecoration(labelText: 'Address'),
-                    onTap: () async {
-                      final selectedLocation = await Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: ((context) => SetLocationScreen()),
-                          ));
-                      if (selectedLocation != null) {
-                        setState(() {
-                          addressController.text = selectedLocation;
-                        });
-                      }
-                    },
-                    onSaved: (value) {
-                      address = value;
-                    },
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter address';
-                      }
-                      return null;
-                    },
-                  ),
                   TextFormField(
                     controller: distanceController,
                     decoration: InputDecoration(labelText: 'Distance'),
                     onSaved: (value) {
-                      distance = double.tryParse(value ?? '');
+                      distance =
+                          value == '' ? distance : double.tryParse(value ?? '');
                     },
                     validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter distance';
-                      }
-                      if (double.tryParse(value) == null) {
+                      if (value != '' && double.tryParse(value!) == null) {
                         return 'Please enter a valid number';
                       }
                       return null;
@@ -266,28 +301,43 @@ class _AddStationState extends State<AddStation> {
                     controller: gasTypesController,
                     decoration: InputDecoration(labelText: 'Gas Types'),
                     onSaved: (value) {
-                      gasTypes = value;
+                      selectedGasTypes = value!.split(',');
                     },
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter gas types';
-                      }
-                      return null;
-                    },
-                  ),
-                  TextFormField(
-                    controller: gasTypeInfoController,
-                    decoration: InputDecoration(labelText: 'Gas Type Info'),
-                    onSaved: (value) {
-                      gasTypeInfo = value;
-                    },
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter gas type info';
-                      }
-                      return null;
+                    onChanged: (newValue) {
+                      setState(() {
+                        selectedImagePath = newValue;
+                        selectedGasTypes = brandGasTypes[newValue] ?? [];
+                        gasTypesController.text = selectedGasTypes.join(', ');
+                      });
+                      onStationSelected(id!);
                     },
                   ),
+                  ...selectedGasTypes
+                      .map(
+                        (gasType) => TextFormField(
+                          controller: gasTypePriceControllers[gasType],
+                          decoration: InputDecoration(
+                            hintText: 'Enter price for $gasType',
+                          ),
+                          onChanged: (newValue) {
+                            setState(() {
+                              gasTypePrices[gasType] = newValue;
+                            });
+                          },
+                          // validator: (value) {
+                          //   if (value == null || value.isEmpty) {
+                          //     return 'Enter price for $gasType';
+                          //   }
+                          //   return null;
+                          // },
+                          keyboardType: TextInputType.number,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.allow(
+                                RegExp(r'^\d+\.?\d{0,2}')),
+                          ],
+                        ),
+                      )
+                      .toList(),
                   TextFormField(
                     readOnly: true,
                     controller: servicesController,
@@ -302,47 +352,48 @@ class _AddStationState extends State<AddStation> {
                   SizedBox(height: 20),
                   ElevatedButton(
                     onPressed: () async {
-                      List<String> selectedServices = services.entries
-                          .where((entry) => entry.value)
-                          .map((entry) => entry.key)
-                          .toList();
-                      // Call the API to create a new station
-                      final http.Response response =
-                          await createStation(selectedServices);
-                      if (response.statusCode == 200) {
-                        // If the server returns a 200 OK response,
-                        // then parse the JSON.
-                        print('Station created successfully');
-                        showSnackBar(context, 'Station Created Successfully');
-                        List<Station> updatedStations = await fetchStations();
-                        setState(() {
-                          station = updatedStations;
-                        });
-                      } else {
-                        // If the server returns an unexpected response,
-                        // then throw an exception.
-                        throw Exception('Failed to create station');
+                      if (currentStation != null) {
+                        // Call the API to update the station
+                        final http.Response response =
+                            await updateStation(currentStation!);
+                        if (response.statusCode == 200) {
+                          // If the server returns a 200 OK response,
+                          // then parse the JSON.
+                          showSnackBar(context, 'Station Updated Successfully');
+                          List<Station> updatedStations =
+                              await fetchAllStationsDetails();
+                          setState(() {
+                            stations = updatedStations;
+                          });
+                        } else {
+                          // If the server returns an unexpected response,
+                          // then throw an exception.
+                          throw Exception('Failed to update station');
+                        }
                       }
                     },
                     child: Text('Submit'),
                   ),
                   SizedBox(height: 20),
-                  DropdownButtonFormField(
-                    decoration: InputDecoration(labelText: 'Station'),
-                    items: station.map((Station value) {
-                      return DropdownMenuItem<int>(
-                        value: value.id,
-                        child: Text(value.id.toString()),
-                      );
-                    }).toList(),
+                  DropdownButtonFormField<int>(
+                    decoration: InputDecoration(labelText: 'Address to Delete'),
+                    value: id,
+                    items: stationsLoaded
+                        ? stations.map((Station station) {
+                            return DropdownMenuItem<int>(
+                              value: station.id,
+                              child: Text(station.address),
+                            );
+                          }).toList()
+                        : [],
                     onChanged: (newValue) {
                       setState(() {
-                        id = newValue as int;
+                        id = newValue;
                       });
                     },
                     validator: (value) {
                       if (value == null) {
-                        return 'Please select a station';
+                        return 'Please select an address';
                       }
                       return null;
                     },
@@ -350,27 +401,26 @@ class _AddStationState extends State<AddStation> {
                   SizedBox(height: 20),
                   ElevatedButton(
                     onPressed: () async {
-                      // Call the API to delete the selected station
-                      final http.Response response = await deleteStation(id!);
-                      if (response.statusCode == 200) {
-                        // If the server returns a 200 OK response,
-                        // then parse the JSON.
-                        print('Station deleted successfully');
-                        showSnackBar(context, 'Station Deleted Successfully');
-
-                        // Fetch the updated list of stations
-                        List<Station> updatedStations = await fetchStations();
-                        setState(() {
-                          station = updatedStations;
-                          id = null;
-                        });
-                      } else {
-                        // If the server returns an unexpected response,
-                        // then throw an exception.
-                        throw Exception('Failed to delete station');
+                      if (id != null) {
+                        // Call the API to delete the station
+                        final http.Response response = await deleteStation(id!);
+                        if (response.statusCode == 200) {
+                          // If the server returns a 200 OK response,
+                          // then parse the JSON.
+                          showSnackBar(context, 'Station Deleted Successfully');
+                          List<Station> updatedStations =
+                              await fetchAllStationsDetails();
+                          setState(() {
+                            stations = updatedStations;
+                          });
+                        } else {
+                          // If the server returns an unexpected response,
+                          // then throw an exception.
+                          throw Exception('Failed to delete station');
+                        }
                       }
                     },
-                    child: Text('Delete Selected Station'),
+                    child: Text('Delete Station'),
                   ),
                 ],
               ),
