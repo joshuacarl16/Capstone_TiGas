@@ -1,14 +1,21 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
-import 'package:intl/intl.dart';
 
 class CommercialPage extends StatefulWidget {
   final int selectedTab;
-  CommercialPage({super.key, required this.selectedTab});
+  final ScrollController scrollController;
+  CommercialPage({
+    Key? key,
+    required this.selectedTab,
+    required this.scrollController,
+  }) : super(key: key);
 
   @override
   _CommercialPageState createState() => _CommercialPageState();

@@ -14,13 +14,16 @@ class LocationListTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        ListTile(
+        InkWell(
           onTap: press,
-          horizontalTitleGap: 0,
-          title: Text(
-            location,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
+          splashColor: Colors.green.withAlpha(30),
+          child: ListTile(
+            horizontalTitleGap: 0,
+            title: Text(
+              location,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
         ),
         Divider(

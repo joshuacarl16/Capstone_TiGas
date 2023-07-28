@@ -1,14 +1,24 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:io';
+
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:image_cropper/image_cropper.dart';
+import 'package:permission_handler/permission_handler.dart';
 
+import 'package:tigas_application/models/station_model.dart';
+import 'package:tigas_application/styles/styles.dart';
+import 'package:string_similarity/string_similarity.dart';
 import 'result_screen.dart';
 
 class CameraScreen extends StatefulWidget {
-  const CameraScreen({super.key});
+  final Station selectedStation;
+  const CameraScreen({
+    Key? key,
+    required this.selectedStation,
+  }) : super(key: key);
 
   @override
   State<CameraScreen> createState() => _CameraScreenState();
@@ -24,6 +34,27 @@ class _CameraScreenState extends State<CameraScreen>
   CameraController? _cameraController;
 
   final _textRecognizer = TextRecognizer();
+
+  Map<String, List<String>> brandGasTypes = {
+    'Shell': [
+      'FuelSave Diesel',
+      'V-Power Diesel',
+      'V-Power Gasoline',
+      'FuelSave Unleaded',
+    ],
+    'Caltex': ['Diesel', 'Silver', 'Platinum'],
+    'Petron': [
+      'Blaze 100 Euro 6',
+      'XCS',
+      'Xtra Advance',
+      'Turbo Diesel',
+      'Diesel Max'
+    ],
+    'Phoenix': ['Diesel', 'Super', 'Premium 95', 'Premium 98'],
+    'Jetti': ['DieselMaster', 'Accelrate', 'JX Premium'],
+    'Total': ['Excellium Unleaded', 'Excellium Diesel'],
+    'Seaoil': ['Extreme 97', 'Extreme 95', 'Extreme U', 'Extreme Diesel'],
+  };
 
   @override
   void initState() {
@@ -60,16 +91,7 @@ class _CameraScreenState extends State<CameraScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.center,
-            colors: [
-              Color(0xFF609966),
-              Color(0xFF175124),
-            ],
-          ),
-        ),
+        decoration: getGradientDecoration(),
         child: FutureBuilder(
           future: _future,
           builder: (context, snapshot) {
@@ -104,12 +126,13 @@ class _CameraScreenState extends State<CameraScreen>
                               child: Center(
                                 child: ElevatedButton(
                                   onPressed: _scanImage,
-                                  child: Text("Submit"),
+                                  child: Text("Scan Image"),
                                   style: ElevatedButton.styleFrom(
-                                      backgroundColor: Color(0xFF175124)),
+                                    backgroundColor: Colors.green[400],
+                                  ),
                                 ),
                               ),
-                            )
+                            ),
                           ],
                         )
                       : Center(
@@ -122,7 +145,34 @@ class _CameraScreenState extends State<CameraScreen>
                             ),
                           ),
                         ),
-                )
+                ),
+                Positioned(
+                  top: 70,
+                  right: 10,
+                  child: Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Colors.green[400],
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Text(
+                      widget.selectedStation.name,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+                Positioned(
+                    top: 60,
+                    left: 10,
+                    child: IconButton(
+                      onPressed: Navigator.of(context).pop,
+                      icon: FaIcon(FontAwesomeIcons.arrowLeft,
+                          color: Colors.white),
+                    )),
               ],
             );
           },
@@ -170,7 +220,7 @@ class _CameraScreenState extends State<CameraScreen>
   Future<void> _cameraSelected(CameraDescription camera) async {
     _cameraController = CameraController(
       camera,
-      ResolutionPreset.max,
+      ResolutionPreset.high,
       enableAudio: false,
     );
 
@@ -186,6 +236,24 @@ class _CameraScreenState extends State<CameraScreen>
     if (_cameraController == null) return;
 
     final navigator = Navigator.of(context);
+    String stationName = widget.selectedStation.name;
+    List<String> processLogs = [];
+
+    String brand = brandGasTypes.keys.firstWhere(
+      (brand) => stationName.contains(brand),
+      orElse: () => '',
+    );
+
+    if (brand.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('No gas types found for this station: $stationName'),
+        ),
+      );
+      return;
+    }
+
+    List<String> gasTypes = brandGasTypes[brand]!;
 
     try {
       final pictureFile = await _cameraController!.takePicture();
@@ -218,35 +286,55 @@ class _CameraScreenState extends State<CameraScreen>
 
       List<TextBlock> blocks = recognizedText.blocks
         ..sort((a, b) => a.boundingBox.top.compareTo(b.boundingBox.top));
-      // StringBuffer buffer = StringBuf
 
-      List<String> prices = [];
+      Map<String, String> gasTypePrices = {};
 
       for (var block in blocks) {
-        RegExp regExp = RegExp(r'\d+\.\d+');
-        var matches = regExp.allMatches(block.text);
-        matches.forEach((match) {
-          prices.add(match.group(0)!);
-        });
-        // String numOnly = block.text.replaceAll(RegExp(r'\D'), '');
-        // buffer.writeln(numOnly);
-        // buffer.writeln(block.text);
+        // best match variables
+        double bestMatchRating = 0.0;
+        String bestMatchType = '';
+
+        for (var type in gasTypes) {
+          // calculate similarity between type and block text
+          double similarity =
+              StringSimilarity.compareTwoStrings(type, block.text);
+          processLogs.add(
+              'Comparing type: $type with block text: ${block.text}. Similarity: $similarity');
+
+          // check if similarity is the best so far
+          if (similarity > bestMatchRating) {
+            bestMatchRating = similarity;
+            bestMatchType = type;
+          }
+        }
+
+        processLogs.add(
+            'Best match type: $bestMatchType with similarity: $bestMatchRating');
+
+        // check if a good match was found
+        if (bestMatchType.isNotEmpty && bestMatchRating > 0.6) {
+          // threshold
+          RegExp exp = RegExp('$bestMatchType\\s(\\d+\\.\\d+)');
+          var matches = exp.allMatches(block.text);
+
+          if (matches.isNotEmpty) {
+            gasTypePrices[bestMatchType] = matches.first.group(1)!;
+            processLogs.add(
+                'Match found. Type: $bestMatchType, Price: ${gasTypePrices[bestMatchType]}');
+          }
+        } else {
+          processLogs.add(
+              'No match found or similarity below threshold for block: ${block.text}');
+        }
       }
-
-      // String text = buffer.toString();
-      // if (prices.length != 3) {
-      //   throw Exception('Expected 3 prices but got ${prices.length}');
-      // }
-
-      String regular = prices[0];
-      String diesel = prices[1];
-      String premium = prices[2];
-
-      String text = 'Regular: $regular\n Diesel: $diesel\n Premium: $premium';
 
       await navigator.push(
         MaterialPageRoute(
-          builder: (context) => ResultScreen(text: text),
+          builder: (context) => ResultScreen(
+            selectedStation: widget.selectedStation,
+            scannedGasPrices: gasTypePrices,
+            processLogs: processLogs,
+          ),
         ),
       );
     } catch (e) {

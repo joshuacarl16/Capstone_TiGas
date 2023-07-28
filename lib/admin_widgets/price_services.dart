@@ -21,6 +21,27 @@ class _ModifyPriceServicesState extends State<ModifyPriceServices> {
     'Premium': ''
   }; // Default prices
 
+  Map<String, List<String>> brandGasTypes = {
+    'Shell': [
+      'FuelSave Unleaded',
+      'V-Power Gasoline',
+      'FuelSave Diesel',
+      'V-Power Diesel'
+    ],
+    'Caltex': ['Silver', 'Platinum', 'Diesel'],
+    'Petron': [
+      'Blaze 100 Euro 6',
+      'XCS',
+      'Xtra Advance',
+      'Turbo Diesel',
+      'Diesel Max'
+    ],
+    'Phoenix': ['Diesel', 'Super', 'Premium 95', 'Premium 98'],
+    'Jetti': ['DieselMaster', 'Accelrate', 'JX Premium'],
+    'Total': ['Excellium Unleaded', 'Excellium Diesel'],
+    'Seaoil': ['Extreme 97', 'Extreme 95', 'Extreme U', 'Extreme Diesel'],
+  };
+
   Map<String, bool> services = {};
 
   @override
@@ -136,13 +157,19 @@ class _ModifyPriceServicesState extends State<ModifyPriceServices> {
                         _selectedGasType = newValue;
                       });
                     },
-                    items: <String>['Regular', 'Diesel', 'Premium']
-                        .map<DropdownMenuItem<String>>((String gasType) {
-                      return DropdownMenuItem<String>(
-                        value: gasType,
-                        child: Text(gasType),
-                      );
-                    }).toList(),
+                    items: (_selectedStation != null)
+                        ? brandGasTypes.entries
+                            .where((entry) => _selectedStation!.name
+                                .toLowerCase()
+                                .contains(entry.key.toLowerCase()))
+                            .expand((entry) => entry.value)
+                            .map<DropdownMenuItem<String>>((String gasType) {
+                            return DropdownMenuItem<String>(
+                              value: gasType,
+                              child: Text(gasType),
+                            );
+                          }).toList()
+                        : [], // return an empty list if the brand does not exist
                   ),
                   TextFormField(
                     controller: _priceController,
@@ -172,56 +199,30 @@ class _ModifyPriceServicesState extends State<ModifyPriceServices> {
                   SizedBox(
                     height: 20,
                   ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text('Regular Price: ₱${_gasPrices['Regular']}'),
-                      if (_selectedGasType == 'Regular')
-                        Container(
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 8.0, vertical: 4.0),
-                          decoration: BoxDecoration(
-                            color: Colors.blueAccent.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(8.0),
-                          ),
-                          child: Text('Updated: ₱${_priceController.text}',
-                              style: TextStyle(fontWeight: FontWeight.bold)),
-                        ),
-                    ],
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text('Diesel Price: ₱${_gasPrices['Diesel']}'),
-                      if (_selectedGasType == 'Diesel')
-                        Container(
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 8.0, vertical: 4.0),
-                          decoration: BoxDecoration(
-                            color: Colors.blueAccent.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(8.0),
-                          ),
-                          child: Text('Updated: ₱${_priceController.text}',
-                              style: TextStyle(fontWeight: FontWeight.bold)),
-                        ),
-                    ],
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text('Premium Price: ₱${_gasPrices['Premium']}'),
-                      if (_selectedGasType == 'Premium')
-                        Container(
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 8.0, vertical: 4.0),
-                          decoration: BoxDecoration(
-                            color: Colors.blueAccent.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(8.0),
-                          ),
-                          child: Text('Updated: ₱${_priceController.text}',
-                              style: TextStyle(fontWeight: FontWeight.bold)),
-                        ),
-                    ],
+                  Column(
+                    children: _selectedStation != null
+                        ? _selectedStation!.gasTypeInfo!.entries.map((entry) {
+                            return Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text('${entry.key}: ₱${entry.value}'),
+                                if (_selectedGasType == entry.key)
+                                  Container(
+                                    padding: EdgeInsets.symmetric(
+                                        horizontal: 8.0, vertical: 4.0),
+                                    decoration: BoxDecoration(
+                                      color: Colors.blueAccent.withOpacity(0.2),
+                                      borderRadius: BorderRadius.circular(8.0),
+                                    ),
+                                    child: Text(
+                                        'Updated: ₱${_priceController.text}',
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold)),
+                                  ),
+                              ],
+                            );
+                          }).toList()
+                        : [],
                   ),
                 ],
               ),

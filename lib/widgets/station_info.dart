@@ -108,7 +108,14 @@ class _StationInfoState extends State<StationInfo> {
                 ),
                 SizedBox(height: unitWidthValue * 6),
                 ElevatedButton.icon(
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: ((context) =>
+                              GMaps(destination: widget.station.id.toString())),
+                        ));
+                  },
                   icon: FaIcon(FontAwesomeIcons.car),
                   label: Text('Get Route'),
                   style: ElevatedButton.styleFrom(

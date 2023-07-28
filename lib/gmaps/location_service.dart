@@ -127,4 +127,28 @@ class LocationService {
 
     return distanceInKilometers;
   }
+
+  Future<Station> getGasStation(String stationId) async {
+    String url = "http://192.168.1.10:8000/stations/$stationId";
+
+    var response = await http.get(Uri.parse(url));
+    if (response.statusCode != 200) {
+      throw Exception(
+          'Failed to load station. HTTP status: ${response.statusCode}');
+    }
+
+    var json = convert.jsonDecode(response.body);
+
+    Station station = Station(
+      id: json['id'],
+      name: json['name'],
+      latitude: json['latitude'],
+      longitude: json['longitude'],
+      address: '',
+      place_id: '',
+      updated: DateTime.now(),
+    );
+
+    return station;
+  }
 }

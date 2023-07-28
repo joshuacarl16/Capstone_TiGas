@@ -1,19 +1,25 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 // ignore_for_file: prefer_const_constructors
 
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
+
 import 'package:tigas_application/models/station_model.dart';
 import 'package:tigas_application/providers/station_provider.dart';
-import 'package:tigas_application/styles/styles.dart';
 import 'package:tigas_application/screens/set_location.dart';
+import 'package:tigas_application/styles/styles.dart';
 import 'package:tigas_application/widgets/station_card.dart';
 import 'package:tigas_application/widgets/station_info.dart';
 
 class HomePage extends StatefulWidget {
   final int selectedTab;
-
-  const HomePage({super.key, required this.selectedTab});
+  final ScrollController scrollController;
+  const HomePage({
+    Key? key,
+    required this.selectedTab,
+    required this.scrollController,
+  }) : super(key: key);
 
   @override
   _HomePageState createState() => _HomePageState();
@@ -41,6 +47,7 @@ class _HomePageState extends State<HomePage> {
 
     return Scaffold(
         body: NestedScrollView(
+      controller: widget.scrollController,
       headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
         return <Widget>[
           SliverAppBar(

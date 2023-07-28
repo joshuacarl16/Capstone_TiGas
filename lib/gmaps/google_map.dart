@@ -4,10 +4,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:tigas_application/gmaps/location_service.dart';
 import 'package:tigas_application/gmaps/points.dart';
 import 'package:image/image.dart' as img;
+import 'package:tigas_application/models/station_model.dart';
+import 'package:tigas_application/models/user_location.dart';
 
 class GMaps extends StatefulWidget {
   const GMaps({Key? key, required this.destination}) : super(key: key);
@@ -24,9 +25,12 @@ class GMapsState extends State<GMaps> {
   LatLngBounds? lastBounds;
   List<BitmapDescriptor> customIcons = [];
   String? location;
-  Marker? _currentLocationMarker;
+  Marker? currentLocationMarker;
+  Marker? destinationMarker;
   BitmapDescriptor? currentLocationIcon;
   List<Marker> gasStationMarkers = [];
+  Future<Station>? _station;
+  LatLng? _startLocation;
 
   Set<Polyline> _polylines = Set<Polyline>();
   int _polylineIdCounter = 1;
@@ -65,8 +69,7 @@ class GMapsState extends State<GMaps> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      getRoute(widget.destination);
-      getGasStations();
+      _station = getRoute(widget.destination);
     });
     loadMarkers();
   }
@@ -76,56 +79,90 @@ class GMapsState extends State<GMaps> {
 
     for (var i = 0; i < points.length; i++) {
       markers.addAll(gasStationMarkers);
-      // markers.add(Marker(
-      //     markerId: MarkerId('marker$i'),
-      //     position: points[i],
-      //     infoWindow: InfoWindow(title: 'Gas Station $i'),
-      //     icon: customIcons[i % customIcons.length]));
     }
-    if (_currentLocationMarker != null) {
-      markers.add(_currentLocationMarker!);
+    if (currentLocationMarker != null) {
+      markers.add(currentLocationMarker!);
+    }
+    if (destinationMarker != null) {
+      markers.add(destinationMarker!);
     }
     return markers;
   }
 
-  void setCurrentLocationMarker(Position currentPosition) {
-    _currentLocationMarker = Marker(
+  void setDestinationMarker(double latitude, double longitude, String title) {
+    destinationMarker = Marker(
+      markerId: MarkerId('destination'),
+      position: LatLng(latitude, longitude),
+      infoWindow: InfoWindow(title: title),
+      icon: BitmapDescriptor.defaultMarker,
+    );
+  }
+
+  void setCurrentLocationMarker(double latitude, double longitude) {
+    currentLocationMarker = Marker(
       markerId: MarkerId('currentLocation'),
-      position: LatLng(currentPosition.latitude, currentPosition.longitude),
+      position: LatLng(latitude, longitude),
       infoWindow: InfoWindow(title: 'Current Location'),
       icon: currentLocationIcon ?? BitmapDescriptor.defaultMarker,
     );
   }
 
-  void getRoute(String destination) async {
-    LocationPermission permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        openAppSettings();
-      }
-    }
-    if (permission == LocationPermission.deniedForever) {
-      return Future.error('Location permissions permanently denied');
-    }
-    Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high);
-    String currentpos = "${position.latitude}, ${position.longitude}";
+  Future<Station> getRoute(String stationId) async {
+    Station station = await LocationService().getGasStation(stationId);
 
-    setCurrentLocationMarker(position);
+    setCurrentLocationMarker(
+        UserLocation().latitude!, UserLocation().longitude!);
+
+    setDestinationMarker(station.latitude, station.longitude, station.name);
+
+    String currentPos =
+        "${UserLocation().latitude}, ${UserLocation().longitude}";
+
+    String destination = "${station.latitude}, ${station.longitude}";
 
     var directions =
-        await LocationService().getDirections(currentpos, destination);
+        await LocationService().getDirections(currentPos, destination);
 
-    _goToPlace(
+    _startLocation = LatLng(
       directions['start_location']['lat'],
       directions['start_location']['lng'],
+    );
+
+    _goToPlace(
+      _startLocation!.latitude,
+      _startLocation!.longitude,
       directions['bounds_ne'],
       directions['bounds_sw'],
     );
 
     _setPolyline(directions['polyline_decoded']);
+
+    return station;
   }
+
+  // void getRoute(String stationId) async {
+  //   Station station = await LocationService().getGasStation(stationId);
+
+  //   setCurrentLocationMarker(
+  //       UserLocation().latitude!, UserLocation().longitude!);
+
+  //   String currentPos =
+  //       "${UserLocation().latitude}, ${UserLocation().longitude}";
+
+  //   String destination = "${station.latitude}, ${station.longitude}";
+
+  //   var directions =
+  //       await LocationService().getDirections(currentPos, destination);
+
+  //   _goToPlace(
+  //     directions['start_location']['lat'],
+  //     directions['start_location']['lng'],
+  //     directions['bounds_ne'],
+  //     directions['bounds_sw'],
+  //   );
+
+  //   _setPolyline(directions['polyline_decoded']);
+  // }
 
   Future<void> _goToPlace(
     double lat,
@@ -134,14 +171,42 @@ class GMapsState extends State<GMaps> {
     Map<String, dynamic> boundsSw,
   ) async {
     final GoogleMapController controller = await _controller.future;
-    controller.animateCamera(CameraUpdate.newCameraPosition(
-        CameraPosition(target: LatLng(lat, lng), zoom: 12)));
 
     lastBounds = LatLngBounds(
-        southwest: LatLng(boundsSw['lat'], boundsSw['lng']),
-        northeast: LatLng(boundsNe['lat'], boundsNe['lng']));
+      southwest: LatLng(boundsSw['lat'], boundsSw['lng']),
+      northeast: LatLng(boundsNe['lat'], boundsNe['lng']),
+    );
 
-    controller.animateCamera(CameraUpdate.newLatLngBounds(lastBounds!, 25));
+    // Apply padding as needed
+    final double screenPadding = MediaQuery.of(context).size.width * 0.10;
+
+    controller.animateCamera(
+      CameraUpdate.newLatLngBounds(lastBounds!, screenPadding),
+    );
+  }
+
+  double calculateZoomLevel(LatLngBounds bounds) {
+    final double maxZoom = 15.0;
+    final double minZoom = 4.0;
+
+    double distance = Geolocator.distanceBetween(
+      bounds.southwest.latitude,
+      bounds.southwest.longitude,
+      bounds.northeast.latitude,
+      bounds.northeast.longitude,
+    );
+
+    double distanceInKilometers = distance / 1000;
+
+    double zoomLevel = maxZoom - (distanceInKilometers / 10);
+
+    if (zoomLevel < minZoom) {
+      return minZoom;
+    } else if (zoomLevel > maxZoom) {
+      return maxZoom;
+    } else {
+      return zoomLevel;
+    }
   }
 
   void _setPolyline(List<PointLatLng> points) {
@@ -153,7 +218,7 @@ class GMapsState extends State<GMaps> {
         Polyline(
             polylineId: PolylineId(polylineIdVal),
             width: 6,
-            color: Colors.green,
+            color: Colors.purple[400]!,
             points: points
                 .map(
                   (point) => LatLng(point.latitude, point.longitude),
@@ -170,88 +235,38 @@ class GMapsState extends State<GMaps> {
     );
   }
 
-  Future<void> getGasStations() async {
-    try {
-      List<Map<String, dynamic>> gasStations =
-          await LocationService().getGasStations();
-
-      for (var station in gasStations) {
-        Marker marker = Marker(
-          markerId: MarkerId(station['place_id']),
-          position: station['location'],
-          infoWindow: InfoWindow(title: station['name']),
-          icon:
-              BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
-        );
-
-        gasStationMarkers.add(marker);
-      }
-    } catch (e) {
-      print(e.toString());
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-      future: loadMarkers(),
-      builder: (context, snapshot) {
+    return FutureBuilder<Station>(
+      future: _station,
+      builder: (BuildContext context, AsyncSnapshot<Station> snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
           return Scaffold(
-            body: Scaffold(
-              appBar: AppBar(
-                centerTitle: true,
-                title: Image.asset(
-                  'assets/TiGas.png',
-                  fit: BoxFit.contain,
-                  height: 140,
-                ),
-                backgroundColor: Color(0xFF609966),
-                elevation: 0,
+            appBar: AppBar(
+              centerTitle: true,
+              title: Image.asset(
+                'assets/TiGas.png',
+                fit: BoxFit.contain,
+                height: 140,
               ),
-              body: Column(
-                children: [
-                  Expanded(
-                    child: GoogleMap(
-                      mapType: MapType.normal,
-                      markers: _createMarker(),
-                      polylines: _polylines,
-                      initialCameraPosition: CameraPosition(
-                        target: lastBounds != null
-                            ? calculateMidPoint(
-                                lastBounds!.southwest,
-                                lastBounds!.northeast,
-                              )
-                            : LatLng(10.31306, 123.9128),
-                        zoom: 13,
-                      ),
-                      onMapCreated: (GoogleMapController controller) {
-                        _controller.complete(controller);
-                      },
-                    ),
-                  ),
-                ],
+              backgroundColor: Color(0xFF609966),
+              elevation: 0,
+            ),
+            body: GoogleMap(
+              mapType: MapType.normal,
+              markers: _createMarker(),
+              polylines: _polylines,
+              initialCameraPosition: CameraPosition(
+                target: _startLocation ?? LatLng(10.31306, 123.9128),
+                zoom: 13,
               ),
+              onMapCreated: (GoogleMapController controller) {
+                _controller.complete(controller);
+              },
             ),
           );
         } else {
-          return Center(
-            child: Container(
-              width: 60,
-              height: 60,
-              decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                        color: Colors.black54, blurRadius: 20, spreadRadius: 5)
-                  ]),
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: CircularProgressIndicator(),
-              ),
-            ),
-          );
+          return CircularProgressIndicator(); // or any other placeholder widget
         }
       },
     );

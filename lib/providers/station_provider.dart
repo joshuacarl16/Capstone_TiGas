@@ -1,11 +1,9 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:tigas_application/gmaps/location_service.dart';
 import 'package:tigas_application/models/station_model.dart';
 import 'package:http/http.dart' as http;
-import 'package:tigas_application/models/user_location.dart';
 
 class StationProvider with ChangeNotifier {
   List<Station> _stations = [];

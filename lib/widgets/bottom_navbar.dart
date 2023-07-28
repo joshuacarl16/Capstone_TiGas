@@ -3,9 +3,9 @@
 import 'package:flutter/material.dart';
 import 'package:salomon_bottom_bar/salomon_bottom_bar.dart';
 import 'package:tigas_application/screens/ads_screen.dart';
-import 'package:tigas_application/screens/camera_screen.dart';
 import 'package:tigas_application/screens/homepage_screen.dart';
 import 'package:tigas_application/widgets/side_bar.dart';
+import 'package:tigas_application/widgets/station_selector.dart';
 
 class NavBar extends StatefulWidget {
   int selectedTab;
@@ -19,11 +19,26 @@ class NavBar extends StatefulWidget {
 final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
 class _NavBarState extends State<NavBar> {
-  final List<Widget> _screens = [
-    HomePage(selectedTab: 0),
-    CameraScreen(),
-    CommercialPage(selectedTab: 2),
+  final homePageScrollController = ScrollController();
+  final commercialPageScrollController = ScrollController();
+  late final List<Widget> screens = [
+    HomePage(selectedTab: 0, scrollController: homePageScrollController),
+    StationSelector(),
+    CommercialPage(
+        selectedTab: 2, scrollController: commercialPageScrollController),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    homePageScrollController.dispose();
+    commercialPageScrollController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,13 +55,28 @@ class _NavBarState extends State<NavBar> {
         elevation: 0,
       ),
       drawer: DrawerContent(),
-      body: _screens[widget.selectedTab],
+      body: screens[widget.selectedTab],
       bottomNavigationBar: SalomonBottomBar(
         currentIndex: widget.selectedTab,
         onTap: (index) {
-          setState(() {
-            widget.selectedTab = index;
-          });
+          if (widget.selectedTab == index) {
+            switch (index) {
+              case 0:
+                homePageScrollController.animateTo(0.0,
+                    duration: Duration(milliseconds: 500),
+                    curve: Curves.bounceInOut);
+                break;
+              case 1:
+                commercialPageScrollController.animateTo(0.0,
+                    duration: Duration(milliseconds: 500),
+                    curve: Curves.easeInOut);
+                break;
+            }
+          } else {
+            setState(() {
+              widget.selectedTab = index;
+            });
+          }
         },
         items: [
           SalomonBottomBarItem(

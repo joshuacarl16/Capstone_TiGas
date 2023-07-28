@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:tigas_application/models/station_model.dart';
 import 'package:http/http.dart' as http;
-import 'package:tigas_application/screens/set_location.dart';
 import 'dart:convert';
 
 import 'package:tigas_application/widgets/show_snackbar.dart';
