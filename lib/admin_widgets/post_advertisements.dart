@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
+import 'package:tigas_application/providers/url_manager.dart';
 import 'package:tigas_application/widgets/show_snackbar.dart';
 
 class Advertisement {
@@ -28,6 +29,7 @@ class _PostAdvertisementState extends State<PostAdvertisement> {
   final TextEditingController _adController = TextEditingController();
   List<Advertisement> postedAds = [];
   XFile? pickedImage;
+  final urlManager = UrlManager();
 
   @override
   Widget build(BuildContext context) {
@@ -78,10 +80,9 @@ class _PostAdvertisementState extends State<PostAdvertisement> {
               ElevatedButton(
                 onPressed: () async {
                   if (pickedImage != null && _adController.text.isNotEmpty) {
-                    Uri uri =
-                        // Uri.parse("http://127.0.0.1:8000/upload_image/");
-                        Uri.parse(
-                            "http://192.168.1.10:8000/upload_image/"); //used for external device
+                    String url = await urlManager.getValidBaseUrl();
+                    Uri uri = Uri.parse(
+                        "$url/upload_image/"); //used for external device
                     var request = http.MultipartRequest('POST', uri);
                     request.files.add(
                       await http.MultipartFile.fromPath(

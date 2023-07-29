@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:tigas_application/models/station_model.dart';
 import 'package:http/http.dart' as http;
+import 'package:tigas_application/providers/url_manager.dart';
 import 'dart:convert';
 
 import 'package:tigas_application/widgets/show_snackbar.dart';
@@ -28,6 +29,7 @@ class _EditStationState extends State<EditStation> {
   List<String> selectedGasTypes = [];
   bool stationsLoaded = false;
   Map<String, TextEditingController> gasTypePriceControllers = {};
+  final urlManager = UrlManager();
 
   final TextEditingController imagePathController = TextEditingController();
   final TextEditingController distanceController = TextEditingController();
@@ -89,7 +91,8 @@ class _EditStationState extends State<EditStation> {
     'Restroom': false,
   };
 
-  Future<http.Response> updateStation(Station station) {
+  Future<http.Response> updateStation(Station station) async {
+    String url = await urlManager.getValidBaseUrl();
     Map<String, dynamic> requestBody = {
       'imagePath': selectedImagePath,
       'distance': double.tryParse(distanceController.text) ?? 0.0,
@@ -103,8 +106,8 @@ class _EditStationState extends State<EditStation> {
 
     return http.patch(
       Uri.parse(
-          'http://192.168.1.10:8000/stations/${station.id}/update/'), // used for external device
-      // Uri.parse('http://127.0.0.1:8000/stations/${station.id}/update/'),
+        '$url/stations/${station.id}/update/',
+      ),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
@@ -113,35 +116,25 @@ class _EditStationState extends State<EditStation> {
   }
 
   Future<List<Station>> fetchAllStationsDetails() async {
-    final response =
-        await http.get(Uri.parse('http://192.168.1.10:8000/stations/'));
-    // await http.get(Uri.parse('http://127.0.0.1:8000/stations/'));
+    String url = await urlManager.getValidBaseUrl();
+    final response = await http.get(Uri.parse('$url/stations/'));
 
     if (response.statusCode == 200) {
-      // Parse the response body as a list of dynamic objects (JSON)
       final List<dynamic> jsonResponse = jsonDecode(response.body);
 
-      // Map each dynamic object to a Station object using the fromMap constructor
       List<Station> stations =
           jsonResponse.map((dynamic item) => Station.fromMap(item)).toList();
 
       return stations;
     } else {
-      // If the server returned an error response, throw an exception with the status code and response body
       throw Exception(
           'Failed to load stations. Status code: ${response.statusCode}. Response: ${response.body}');
     }
   }
 
-  Future<http.Response> deleteStation(int id) {
-    return http.delete(
-      Uri.parse(
-          'http://192.168.1.10:8000/stations/$id/delete/'), // used for external device
-      // Uri.parse('http://127.0.0.1:8000/stations/$id/delete/'),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-    );
+  Future<http.Response> deleteStation(int id) async {
+    String url = await urlManager.getValidBaseUrl();
+    return http.delete(Uri.parse('$url/stations/$id/delete/'));
   }
 
   @override

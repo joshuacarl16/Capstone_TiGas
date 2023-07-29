@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tigas_application/models/station_model.dart';
 import 'package:tigas_application/providers/station_provider.dart';
+import 'package:tigas_application/providers/url_manager.dart';
 import 'package:tigas_application/widgets/show_snackbar.dart';
 
 class ModifyPriceServices extends StatefulWidget {
@@ -43,6 +44,7 @@ class _ModifyPriceServicesState extends State<ModifyPriceServices> {
   };
 
   Map<String, bool> services = {};
+  final urlManager = UrlManager();
 
   @override
   void initState() {
@@ -72,14 +74,13 @@ class _ModifyPriceServicesState extends State<ModifyPriceServices> {
 
   Future<void> updateGasPrice() async {
     if (_selectedStation != null && _selectedGasType != null) {
-      var url = Uri.parse(
-          // 'http://127.0.0.1:8000/stations/${_selectedStation!.id}/update/');
-          'http://192.168.1.10:8000/stations/${_selectedStation!.id}/update/'); //for external device
+      String url = await urlManager.getValidBaseUrl();
+      var patchUrl = Uri.parse('$url/stations/${_selectedStation!.id}/update/');
       var newGasPrice = {_selectedGasType: _priceController.text};
       var oldGasTypeInfo = _selectedStation!.gasTypeInfo ?? {};
       var newGasTypeInfo = {...oldGasTypeInfo, ...newGasPrice};
 
-      var response = await http.patch(url,
+      var response = await http.patch(patchUrl,
           body: json.encode({'gasTypeInfo': newGasTypeInfo}),
           headers: {"Content-Type": "application/json"});
 
@@ -91,13 +92,12 @@ class _ModifyPriceServicesState extends State<ModifyPriceServices> {
 
   Future<void> updateServices() async {
     if (_selectedStation != null) {
-      var url = Uri.parse(
-          // 'http://127.0.0.1:8000/stations/${_selectedStation!.id}/update/');
-          'http://192.168.1.10:8000/stations/${_selectedStation!.id}/update/'); //for external device
+      String url = await urlManager.getValidBaseUrl();
+      var patchUrl = Uri.parse('$url/stations/${_selectedStation!.id}/update/');
       var availableServices =
           services.keys.where((key) => services[key]!).toList();
 
-      var response = await http.patch(url,
+      var response = await http.patch(patchUrl,
           body: json.encode({'services': availableServices}),
           headers: {"Content-Type": "application/json"});
 

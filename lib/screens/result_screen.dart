@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:tigas_application/models/station_model.dart';
+import 'package:tigas_application/providers/url_manager.dart';
 import 'package:tigas_application/widgets/bottom_navbar.dart';
 
 class ResultScreen extends StatefulWidget {
@@ -25,6 +26,7 @@ class ResultScreen extends StatefulWidget {
 
 class _ResultScreenState extends State<ResultScreen> {
   Map<String, TextEditingController> _controllers = {};
+  final urlManager = UrlManager();
 
   @override
   void initState() {
@@ -34,10 +36,8 @@ class _ResultScreenState extends State<ResultScreen> {
         String initialText;
         if (widget.scannedGasPrices != null &&
             widget.scannedGasPrices!.containsKey(key)) {
-          // If scanned price for this gas type exists, use it
           initialText = widget.scannedGasPrices![key]!;
         } else {
-          // If not, use the original price
           initialText = value.toString();
         }
         _controllers[key] = TextEditingController(text: initialText);
@@ -46,8 +46,9 @@ class _ResultScreenState extends State<ResultScreen> {
   }
 
   Future<void> updateGasPrice() async {
-    var url = Uri.parse(
-        'http://192.168.1.10:8000/stations/${widget.selectedStation.id}/update/');
+    String baseUrl = await urlManager.getValidBaseUrl();
+    var url =
+        Uri.parse('$baseUrl/stations/${widget.selectedStation.id}/update/');
     Map<String, String> newGasPrices = {};
     _controllers.forEach((key, value) {
       newGasPrices[key] = value.text;

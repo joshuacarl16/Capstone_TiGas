@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:tigas_application/models/station_model.dart';
+import 'package:tigas_application/providers/url_manager.dart';
 import 'package:tigas_application/screens/camera_screen.dart';
 import 'package:tigas_application/styles/styles.dart';
 
@@ -11,9 +12,11 @@ class StationSelector extends StatefulWidget {
 }
 
 class _StationSelectorState extends State<StationSelector> {
+  final urlManager = UrlManager();
+
   Future<List<Station>> fetchStations() async {
-    final response =
-        await http.get(Uri.parse('http://192.168.1.10:8000/stations/'));
+    String url = await urlManager.getValidBaseUrl();
+    final response = await http.get(Uri.parse('$url/stations/'));
 
     if (response.statusCode == 200) {
       List jsonResponse = jsonDecode(response.body);
@@ -35,7 +38,7 @@ class _StationSelectorState extends State<StationSelector> {
           return Container(
             decoration: getGradientDecoration(),
             child: AlertDialog(
-              title: Text('Loading...'),
+              title: Text('Loading Stations...'),
               content: SizedBox(
                 width: MediaQuery.of(context).size.width * 0.8,
                 height: MediaQuery.of(context).size.height * 0.8,

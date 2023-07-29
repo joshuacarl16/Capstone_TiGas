@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'package:tigas_application/providers/url_manager.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
@@ -23,6 +24,7 @@ class CommercialPage extends StatefulWidget {
 
 class _CommercialPageState extends State<CommercialPage> {
   List<Map<String, dynamic>> advertisements = [];
+  final urlManager = UrlManager();
 
   @override
   void initState() {
@@ -32,19 +34,16 @@ class _CommercialPageState extends State<CommercialPage> {
   }
 
   Future<void> fetchAdvertisements() async {
+    String url = await urlManager.getValidBaseUrl();
     final response =
-        // await http.get(Uri.parse('http://127.0.0.1:8000/images/'));
-        await http.get(Uri.parse(
-            'http://192.168.1.10:8000/images/')); //used for external device
+        await http.get(Uri.parse('$url/images/')); //used for external device
 
     if (response.statusCode == 200) {
       List<dynamic> ads = json.decode(response.body);
       setState(() {
         advertisements = ads
             .map<Map<String, dynamic>>((ad) => {
-                  // 'image': 'http://127.0.0.1:8000${ad['image']}',
-                  'image':
-                      'http://192.168.1.10:8000${ad['image']}', //used for external device
+                  'image': '$url${ad['image']}', //used for external device
                   'caption': ad['caption'],
                   'updated': convertTime(ad['updated'])
                 })

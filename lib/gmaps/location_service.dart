@@ -5,9 +5,11 @@ import 'dart:convert' as convert;
 import 'package:geolocator/geolocator.dart';
 import 'package:tigas_application/models/station_model.dart';
 import 'package:tigas_application/models/user_location.dart';
+import 'package:tigas_application/providers/url_manager.dart';
 
 class LocationService {
   final String key = 'AIzaSyCvx_bpq17DFPNuW9yNU4EvAo_oXFybnfo';
+  final urlManager = UrlManager();
 
   Future<String> getPlaceId(String input) async {
     final String url =
@@ -129,9 +131,9 @@ class LocationService {
   }
 
   Future<Station> getGasStation(String stationId) async {
-    String url = "http://192.168.1.10:8000/stations/$stationId";
+    String url = await urlManager.getValidBaseUrl();
 
-    var response = await http.get(Uri.parse(url));
+    var response = await http.get(Uri.parse('$url/stations/$stationId'));
     if (response.statusCode != 200) {
       throw Exception(
           'Failed to load station. HTTP status: ${response.statusCode}');

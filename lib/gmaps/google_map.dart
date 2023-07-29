@@ -140,30 +140,6 @@ class GMapsState extends State<GMaps> {
     return station;
   }
 
-  // void getRoute(String stationId) async {
-  //   Station station = await LocationService().getGasStation(stationId);
-
-  //   setCurrentLocationMarker(
-  //       UserLocation().latitude!, UserLocation().longitude!);
-
-  //   String currentPos =
-  //       "${UserLocation().latitude}, ${UserLocation().longitude}";
-
-  //   String destination = "${station.latitude}, ${station.longitude}";
-
-  //   var directions =
-  //       await LocationService().getDirections(currentPos, destination);
-
-  //   _goToPlace(
-  //     directions['start_location']['lat'],
-  //     directions['start_location']['lng'],
-  //     directions['bounds_ne'],
-  //     directions['bounds_sw'],
-  //   );
-
-  //   _setPolyline(directions['polyline_decoded']);
-  // }
-
   Future<void> _goToPlace(
     double lat,
     double lng,
@@ -266,7 +242,10 @@ class GMapsState extends State<GMaps> {
             ),
           );
         } else {
-          return CircularProgressIndicator(); // or any other placeholder widget
+          return const Scaffold(
+              body: Center(
+                  child:
+                      CircularProgressIndicator())); // or any other placeholder widget
         }
       },
     );

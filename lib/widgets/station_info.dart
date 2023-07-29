@@ -12,6 +12,7 @@ import 'package:tigas_application/gmaps/google_map.dart';
 import 'package:tigas_application/gmaps/location_service.dart';
 import 'package:tigas_application/models/station_model.dart';
 import 'package:intl/intl.dart';
+import 'package:tigas_application/providers/url_manager.dart';
 import 'package:timezone/timezone.dart' as tz;
 
 class StationInfo extends StatefulWidget {
@@ -35,6 +36,7 @@ class StationInfo extends StatefulWidget {
 class _StationInfoState extends State<StationInfo> {
   bool isStarred = false;
   double? distanceToStation;
+  final urlManager = UrlManager();
 
   @override
   void initState() {
@@ -49,10 +51,8 @@ class _StationInfoState extends State<StationInfo> {
   };
 
   Future<List<Station>> fetchStations() async {
-    final response =
-        // await http.get(Uri.parse('http://127.0.0.1:8000/stations/'));
-        await http.get(Uri.parse(
-            'http://192.168.1.10:8000/stations/')); //used for external device
+    String url = await urlManager.getValidBaseUrl();
+    final response = await http.get(Uri.parse('$url/stations/'));
     if (response.statusCode == 200) {
       List jsonResponse = jsonDecode(response.body);
       return jsonResponse
@@ -85,9 +85,13 @@ class _StationInfoState extends State<StationInfo> {
                 Text(widget.station.name,
                     style: GoogleFonts.ubuntu(
                         fontSize: 25, fontWeight: FontWeight.bold)),
-                Text(widget.station.address,
-                    style: GoogleFonts.catamaran(
-                        fontWeight: FontWeight.w600, color: Colors.grey[600])),
+                Padding(
+                  padding: const EdgeInsets.only(right: 16.0),
+                  child: Text(widget.station.address,
+                      style: GoogleFonts.catamaran(
+                          fontWeight: FontWeight.w600,
+                          color: Colors.grey[600])),
+                ),
                 FutureBuilder<double>(
                   future: LocationService()
                       .calculateDistanceToStation(widget.station),
@@ -168,12 +172,14 @@ class _StationInfoState extends State<StationInfo> {
                   alignment: Alignment.center,
                   children: [
                     FaIcon(
-                      FontAwesomeIcons.solidStar,
-                      color: isStarred ? Colors.yellow : Colors.transparent,
+                      FontAwesomeIcons.solidHeart,
+                      color: isStarred ? Colors.red : Colors.transparent,
+                      size: unitWidthValue * 8,
                     ),
                     FaIcon(
-                      FontAwesomeIcons.star,
-                      color: Colors.grey,
+                      FontAwesomeIcons.heart,
+                      color: isStarred ? Colors.red : Colors.grey,
+                      size: unitWidthValue * 8,
                     ),
                   ],
                 ),
