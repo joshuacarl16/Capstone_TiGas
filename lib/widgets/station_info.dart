@@ -4,9 +4,21 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:tigas_application/gmaps/google_map.dart';
+import 'package:tigas_application/screens/rate_screen.dart';
 
 class StationInfo extends StatelessWidget {
   const StationInfo({super.key});
+
+  showRatingDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Dialog(
+          child: RateDialog(),
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,6 +59,17 @@ class StationInfo extends StatelessWidget {
                 },
                 label: Text('Get Route'),
                 icon: Icon(FontAwesomeIcons.route)),
+          ),
+          Positioned(
+            bottom: 10,
+            left: 10,
+            child: FloatingActionButton.extended(
+              backgroundColor: Color(0xFF175124),
+              onPressed: () {
+                showRatingDialog(context);
+              },
+              label: Text('Rate Station'),
+            ),
           ),
         ],
       ),

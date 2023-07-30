@@ -35,8 +35,11 @@ class MyApp extends StatelessWidget {
         title: 'TiGas',
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Color(0xFF609966)),
-        ),
+            colorScheme: ColorScheme.fromSeed(seedColor: Color(0xFF609966)),
+            dialogTheme: DialogTheme(
+                backgroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(24)))),
         home: LoadingScreen(),
       ),
     );
