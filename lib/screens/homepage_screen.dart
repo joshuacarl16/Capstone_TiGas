@@ -9,6 +9,7 @@ import 'package:tigas_application/models/station_model.dart';
 import 'package:tigas_application/providers/station_provider.dart';
 import 'package:tigas_application/screens/set_location.dart';
 import 'package:tigas_application/styles/styles.dart';
+import 'package:tigas_application/widgets/show_snackbar.dart';
 import 'package:tigas_application/widgets/station_card.dart';
 import 'package:tigas_application/widgets/station_info.dart';
 
@@ -32,11 +33,55 @@ class _HomePageState extends State<HomePage> {
   String? selectedStation;
   List<String> services = ['Air', 'Water', 'Oil', 'Restroom'];
   List<bool> serviceSelections = List<bool>.filled(4, false);
+  bool sortByGasPrice = false;
+  bool sortByServices = false;
+  String? selectedGasType;
 
   @override
   void initState() {
     super.initState();
-    Provider.of<StationProvider>(context, listen: false).fetchStations();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return const Dialog(
+            backgroundColor: Colors.white,
+            child: SizedBox(
+              height: 100,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircularProgressIndicator(),
+                  Text(
+                    "Loading Stations",
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      );
+
+      Provider.of<StationProvider>(context, listen: false)
+          .fetchStations()
+          .then((_) => Navigator.pop(
+              context)) // close the dialog after fetchStations completes
+          .catchError((error) {
+        // Handle any errors here
+        Navigator.pop(context); // close the dialog
+      });
+    });
+  }
+
+  double? getSelectedGasPrice(Map<String, String>? gasTypeInfo) {
+    if (gasTypeInfo == null || !gasTypeInfo.containsKey(selectedGasType)) {
+      return null;
+    }
+
+    return double.tryParse(gasTypeInfo[selectedGasType] ?? '') ??
+        double.infinity;
   }
 
   @override
@@ -63,27 +108,47 @@ class _HomePageState extends State<HomePage> {
                 children: [
                   Padding(
                     padding: EdgeInsets.all(2 * unitHeightValue),
-                    child: TextField(
-                      readOnly: true,
-                      controller: currentLocController,
-                      onTap: () async {
-                        final selectedLocation = await Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: ((context) => SetLocationScreen()),
-                            ));
-                        if (selectedLocation != null) {
-                          setState(() {
-                            location = selectedLocation;
-                            currentLocController.text = selectedLocation;
-                          });
-                        }
-                      },
-                      decoration: InputDecoration(
-                        labelText: 'Current Location',
-                        filled: true,
-                        fillColor: Colors.grey[300],
-                      ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            readOnly: true,
+                            controller: currentLocController,
+                            onTap: () async {
+                              final selectedLocation = await Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: ((context) => SetLocationScreen()),
+                                  ));
+                              if (selectedLocation != null) {
+                                setState(() {
+                                  location = selectedLocation;
+                                  currentLocController.text = selectedLocation;
+                                });
+                              }
+                            },
+                            decoration: InputDecoration(
+                              labelText: 'Current Location',
+                              filled: true,
+                              fillColor: Colors.grey[300],
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: 2 * unitWidthValue),
+                        FloatingActionButton(
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(6))),
+                          backgroundColor: Colors.grey[300],
+                          onPressed: _filterServices,
+                          child: FaIcon(
+                            FontAwesomeIcons.filterCircleXmark,
+                            color:
+                                sortByServices ? Colors.red : Colors.green[400],
+                          ),
+                        )
+                      ],
                     ),
                   ),
                   Padding(
@@ -92,9 +157,52 @@ class _HomePageState extends State<HomePage> {
                     child: Row(
                       children: [
                         Expanded(
+                          child: Consumer<StationProvider>(
+                              builder: (context, stationProvider, child) {
+                            var allGasTypes = stationProvider.stations
+                                .map((station) => station.gasTypes)
+                                .expand((i) => i ?? [])
+                                .toSet()
+                                .toList();
+
+                            return DropdownButtonFormField<String>(
+                              // itemHeight: null,
+                              isExpanded: true,
+                              decoration: InputDecoration(
+                                labelText: 'Gas Type',
+                                filled: true,
+                                fillColor: Colors.grey[300],
+                              ),
+                              items: <DropdownMenuItem<String>>[
+                                DropdownMenuItem(
+                                  value: null,
+                                  child: Text('Show All',
+                                      overflow: TextOverflow.ellipsis),
+                                ),
+                              ]..addAll(
+                                  allGasTypes
+                                      .map(
+                                          (gasType) => DropdownMenuItem<String>(
+                                                value: gasType,
+                                                child: Text(
+                                                  gasType,
+                                                ),
+                                              ))
+                                      .toList(),
+                                ),
+                              onChanged: (value) {
+                                setState(() {
+                                  selectedGasType = value;
+                                });
+                              },
+                            );
+                          }),
+                        ),
+                        SizedBox(width: 2 * unitWidthValue),
+                        Expanded(
                           child: DropdownButtonFormField<String>(
                             decoration: InputDecoration(
-                              labelText: 'Gasoline Station',
+                              labelText: 'Gas Brand',
                               filled: true,
                               fillColor: Colors.grey[300],
                             ),
@@ -146,16 +254,30 @@ class _HomePageState extends State<HomePage> {
                         ),
                         SizedBox(width: 2 * unitWidthValue),
                         FloatingActionButton(
+                          elevation: 0,
                           shape: RoundedRectangleBorder(
                               borderRadius:
                                   BorderRadius.all(Radius.circular(6))),
                           backgroundColor: Colors.grey[300],
-                          onPressed: _filterServices,
+                          onPressed: () {
+                            setState(() {
+                              sortByGasPrice = !sortByGasPrice;
+                              if (sortByGasPrice == true) {
+                                showSnackBar(context, 'Sorting by price');
+                              } else {
+                                showSnackBar(context, 'Sorting by distance');
+                              }
+                            });
+                          },
                           child: FaIcon(
-                            FontAwesomeIcons.filterCircleXmark,
-                            color: Colors.green[400],
+                            sortByGasPrice
+                                ? FontAwesomeIcons.dollarSign
+                                : FontAwesomeIcons.locationArrow,
+                            color: sortByGasPrice
+                                ? Colors.green[400]
+                                : Colors.blue,
                           ),
-                        )
+                        ),
                       ],
                     ),
                   ),
@@ -173,12 +295,25 @@ class _HomePageState extends State<HomePage> {
               .where((station) =>
                   (selectedStation == null ||
                       station.name.contains(selectedStation ?? '')) &&
+                  (selectedGasType == null ||
+                      station.gasTypes!.contains(selectedGasType)) &&
                   serviceSelections.asMap().entries.every((entry) {
                     return !entry.value ||
                         station.services!.contains(services[entry.key]);
                   }))
               .toList();
+
           filteredStations.sort((a, b) {
+            if (sortByGasPrice) {
+              var priceA = getSelectedGasPrice(a.gasTypeInfo);
+              var priceB = getSelectedGasPrice(b.gasTypeInfo);
+
+              if (priceA == null || priceB == null) {
+                return 0;
+              }
+              return priceA.compareTo(priceB);
+            }
+
             var distanceA = stationProvider.getDistanceToStation(a);
             var distanceB = stationProvider.getDistanceToStation(b);
 
@@ -270,6 +405,8 @@ class _HomePageState extends State<HomePage> {
                   onPressed: () {
                     setState(() {
                       serviceSelections = tempSelections;
+                      sortByServices =
+                          serviceSelections.any((selection) => selection);
                     });
                     Navigator.of(context).pop();
                   },

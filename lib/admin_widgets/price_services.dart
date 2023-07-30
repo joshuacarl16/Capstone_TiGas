@@ -116,6 +116,8 @@ class _ModifyPriceServicesState extends State<ModifyPriceServices> {
         child: Column(
           children: [
             DropdownButton<Station>(
+              itemHeight: null,
+              isExpanded: true,
               value: _selectedStation,
               onChanged: (Station? newValue) {
                 setState(() {

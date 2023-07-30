@@ -1,4 +1,4 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
+// ignoreforfile: publicmemberapidocs, sortconstructorsfirst
 import 'dart:io';
 
 import 'package:camera/camera.dart';
@@ -7,11 +7,10 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:permission_handler/permission_handler.dart';
-
-import 'package:tigas_application/models/station_model.dart';
-import 'package:tigas_application/styles/styles.dart';
 import 'package:string_similarity/string_similarity.dart';
-import 'result_screen.dart';
+import 'package:tigas_application/models/station_model.dart';
+import 'package:tigas_application/screens/result_screen.dart';
+import 'package:tigas_application/styles/styles.dart';
 
 class CameraScreen extends StatefulWidget {
   final Station selectedStation;
@@ -21,19 +20,19 @@ class CameraScreen extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<CameraScreen> createState() => _CameraScreenState();
+  State<CameraScreen> createState() => CameraScreenState();
 }
 
-class _CameraScreenState extends State<CameraScreen>
+class CameraScreenState extends State<CameraScreen>
     with WidgetsBindingObserver {
   final int selectedTab = 1;
-  bool _isPermissionGranted = false;
+  bool isPermissionGranted = false;
 
-  late final Future<void> _future;
+  late final Future<void> future;
 
-  CameraController? _cameraController;
+  CameraController? cameraController;
 
-  final _textRecognizer = TextRecognizer();
+  final textRecognizer = TextRecognizer();
 
   Map<String, List<String>> brandGasTypes = {
     'Shell': [
@@ -61,29 +60,29 @@ class _CameraScreenState extends State<CameraScreen>
     super.initState();
     WidgetsBinding.instance.addObserver(this);
 
-    _future = _requestCameraPermission();
+    future = requestCameraPermission();
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    _stopCamera();
-    _textRecognizer.close();
+    stopCamera();
+    textRecognizer.close();
     super.dispose();
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (_cameraController == null || !_cameraController!.value.isInitialized) {
+    if (cameraController == null || !cameraController!.value.isInitialized) {
       return;
     }
 
     if (state == AppLifecycleState.inactive) {
-      _stopCamera();
+      stopCamera();
     } else if (state == AppLifecycleState.resumed &&
-        _cameraController != null &&
-        _cameraController!.value.isInitialized) {
-      _startCamera();
+        cameraController != null &&
+        cameraController!.value.isInitialized) {
+      startCamera();
     }
   }
 
@@ -93,19 +92,19 @@ class _CameraScreenState extends State<CameraScreen>
       body: Container(
         decoration: getGradientDecoration(),
         child: FutureBuilder(
-          future: _future,
+          future: future,
           builder: (context, snapshot) {
             return Stack(
               children: [
-                if (_isPermissionGranted)
+                if (isPermissionGranted)
                   FutureBuilder<List<CameraDescription>>(
                     future: availableCameras(),
                     builder: (context, snapshot) {
                       if (snapshot.hasData) {
-                        _initCameraController(snapshot.data!);
+                        initCameraController(snapshot.data!);
 
                         return Center(
-                          child: CameraPreview(_cameraController!),
+                          child: CameraPreview(cameraController!),
                         );
                       } else {
                         return const LinearProgressIndicator();
@@ -114,8 +113,8 @@ class _CameraScreenState extends State<CameraScreen>
                   ),
                 Scaffold(
                   backgroundColor:
-                      _isPermissionGranted ? Colors.transparent : null,
-                  body: _isPermissionGranted
+                      isPermissionGranted ? Colors.transparent : null,
+                  body: isPermissionGranted
                       ? Column(
                           children: [
                             Expanded(
@@ -125,7 +124,7 @@ class _CameraScreenState extends State<CameraScreen>
                               padding: const EdgeInsets.only(bottom: 30.0),
                               child: Center(
                                 child: ElevatedButton(
-                                  onPressed: _scanImage,
+                                  onPressed: scanImage,
                                   child: Text("Scan Image"),
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: Colors.green[400],
@@ -181,25 +180,25 @@ class _CameraScreenState extends State<CameraScreen>
     );
   }
 
-  Future<void> _requestCameraPermission() async {
+  Future<void> requestCameraPermission() async {
     final status = await Permission.camera.request();
-    _isPermissionGranted = status == PermissionStatus.granted;
+    isPermissionGranted = status == PermissionStatus.granted;
   }
 
-  void _startCamera() {
-    if (_cameraController != null) {
-      _cameraSelected(_cameraController!.description);
+  void startCamera() {
+    if (cameraController != null) {
+      cameraSelected(cameraController!.description);
     }
   }
 
-  void _stopCamera() {
-    if (_cameraController != null) {
-      _cameraController?.dispose();
+  void stopCamera() {
+    if (cameraController != null) {
+      cameraController?.dispose();
     }
   }
 
-  void _initCameraController(List<CameraDescription> cameras) {
-    if (_cameraController != null) {
+  void initCameraController(List<CameraDescription> cameras) {
+    if (cameraController != null) {
       return;
     }
 
@@ -213,18 +212,18 @@ class _CameraScreenState extends State<CameraScreen>
     }
 
     if (camera != null) {
-      _cameraSelected(camera);
+      cameraSelected(camera);
     }
   }
 
-  Future<void> _cameraSelected(CameraDescription camera) async {
-    _cameraController = CameraController(
+  Future<void> cameraSelected(CameraDescription camera) async {
+    cameraController = CameraController(
       camera,
       ResolutionPreset.high,
       enableAudio: false,
     );
 
-    await _cameraController?.initialize();
+    await cameraController?.initialize();
 
     if (!mounted) {
       return;
@@ -232,8 +231,8 @@ class _CameraScreenState extends State<CameraScreen>
     setState(() {});
   }
 
-  Future<void> _scanImage() async {
-    if (_cameraController == null) return;
+  Future<void> scanImage() async {
+    if (cameraController == null) return;
 
     final navigator = Navigator.of(context);
     String stationName = widget.selectedStation.name;
@@ -256,7 +255,7 @@ class _CameraScreenState extends State<CameraScreen>
     List<String> gasTypes = brandGasTypes[brand]!;
 
     try {
-      final pictureFile = await _cameraController!.takePicture();
+      final pictureFile = await cameraController!.takePicture();
 
       final croppedFile = await ImageCropper().cropImage(
           sourcePath: pictureFile.path,
@@ -282,7 +281,7 @@ class _CameraScreenState extends State<CameraScreen>
 
       final inputImage = InputImage.fromFile(file);
       final RecognizedText recognizedText =
-          await _textRecognizer.processImage(inputImage);
+          await textRecognizer.processImage(inputImage);
 
       List<TextBlock> blocks = recognizedText.blocks
         ..sort((a, b) => a.boundingBox.top.compareTo(b.boundingBox.top));
@@ -290,41 +289,93 @@ class _CameraScreenState extends State<CameraScreen>
       Map<String, String> gasTypePrices = {};
 
       for (var block in blocks) {
-        // best match variables
         double bestMatchRating = 0.0;
         String bestMatchType = '';
+        String blockTextLower = block.text.toLowerCase();
 
+        bool gasTypeFound = false;
+
+        // Direct matching with gas types.
         for (var type in gasTypes) {
-          // calculate similarity between type and block text
-          double similarity =
-              StringSimilarity.compareTwoStrings(type, block.text);
-          processLogs.add(
-              'Comparing type: $type with block text: ${block.text}. Similarity: $similarity');
-
-          // check if similarity is the best so far
-          if (similarity > bestMatchRating) {
-            bestMatchRating = similarity;
+          if (blockTextLower.contains(type.toLowerCase())) {
             bestMatchType = type;
+            gasTypeFound = true;
+            break;
           }
         }
 
-        processLogs.add(
-            'Best match type: $bestMatchType with similarity: $bestMatchRating');
+        if (!gasTypeFound) {
+          continue;
+        }
 
-        // check if a good match was found
-        if (bestMatchType.isNotEmpty && bestMatchRating > 0.6) {
-          // threshold
-          RegExp exp = RegExp('$bestMatchType\\s(\\d+\\.\\d+)');
+        // If no match is found, use string similarity.
+        if (bestMatchType.isEmpty) {
+          for (var type in gasTypes) {
+            double similarity =
+                StringSimilarity.compareTwoStrings(type, block.text);
+
+            if (similarity > bestMatchRating) {
+              bestMatchRating = similarity;
+              bestMatchType = type;
+            }
+          }
+
+          // Continue with next block if similarity is too low.
+          if (bestMatchRating < 0.2) {
+            processLogs
+                .add('Block "${block.text}" does not match any gas type');
+            continue;
+          }
+        }
+
+        List<RegExp> expressions = [
+          RegExp('$bestMatchType\\s(\\d+(\\.\\d+)?)'), // original expression
+          RegExp(
+              '$bestMatchType\\s.*?(\\d+(\\.\\d+)?)'), // expression handling allowing characters in between
+          RegExp(
+              '$bestMatchType\\s(\\d{1,3}(\\d{2}))'), // expression handling for missed decimal point
+          RegExp(
+              '$bestMatchType\\s(\\d+(,\\d+)?)'), // expression handling decimal point recognized as comma
+          RegExp(
+              '$bestMatchType\\s*\\n\\s*(\\d+(\\.\\d+)?)'), // expression handling price below the name
+          RegExp(
+              '$bestMatchType\\s+(\\d+(\\.\\d+)?)'), //expression handling price beside gas type but lower
+          RegExp(
+              '$bestMatchType\\s+(\\d{2,5}(\\.\\d+)?)'), //expression handling price contains more digit
+          RegExp(
+              '$bestMatchType\\s+\\s*(\\d+(\\.\\d+)?)'), //expression handling for space between type and price
+          RegExp(
+              '$bestMatchType[\\s\\n]*(\\d+(\\.\\d+)?)') //expression handling multiple spaces
+        ];
+
+        // String textToSearch = block.text;
+        // if (blocks.indexOf(block) < blocks.length - 1) {
+        //   textToSearch += ' ' + blocks[blocks.indexOf(block) + 1].text;
+        // }
+
+        for (var exp in expressions) {
           var matches = exp.allMatches(block.text);
-
           if (matches.isNotEmpty) {
-            gasTypePrices[bestMatchType] = matches.first.group(1)!;
+            String price = matches.first.group(1)!;
+
+            // Replace comma with a decimal point
+            if (price.contains(',')) {
+              price = price.replaceAll(',', '.');
+            }
+
+            // If the matched string has 4 or 5 characters and the expression is for missed decimal point
+            // Insert a decimal point before the last two digits
+            if (price.length > 3 && exp.pattern == '\\b(\\d{1,3}(\\d{2}))\\b') {
+              price = price.substring(0, price.length - 2) +
+                  '.' +
+                  price.substring(price.length - 2);
+            }
+
+            gasTypePrices[bestMatchType] = price;
             processLogs.add(
                 'Match found. Type: $bestMatchType, Price: ${gasTypePrices[bestMatchType]}');
+            break; // exit the loop if a match is found
           }
-        } else {
-          processLogs.add(
-              'No match found or similarity below threshold for block: ${block.text}');
         }
       }
 
@@ -345,4 +396,172 @@ class _CameraScreenState extends State<CameraScreen>
       );
     }
   }
+
+  // Future<void> scanImage() async {
+  //   if (cameraController == null) return;
+
+  //   final navigator = Navigator.of(context);
+  //   String stationName = widget.selectedStation.name;
+  //   List<String> processLogs = [];
+
+  //   String brand = brandGasTypes.keys.firstWhere(
+  //     (brand) => stationName.contains(brand),
+  //     orElse: () => '',
+  //   );
+
+  //   if (brand.isEmpty) {
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(
+  //         content: Text('No gas types found for this station: $stationName'),
+  //       ),
+  //     );
+  //     return;
+  //   }
+
+  //   List<String> gasTypes = brandGasTypes[brand]!;
+
+  //   try {
+  //     final pictureFile = await cameraController!.takePicture();
+
+  //     final croppedFile = await ImageCropper().cropImage(
+  //         sourcePath: pictureFile.path,
+  //         compressFormat: ImageCompressFormat.jpg,
+  //         compressQuality: 100,
+  //         uiSettings: [
+  //           AndroidUiSettings(
+  //               toolbarTitle: 'Confirm Submission',
+  //               toolbarColor: Color(0xFF609966),
+  //               toolbarWidgetColor: Colors.white,
+  //               initAspectRatio: CropAspectRatioPreset.original,
+  //               lockAspectRatio: false),
+  //           IOSUiSettings(
+  //             title: 'Confirm Submission',
+  //           ),
+  //         ]);
+
+  //     if (croppedFile == null) {
+  //       return;
+  //     }
+
+  //     final file = File(croppedFile.path);
+
+  //     final inputImage = InputImage.fromFile(file);
+  //     final RecognizedText recognizedText =
+  //         await textRecognizer.processImage(inputImage);
+
+  //     List<TextBlock> blocks = recognizedText.blocks
+  //       ..sort((a, b) => a.boundingBox.top.compareTo(b.boundingBox.top));
+
+  //     Map<String, String> gasTypePrices = {};
+
+  //     for (var block in blocks) {
+  //       double bestMatchRating = 0.0;
+  //       String bestMatchType = '';
+
+  //       for (var type in gasTypes) {
+  //         // check if block text contains part of the gas type
+  //         if (type.split(' ').any((word) => block.text.contains(word))) {
+  //           bestMatchType = type;
+  //           break;
+  //         }
+  //       }
+
+  //       processLogs.add('Best match type: $bestMatchType');
+
+  //       for (var type in gasTypes) {
+  //         // calculate similarity between type and block text
+  //         double similarity =
+  //             StringSimilarity.compareTwoStrings(type, block.text);
+  //         processLogs.add(
+  //             'Comparing type: $type with block text: ${block.text}. Similarity: $similarity');
+
+  //         // check if similarity is the best so far
+  //         if (similarity > bestMatchRating) {
+  //           bestMatchRating = similarity;
+  //           bestMatchType = type;
+  //         }
+  //       }
+
+  //       processLogs.add(
+  //           'Best match type: $bestMatchType with similarity: $bestMatchRating');
+
+  //       // check if a good match was found
+  //       if (bestMatchType.isNotEmpty && bestMatchRating > 0.2 ||
+  //           bestMatchRating == 1.0) {
+  //         // Define list of expressions to check
+  //         List<RegExp> expressions = [
+  //           RegExp('$bestMatchType\\s(\\d+(\\.\\d+)?)'), // original expression
+  //           RegExp(
+  //               '$bestMatchType\\s.*?(\\d+(\\.\\d+)?)'), // expression handling allowing characters in between
+  //           RegExp(
+  //               '$bestMatchType\\s(\\d{1,3}(\\d{2}))'), // expression handling for missed decimal point
+  //           RegExp(
+  //               '$bestMatchType\\s(\\d+(,\\d+)?)'), // expression handling decimal point recognized as comma
+  //           RegExp(
+  //               '$bestMatchType\\s*\\n\\s*(\\d+(\\.\\d+)?)'), // expression handling price below the name
+  //           RegExp(
+  //               '$bestMatchType\\s+(\\d+(\\.\\d+)?)'), //expression handling price beside gas type but lower
+  //           RegExp(
+  //               '$bestMatchType\\s+(\\d{2,5}(\\.\\d+)?)'), //expression handling price contains more digit
+  //           RegExp(
+  //               '$bestMatchType\\s+\\s*(\\d+(\\.\\d+)?)'), //expression handling for space between type and price
+  //           RegExp(
+  //               '$bestMatchType[\\s\\n]*(\\d+(\\.\\d+)?)') //expression handling multiple spaces
+  //         ];
+
+  //         String textToSearch = block.text;
+  //         if (blocks.indexOf(block) < blocks.length - 1) {
+  //           textToSearch += ' ' + blocks[blocks.indexOf(block) + 1].text;
+  //         }
+
+  // for (var exp in expressions) {
+  //   var matches = exp.allMatches(block.text);
+  //   if (matches.isNotEmpty) {
+  //     String price = matches.first.group(1)!;
+
+  //     // Replace comma with a decimal point
+  //     if (price.contains(',')) {
+  //       price = price.replaceAll(',', '.');
+  //     }
+
+  //     // If the matched string has 4 or 5 characters and the expression is for missed decimal point
+  //     // Insert a decimal point before the last two digits
+  //     if (price.length > 3 &&
+  //         exp.pattern == '\\b(\\d{1,3}(\\d{2}))\\b') {
+  //       price = price.substring(0, price.length - 2) +
+  //           '.' +
+  //           price.substring(price.length - 2);
+  //     }
+
+  //     gasTypePrices[bestMatchType] = price;
+  //     processLogs.add(
+  //         'Match found. Type: $bestMatchType, Price: ${gasTypePrices[bestMatchType]}');
+  //     break; // exit the loop if a match is found
+  //   }
+  // }
+
+  //         if (!gasTypePrices.containsKey(bestMatchType)) {
+  //           processLogs.add(
+  //               'No match found or similarity below threshold for block: ${block.text}');
+  //         }
+  //       }
+  //     }
+
+  //     await navigator.push(
+  //       MaterialPageRoute(
+  //         builder: (context) => ResultScreen(
+  //           selectedStation: widget.selectedStation,
+  //           scannedGasPrices: gasTypePrices,
+  //           processLogs: processLogs,
+  //         ),
+  //       ),
+  //     );
+  //   } catch (e) {
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(
+  //         content: Text('An error occured while scanning text: $e'),
+  //       ),
+  //     );
+  //   }
+  // }
 }

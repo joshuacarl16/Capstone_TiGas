@@ -27,6 +27,8 @@ class Advertisement(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     image = models.ImageField(upload_to='advertisements/')
     caption = models.CharField(max_length=255)
+    valid_until = models.DateTimeField(null=True)
+    posted_by = models.CharField(max_length=255, default='Unknown')
     
     class Meta:
         ordering = ['-updated']

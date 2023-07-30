@@ -30,7 +30,38 @@ class _CommercialPageState extends State<CommercialPage> {
   void initState() {
     super.initState();
     tz.initializeTimeZones();
-    fetchAdvertisements();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return const Dialog(
+            backgroundColor: Colors.white,
+            child: SizedBox(
+              height: 100,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircularProgressIndicator(),
+                  Text(
+                    "Loading Posts",
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      );
+
+      fetchAdvertisements().then((_) {
+        Navigator.pop(
+            context); // close the dialog after fetchAdvertisements completes
+      }).catchError((error) {
+        // Handle any errors here
+        Navigator.pop(context); // close the dialog
+      });
+    });
   }
 
   Future<void> fetchAdvertisements() async {
@@ -45,7 +76,11 @@ class _CommercialPageState extends State<CommercialPage> {
             .map<Map<String, dynamic>>((ad) => {
                   'image': '$url${ad['image']}', //used for external device
                   'caption': ad['caption'],
-                  'updated': convertTime(ad['updated'])
+                  'updated': convertTime(ad['updated']),
+                  'valid_until': ad['valid_until'] != null
+                      ? convertTime(ad['valid_until'])
+                      : 'Not specified',
+                  'posted_by': ad['posted_by'] ?? 'Unknown',
                 })
             .toList();
       });
@@ -65,6 +100,7 @@ class _CommercialPageState extends State<CommercialPage> {
 
   @override
   Widget build(BuildContext context) {
+    final screenSize = MediaQuery.of(context).size;
     return Scaffold(
       body: NestedScrollView(
         headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
@@ -104,57 +140,129 @@ class _CommercialPageState extends State<CommercialPage> {
           child: Column(
             children: [
               Expanded(
-                child: ListView.builder(
-                  itemCount: advertisements.length,
-                  itemBuilder: (context, index) {
-                    Map<String, dynamic> ad = advertisements[index];
-                    String imagePath = ad['image'];
-                    String adText = ad['caption'];
-                    String updatedTime = ad['updated'];
-                    return Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 15.0, vertical: 15.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(16),
-                            child: Material(
-                              elevation: 5,
-                              child: Image.network(
-                                imagePath,
-                                fit: BoxFit.cover,
-                                errorBuilder: (BuildContext context,
-                                    Object exception, StackTrace? stackTrace) {
-                                  return const Text('Could not load image');
-                                },
+                child: RefreshIndicator(
+                  onRefresh: fetchAdvertisements,
+                  child: ListView.builder(
+                    itemCount: advertisements.length,
+                    itemBuilder: (context, index) {
+                      Map<String, dynamic> ad = advertisements[index];
+                      String imagePath = ad['image'];
+                      String adText = ad['caption'];
+                      String updatedTime = ad['updated'];
+                      String validUntil = ad['valid_until'];
+                      String postedBy = ad['posted_by'];
+                      return Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 15.0, vertical: 15.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              height: screenSize.height / 3,
+                              width: screenSize.width,
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.only(
+                                  topLeft: Radius.circular(16),
+                                  topRight: Radius.circular(16),
+                                ),
+                                child: Material(
+                                  elevation: 5,
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      showDialog(
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return Dialog(
+                                            child: Container(
+                                              child: Image.network(
+                                                imagePath,
+                                                fit: BoxFit.contain,
+                                                errorBuilder: (BuildContext
+                                                        context,
+                                                    Object exception,
+                                                    StackTrace? stackTrace) {
+                                                  return const Text(
+                                                      'Could not load image');
+                                                },
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                      );
+                                    },
+                                    child: Image.network(
+                                      imagePath,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (BuildContext context,
+                                          Object exception,
+                                          StackTrace? stackTrace) {
+                                        return const Text(
+                                            'Could not load image');
+                                      },
+                                    ),
+                                  ),
+                                ),
                               ),
                             ),
-                          ),
-                          SizedBox(height: 10),
-                          Text(
-                            adText,
-                            style: GoogleFonts.catamaran(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                              fontStyle: FontStyle.italic,
-                              fontSize: 14,
-                            ),
-                          ),
-                          SizedBox(height: 10),
-                          Text(
-                            'Last Updated: $updatedTime',
-                            style: GoogleFonts.catamaran(
-                              fontWeight: FontWeight.w600,
-                              color: Colors.grey[400],
-                              fontStyle: FontStyle.italic,
-                              fontSize: 14,
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
+                            SizedBox(height: 10),
+                            Container(
+                              decoration: BoxDecoration(
+                                color: Colors.white60,
+                                borderRadius: BorderRadius.only(
+                                  bottomLeft: Radius.circular(16),
+                                  bottomRight: Radius.circular(16),
+                                ),
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      adText,
+                                      style: GoogleFonts.catamaran(
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                    SizedBox(height: 10),
+                                    Text(
+                                      'Last Updated: $updatedTime',
+                                      style: GoogleFonts.catamaran(
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.grey[200],
+                                        fontStyle: FontStyle.italic,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                    Text(
+                                      'Valid Until: $validUntil',
+                                      style: GoogleFonts.catamaran(
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.grey[200],
+                                        fontStyle: FontStyle.italic,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                    Text(
+                                      'Posted By: $postedBy',
+                                      style: GoogleFonts.catamaran(
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.grey[200],
+                                        fontStyle: FontStyle.italic,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            )
+                          ],
+                        ),
+                      );
+                    },
+                  ),
                 ),
               ),
             ],
