@@ -98,7 +98,7 @@ class _RateDialogState extends State<RateDialog> {
                               duration: Duration(milliseconds: 300),
                               curve: Curves.easeIn);
                           setState(() {
-                            _starPosition = 20.0;
+                            _starPosition = 10.0;
                             _rating = index + 1;
                           });
                         },
