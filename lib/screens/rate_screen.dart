@@ -15,6 +15,20 @@ class _RateDialogState extends State<RateDialog> {
   var _ratingScreenController = PageController();
   var _starPosition = 170.0;
   var _rating = 0;
+  var _selectedChipIndex =
+      -1; //this one should not be negative but if e zero kay mo auto select siya sa Custom text 1 carl
+  var _isMoreDetailActive = false;
+  var _moreDetailFocusNode = FocusNode();
+
+  List<String> chipTexts = [
+    'Custom Text 1',
+    'Outdated prices',
+    'Unavailable Air',
+    'Unavailable Water',
+    'No CR',
+    'Bad service',
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -42,7 +56,7 @@ class _RateDialogState extends State<RateDialog> {
               color: Colors.green,
               height: 40,
               child: MaterialButton(
-                onPressed: () {},
+                onPressed: () {}, //fetch the inputted data here carl
                 child: Text('Done'),
                 textColor: Colors.white,
               ),
@@ -52,13 +66,13 @@ class _RateDialogState extends State<RateDialog> {
           Positioned(
             right: 0,
             child: IconButton(
-              icon: Icon(Icons.close), // This represents the (x) icon
+              icon: Icon(Icons.close), // Exit (x) icon
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
           ),
-
+          //Star
           AnimatedPositioned(
             top: _starPosition,
             left: 0,
@@ -91,7 +105,19 @@ class _RateDialogState extends State<RateDialog> {
                       )),
             ),
             duration: Duration(milliseconds: 300),
-          )
+          ),
+          //back button
+          if (_isMoreDetailActive)
+            Positioned(
+                left: 0,
+                child: MaterialButton(
+                  onPressed: () {
+                    setState(() {
+                      _isMoreDetailActive = false;
+                    });
+                  },
+                  child: Icon(Icons.arrow_back_ios),
+                )),
         ],
       ),
     );
@@ -124,6 +150,92 @@ class _RateDialogState extends State<RateDialog> {
   }
 
   _ratingDescription() {
-    return Container();
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        Visibility(
+          visible: !_isMoreDetailActive,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('What could be better?'),
+              SizedBox(
+                height: 8.0,
+              ),
+              Wrap(
+                spacing: 8.0,
+                runSpacing: 8.0,
+                alignment: WrapAlignment.center,
+                children: List.generate(
+                  6,
+                  (index) => InkWell(
+                    onTap: () {
+                      setState(() {
+                        _selectedChipIndex = index;
+                      });
+                    },
+                    child: Chip(
+                      backgroundColor: _selectedChipIndex == index
+                          ? Colors.green
+                          : Colors.grey,
+                      label: Text(
+                        chipTexts[index],
+                        style: TextStyle(
+                          color: _selectedChipIndex == index
+                              ? Colors.white
+                              : Colors.black,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(
+                height: 8.0,
+              ),
+              InkWell(
+                onTap: () {
+                  _moreDetailFocusNode.requestFocus();
+                  setState(() {
+                    _isMoreDetailActive = true;
+                  });
+                },
+                child: Text(
+                  'Tell us more.',
+                  style: TextStyle(decoration: TextDecoration.underline),
+                ),
+              )
+            ],
+          ),
+          replacement: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('What is the reason of your review?'),
+              SizedBox(
+                height: 8.0,
+              ),
+              Chip(
+                  backgroundColor: Colors.green,
+                  label: Text(
+                    chipTexts[
+                        _selectedChipIndex + 1], //I need help with this carl
+                    style: TextStyle(color: Colors.white),
+                  )),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: TextField(
+                  focusNode: _moreDetailFocusNode,
+                  decoration: InputDecoration(
+                    hintText: 'Write your review here...',
+                    hintStyle: TextStyle(color: Colors.grey[400]),
+                    border: InputBorder.none,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        )
+      ],
+    );
   }
 }
