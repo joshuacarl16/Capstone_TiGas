@@ -217,6 +217,8 @@ class _EditStationState extends State<EditStation> {
               child: Column(
                 children: [
                   DropdownButtonFormField<int>(
+                    itemHeight: null,
+                    isExpanded: true,
                     decoration: InputDecoration(labelText: 'Address'),
                     value: id,
                     items: stationsLoaded
@@ -368,6 +370,8 @@ class _EditStationState extends State<EditStation> {
                   ),
                   SizedBox(height: 20),
                   DropdownButtonFormField<int>(
+                    itemHeight: null,
+                    isExpanded: true,
                     decoration: InputDecoration(labelText: 'Address to Delete'),
                     value: id,
                     items: stationsLoaded

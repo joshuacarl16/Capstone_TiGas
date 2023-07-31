@@ -83,7 +83,7 @@ class _ResultScreenState extends State<ResultScreen> {
                             style: TextStyle(
                                 fontSize: 16, fontWeight: FontWeight.bold)),
                         Text(
-                          ' (Current: ${entry.value.text})',
+                          ' (Current: ${widget.selectedStation.gasTypeInfo?[entry.key]})',
                           style: TextStyle(
                               fontSize: 12,
                               fontStyle: FontStyle.italic,

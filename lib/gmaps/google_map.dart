@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:tigas_application/gmaps/location_service.dart';
@@ -31,6 +32,7 @@ class GMapsState extends State<GMaps> {
   List<Marker> gasStationMarkers = [];
   Future<Station>? _station;
   LatLng? _startLocation;
+  bool areStationsVisible = false;
 
   Set<Polyline> _polylines = Set<Polyline>();
   int _polylineIdCounter = 1;
@@ -55,14 +57,70 @@ class GMapsState extends State<GMaps> {
 
     for (var i = 0; i < markerImages.length; i++) {
       final byteData = await rootBundle.load(markerImages[i]);
-      final Uint8List resizedBytes =
-          await resizeImage(byteData.buffer.asUint8List(), 80, 80);
+      Uint8List resizedBytes;
       if (i == 0) {
+        resizedBytes = await resizeImage(byteData.buffer.asUint8List(), 40, 40);
         customIcons.add(BitmapDescriptor.fromBytes(resizedBytes));
       } else if (i == 1) {
+        resizedBytes = await resizeImage(byteData.buffer.asUint8List(), 80,
+            80); // new size for current location icon
         currentLocationIcon = BitmapDescriptor.fromBytes(resizedBytes);
       }
     }
+  }
+
+  Future<void> fetchAndLoadGasStations() async {
+    if (areStationsVisible) {
+      setState(() {
+        gasStationMarkers = [];
+        areStationsVisible = false;
+      });
+      return;
+    }
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return const Dialog(
+          backgroundColor: Colors.white,
+          child: SizedBox(
+            height: 100,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                CircularProgressIndicator(),
+                Text(
+                  "Loading Stations",
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+
+    List<Map<String, dynamic>> stations =
+        await LocationService().getGasStations();
+    List<Marker> stationMarkers = [];
+
+    for (var station in stations) {
+      Marker stationMarker = Marker(
+        markerId: MarkerId(station['place_id']),
+        position: station['location'],
+        infoWindow: InfoWindow(title: station['name']),
+        icon: customIcons[0],
+      );
+      stationMarkers.add(stationMarker);
+    }
+
+    Navigator.pop(context);
+
+    setState(() {
+      gasStationMarkers = stationMarkers;
+      areStationsVisible = true;
+    });
   }
 
   @override
@@ -77,9 +135,7 @@ class GMapsState extends State<GMaps> {
   Set<Marker> _createMarker() {
     var markers = <Marker>{};
 
-    for (var i = 0; i < points.length; i++) {
-      markers.addAll(gasStationMarkers);
-    }
+    markers.addAll(gasStationMarkers);
     if (currentLocationMarker != null) {
       markers.add(currentLocationMarker!);
     }
@@ -228,17 +284,37 @@ class GMapsState extends State<GMaps> {
               backgroundColor: Color(0xFF609966),
               elevation: 0,
             ),
-            body: GoogleMap(
-              mapType: MapType.normal,
-              markers: _createMarker(),
-              polylines: _polylines,
-              initialCameraPosition: CameraPosition(
-                target: _startLocation ?? LatLng(10.31306, 123.9128),
-                zoom: 13,
-              ),
-              onMapCreated: (GoogleMapController controller) {
-                _controller.complete(controller);
-              },
+            body: Stack(
+              children: [
+                GoogleMap(
+                  zoomControlsEnabled: false,
+                  mapType: MapType.normal,
+                  markers: _createMarker(),
+                  polylines: _polylines,
+                  initialCameraPosition: CameraPosition(
+                    target: _startLocation ?? LatLng(10.31306, 123.9128),
+                    zoom: 13,
+                  ),
+                  onMapCreated: (GoogleMapController controller) {
+                    _controller.complete(controller);
+                  },
+                ),
+                Positioned(
+                  right: 10,
+                  bottom: 10,
+                  child: FloatingActionButton.extended(
+                    onPressed: () {
+                      fetchAndLoadGasStations();
+                    },
+                    label: Text(areStationsVisible
+                        ? 'Hide Gas Stations'
+                        : 'Show Gas Stations'),
+                    icon: FaIcon(FontAwesomeIcons.locationDot),
+                    backgroundColor:
+                        areStationsVisible ? Colors.blue : Colors.green[600],
+                  ),
+                )
+              ],
             ),
           );
         } else {
