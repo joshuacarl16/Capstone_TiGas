@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.validators import MaxValueValidator, MinValueValidator
 
 class Station(models.Model):
     updated = models.DateTimeField(auto_now=True)
@@ -32,3 +33,13 @@ class Advertisement(models.Model):
     
     class Meta:
         ordering = ['-updated']
+
+class Review(models.Model):
+    updated = models.DateTimeField(auto_now=True)
+    created = models.DateTimeField(auto_now_add=True)
+    station = models.ForeignKey(Station, on_delete=models.CASCADE)
+    posted_by = models.CharField(max_length=255, default='Unknown')
+    rating = models.PositiveIntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
+    review = models.JSONField(null=True)
+    comments = models.TextField(null=True)
+

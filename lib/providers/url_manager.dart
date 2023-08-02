@@ -15,6 +15,8 @@ class UrlManager {
     if (baseUrl != null) return baseUrl!;
 
     List<String> urls = [
+      'http://192.168.1.5:8000',
+      'http://192.168.1.6:8000',
       'http://192.168.1.10:8000',
       'http://127.0.0.1:8000',
       'http://192.168.1.4:8000',

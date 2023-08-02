@@ -13,7 +13,10 @@ import 'package:tigas_application/gmaps/location_service.dart';
 import 'package:tigas_application/models/station_model.dart';
 import 'package:intl/intl.dart';
 import 'package:tigas_application/providers/url_manager.dart';
+import 'package:tigas_application/widgets/rate_station.dart';
 import 'package:timezone/timezone.dart' as tz;
+
+import '../models/reviews_model.dart';
 
 class StationInfo extends StatefulWidget {
   final Station station;
@@ -63,6 +66,31 @@ class _StationInfoState extends State<StationInfo> {
     }
   }
 
+  Future<List<Review>> fetchReviews(int stationId) async {
+    String url = await urlManager.getValidBaseUrl();
+    final response =
+        await http.get(Uri.parse('$url/stations/$stationId/reviews'));
+    if (response.statusCode == 200) {
+      List jsonResponse = jsonDecode(response.body);
+      return jsonResponse
+          .map((item) => Review.fromJson(item as Map<String, dynamic>))
+          .toList();
+    } else {
+      throw Exception('Failed to load reviews');
+    }
+  }
+
+  showRatingDialog(BuildContext context, int stationId) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Dialog(
+          child: RateDialog(stationId: stationId),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -76,116 +104,228 @@ class _StationInfoState extends State<StationInfo> {
         color: Colors.grey[300],
       ),
       padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 30.0),
-      child: SingleChildScrollView(
-        child: Stack(
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(widget.station.name,
-                    style: GoogleFonts.ubuntu(
-                        fontSize: 25, fontWeight: FontWeight.bold)),
-                Padding(
-                  padding: const EdgeInsets.only(right: 16.0),
-                  child: Text(widget.station.address,
-                      style: GoogleFonts.catamaran(
-                          fontWeight: FontWeight.w600,
-                          color: Colors.grey[600])),
-                ),
-                FutureBuilder<double>(
-                  future: LocationService()
-                      .calculateDistanceToStation(widget.station),
-                  builder:
-                      (BuildContext context, AsyncSnapshot<double> snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return CircularProgressIndicator();
-                    } else if (snapshot.hasError) {
-                      return Text('Error: ${snapshot.error}');
-                    } else {
-                      return Text(
-                        '${snapshot.data?.toStringAsFixed(2)} km',
-                        style: GoogleFonts.catamaran(
-                            fontWeight: FontWeight.w600, fontSize: 20),
-                      );
-                    }
-                  },
-                ),
-                SizedBox(height: unitWidthValue * 6),
-                ElevatedButton.icon(
-                  onPressed: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: ((context) =>
-                              GMaps(destination: widget.station.id.toString())),
-                        ));
-                  },
-                  icon: FaIcon(FontAwesomeIcons.car),
-                  label: Text('Get Route'),
-                  style: ElevatedButton.styleFrom(
-                      minimumSize: Size(double.infinity, 50),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30)),
-                      backgroundColor: Colors.green[700]),
-                ),
-                SizedBox(height: unitWidthValue * 6),
-                Center(child: _buildGasTypes(unitHeightValue, unitWidthValue)),
-                SizedBox(height: unitWidthValue * 6),
-                Center(
-                  child: Text('Services Offered',
+      child: RefreshIndicator(
+        onRefresh: () async {
+          await fetchReviews(widget.station.id);
+        },
+        child: SingleChildScrollView(
+          child: Stack(
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(widget.station.name,
                       style: GoogleFonts.ubuntu(
                           fontSize: 25, fontWeight: FontWeight.bold)),
-                ),
-                SizedBox(height: unitWidthValue * 4),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children:
-                      _buildServicesIcons(unitWidthValue, unitHeightValue),
-                ),
-                SizedBox(height: unitWidthValue * 6),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  Padding(
+                    padding: const EdgeInsets.only(right: 16.0),
+                    child: Text(widget.station.address,
+                        style: GoogleFonts.catamaran(
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey[600])),
+                  ),
+                  FutureBuilder<double>(
+                    future: LocationService()
+                        .calculateDistanceToStation(widget.station),
+                    builder:
+                        (BuildContext context, AsyncSnapshot<double> snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return CircularProgressIndicator();
+                      } else if (snapshot.hasError) {
+                        return Text('Error: ${snapshot.error}');
+                      } else {
+                        return Text(
+                          '${snapshot.data?.toStringAsFixed(2)} km',
+                          style: GoogleFonts.catamaran(
+                              fontWeight: FontWeight.w600, fontSize: 20),
+                        );
+                      }
+                    },
+                  ),
+                  SizedBox(height: unitWidthValue * 6),
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: ((context) => GMaps(
+                                destination: widget.station.id.toString())),
+                          ));
+                    },
+                    icon: FaIcon(FontAwesomeIcons.car),
+                    label: Text('Get Route'),
+                    style: ElevatedButton.styleFrom(
+                        minimumSize: Size(double.infinity, 50),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30)),
+                        backgroundColor: Colors.green[700]),
+                  ),
+                  SizedBox(height: unitWidthValue * 6),
+                  Center(
+                      child: _buildGasTypes(unitHeightValue, unitWidthValue)),
+                  SizedBox(height: unitWidthValue * 6),
+                  Center(
+                    child: Text('Services Offered',
+                        style: GoogleFonts.ubuntu(
+                            fontSize: 25, fontWeight: FontWeight.bold)),
+                  ),
+                  SizedBox(height: unitWidthValue * 4),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children:
+                        _buildServicesIcons(unitWidthValue, unitHeightValue),
+                  ),
+                  SizedBox(height: unitWidthValue * 6),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Last Updated: ${DateFormat('yyyy-MM-dd - hh:mm a').format(updated)}',
+                        style: GoogleFonts.catamaran(
+                          fontWeight: FontWeight.w600,
+                          color: Colors.grey[600],
+                          fontStyle: FontStyle.italic,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: unitHeightValue * 10),
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      showRatingDialog(context, widget.station.id);
+                    },
+                    icon: FaIcon(FontAwesomeIcons.comments),
+                    label: Text('Review This Station'),
+                    style: ElevatedButton.styleFrom(
+                        minimumSize: Size(double.infinity, 50),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30)),
+                        backgroundColor: Colors.green[700]),
+                  ),
+                  SizedBox(height: unitHeightValue * 6),
+                  FutureBuilder<List<Review>>(
+                    future: fetchReviews(widget.station.id),
+                    builder: (BuildContext context,
+                        AsyncSnapshot<List<Review>> snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return CircularProgressIndicator();
+                      } else if (snapshot.hasError) {
+                        return Text('Error: ${snapshot.error}');
+                      } else {
+                        return ListView.builder(
+                          shrinkWrap: true,
+                          physics: NeverScrollableScrollPhysics(),
+                          itemCount: snapshot.data?.length ?? 0,
+                          itemBuilder: (context, index) {
+                            Review? review = snapshot.data?[index];
+                            DateTime created = tz.TZDateTime.from(
+                                DateTime.parse(review?.created ?? ''),
+                                tz.getLocation('Asia/Manila'));
+                            return Card(
+                              margin: EdgeInsets.only(bottom: 10.0),
+                              child: Padding(
+                                padding: EdgeInsets.all(10.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          review?.reviewerName ?? '',
+                                          style: GoogleFonts.ubuntu(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                        Row(
+                                          children: List.generate(
+                                            5,
+                                            (i) => Icon(
+                                              i < review!.rating
+                                                  ? Icons.star
+                                                  : Icons.star_border,
+                                              color: i < review.rating
+                                                  ? Colors.orange
+                                                  : Colors.grey,
+                                              size: 14,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    SizedBox(height: 5),
+                                    Text(
+                                      review?.review.join(', ') ?? '',
+                                      style: GoogleFonts.catamaran(
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.grey[600],
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                    SizedBox(height: 5),
+                                    Text(
+                                      review?.content ?? '',
+                                      style: GoogleFonts.catamaran(
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                    SizedBox(height: 5),
+                                    Text(
+                                      DateFormat('yyyy-MM-dd - hh:mm a')
+                                          .format(created),
+                                      style: GoogleFonts.catamaran(
+                                        fontStyle: FontStyle.italic,
+                                        color: Colors.grey,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        );
+                      }
+                    },
+                  )
+                ],
+              ),
+              Positioned(
+                top: 10,
+                right: 10,
+                child: Column(
                   children: [
-                    Text(
-                      'Last Updated: ${DateFormat('yyyy-MM-dd - hh:mm a').format(updated)}',
-                      style: GoogleFonts.catamaran(
-                        fontWeight: FontWeight.w600,
-                        color: Colors.grey[600],
-                        fontStyle: FontStyle.italic,
-                        fontSize: 14,
+                    GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          isStarred = !isStarred;
+                        });
+                      },
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          FaIcon(
+                            FontAwesomeIcons.solidHeart,
+                            color: isStarred ? Colors.red : Colors.transparent,
+                            size: unitWidthValue * 8,
+                          ),
+                          FaIcon(
+                            FontAwesomeIcons.heart,
+                            color: isStarred ? Colors.red : Colors.grey,
+                            size: unitWidthValue * 8,
+                          ),
+                        ],
                       ),
                     ),
                   ],
                 ),
-              ],
-            ),
-            Positioned(
-              top: 10,
-              right: 10,
-              child: GestureDetector(
-                onTap: () {
-                  setState(() {
-                    isStarred = !isStarred;
-                  });
-                },
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    FaIcon(
-                      FontAwesomeIcons.solidHeart,
-                      color: isStarred ? Colors.red : Colors.transparent,
-                      size: unitWidthValue * 8,
-                    ),
-                    FaIcon(
-                      FontAwesomeIcons.heart,
-                      color: isStarred ? Colors.red : Colors.grey,
-                      size: unitWidthValue * 8,
-                    ),
-                  ],
-                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
