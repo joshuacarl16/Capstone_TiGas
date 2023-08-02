@@ -6,10 +6,11 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:tigas_application/gmaps/location_service.dart';
-import 'package:tigas_application/gmaps/points.dart';
 import 'package:image/image.dart' as img;
 import 'package:tigas_application/models/station_model.dart';
 import 'package:tigas_application/models/user_location.dart';
+import 'package:tigas_application/widgets/bottom_navbar.dart';
+import 'package:tigas_application/widgets/rate_station.dart';
 
 class GMaps extends StatefulWidget {
   const GMaps({Key? key, required this.destination}) : super(key: key);
@@ -36,6 +37,17 @@ class GMapsState extends State<GMaps> {
 
   Set<Polyline> _polylines = Set<Polyline>();
   int _polylineIdCounter = 1;
+
+  showRatingDialog(BuildContext context, int stationId) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Dialog(
+          child: RateDialog(stationId: stationId),
+        );
+      },
+    );
+  }
 
   Future<Uint8List> resizeImage(
       Uint8List data, int targetWidth, int targetHeight) async {
@@ -283,6 +295,17 @@ class GMapsState extends State<GMaps> {
               ),
               backgroundColor: Color(0xFF609966),
               elevation: 0,
+              leading: IconButton(
+                icon: Icon(Icons.arrow_back),
+                onPressed: () {
+                  Navigator.of(context).pushReplacement(
+                    MaterialPageRoute(
+                      builder: (context) => NavBar(selectedTab: 0),
+                    ),
+                  );
+                  showRatingDialog(context, snapshot.data!.id);
+                },
+              ),
             ),
             body: Stack(
               children: [

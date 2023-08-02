@@ -33,5 +33,10 @@ urlpatterns = [
     path('images/', views.getImages),
     path('images/<str:pk>/', views.getImage),
     path('images/<str:pk>/delete/', views.deleteImage),
+    path('reviews/', views.getReviews),
+    path('reviews/create/', views.createReview),
+    path('reviews/<str:pk>/', views.getReview),
+    path('reviews/delete/<str:pk>/', views.deleteReview),
+    path('stations/<int:station_id>/reviews/', views.getStationReviews),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
