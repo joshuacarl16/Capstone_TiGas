@@ -366,7 +366,9 @@ class _EditStationState extends State<EditStation> {
                         }
                       }
                     },
+
                     child: Text('Submit'),
+                    
                   ),
                   SizedBox(height: 20),
                   DropdownButtonFormField<int>(
