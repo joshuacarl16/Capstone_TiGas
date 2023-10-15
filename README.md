@@ -1,6 +1,7 @@
 # tigas_application
 
-A new Flutter project.
+A proximity-based gas station application that helps users choose the right gas station for them. It shows gas price comparisons, and services offered (water refills, oil, air, and comfort rooms).
+It has a filter that users can choose between price and distance.
 
 ## Getting Started
 
