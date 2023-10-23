@@ -4,6 +4,7 @@ import 'package:tigas_application/auth/firebase_auth.dart';
 import 'package:tigas_application/screens/register_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:tigas_application/styles/styles.dart';
+import 'package:tigas_application/admin_widgets/admin_login.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -187,7 +188,12 @@ class _LoginScreenState extends State<LoginScreen> {
                                   Center(
                                     child: TextButton(
                                       onPressed: () {
-                                        // Add functionality for "Login as Manager" here
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  AdminLoginScreen()),
+                                        );
                                       },
                                       child: Text(
                                         "Login as Manager",
