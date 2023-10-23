@@ -182,19 +182,19 @@ class _LoginScreenState extends State<LoginScreen> {
                                       ),
                                     ),
                                   ),
-                                  SizedBox(
-                                    height: screenHeight * 0.05
-                                    ),
+                                  SizedBox(height: screenHeight * 0.02),
+                                  SizedBox(height: screenHeight * 0.01),
                                   Center(
                                     child: TextButton(
                                       onPressed: () {
-                                        // Add functionality for "Create Account" here
+                                        // Add functionality for "Login as Manager" here
                                       },
                                       child: Text(
                                         "Login as Manager",
                                         style: GoogleFonts.inter(
-                                          fontSize: screenHeight * 0.025,
-                                          color: Colors.green,
+                                          fontSize: screenHeight * 0.022,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.black87,
                                         ),
                                       ),
                                     ),
