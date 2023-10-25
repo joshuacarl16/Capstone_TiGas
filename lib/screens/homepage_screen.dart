@@ -156,49 +156,49 @@ class _HomePageState extends State<HomePage> {
                         EdgeInsets.symmetric(horizontal: 4 * unitWidthValue),
                     child: Row(
                       children: [
-                        Expanded(
-                          child: Consumer<StationProvider>(
-                              builder: (context, stationProvider, child) {
-                            var allGasTypes = stationProvider.stations
-                                .map((station) => station.gasTypes)
-                                .expand((i) => i ?? [])
-                                .toSet()
-                                .toList();
+                        // Expanded(
+                        //   child: Consumer<StationProvider>(
+                        //       builder: (context, stationProvider, child) {
+                        //     var allGasTypes = stationProvider.stations
+                        //         .map((station) => station.gasTypes)
+                        //         .expand((i) => i ?? [])
+                        //         .toSet()
+                        //         .toList();
 
-                            return DropdownButtonFormField<String>(
-                              // itemHeight: null,
-                              isExpanded: true,
-                              decoration: InputDecoration(
-                                labelText: 'Gas Type',
-                                filled: true,
-                                fillColor: Colors.grey[300],
-                              ),
-                              items: <DropdownMenuItem<String>>[
-                                DropdownMenuItem(
-                                  value: null,
-                                  child: Text('Show All',
-                                      overflow: TextOverflow.ellipsis),
-                                ),
-                              ]..addAll(
-                                  allGasTypes
-                                      .map(
-                                          (gasType) => DropdownMenuItem<String>(
-                                                value: gasType,
-                                                child: Text(
-                                                  gasType,
-                                                ),
-                                              ))
-                                      .toList(),
-                                ),
-                              onChanged: (value) {
-                                setState(() {
-                                  selectedGasType = value;
-                                });
-                              },
-                            );
-                          }),
-                        ),
-                        SizedBox(width: 2 * unitWidthValue),
+                        //     return DropdownButtonFormField<String>(
+                        //       // itemHeight: null,
+                        //       isExpanded: true,
+                        //       decoration: InputDecoration(
+                        //         labelText: 'Gas Type',
+                        //         filled: true,
+                        //         fillColor: Colors.grey[300],
+                        //       ),
+                        //       items: <DropdownMenuItem<String>>[
+                        //         DropdownMenuItem(
+                        //           value: null,
+                        //           child: Text('Show All',
+                        //               overflow: TextOverflow.ellipsis),
+                        //         ),
+                        //       ]..addAll(
+                        //           allGasTypes
+                        //               .map(
+                        //                   (gasType) => DropdownMenuItem<String>(
+                        //                         value: gasType,
+                        //                         child: Text(
+                        //                           gasType,
+                        //                         ),
+                        //                       ))
+                        //               .toList(),
+                        //         ),
+                        //       onChanged: (value) {
+                        //         setState(() {
+                        //           selectedGasType = value;
+                        //         });
+                        //       },
+                        //     );
+                        //   }),
+                        // ),
+                        // SizedBox(width: 2 * unitWidthValue),
                         Expanded(
                           child: DropdownButtonFormField<String>(
                             decoration: InputDecoration(
@@ -251,6 +251,49 @@ class _HomePageState extends State<HomePage> {
                               });
                             },
                           ),
+                        ),
+                        SizedBox(width: 2 * unitWidthValue),
+                        Expanded(
+                          child: Consumer<StationProvider>(
+                              builder: (context, stationProvider, child) {
+                            var allGasTypes = stationProvider.stations
+                                .map((station) => station.gasTypes)
+                                .expand((i) => i ?? [])
+                                .toSet()
+                                .toList();
+
+                            return DropdownButtonFormField<String>(
+                              // itemHeight: null,
+                              isExpanded: true,
+                              decoration: InputDecoration(
+                                labelText: 'Gas Type',
+                                filled: true,
+                                fillColor: Colors.grey[300],
+                              ),
+                              items: <DropdownMenuItem<String>>[
+                                DropdownMenuItem(
+                                  value: null,
+                                  child: Text('Show All',
+                                      overflow: TextOverflow.ellipsis),
+                                ),
+                              ]..addAll(
+                                  allGasTypes
+                                      .map(
+                                          (gasType) => DropdownMenuItem<String>(
+                                                value: gasType,
+                                                child: Text(
+                                                  gasType,
+                                                ),
+                                              ))
+                                      .toList(),
+                                ),
+                              onChanged: (value) {
+                                setState(() {
+                                  selectedGasType = value;
+                                });
+                              },
+                            );
+                          }),
                         ),
                         SizedBox(width: 2 * unitWidthValue),
                         FloatingActionButton(

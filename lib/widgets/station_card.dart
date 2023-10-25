@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:tigas_application/models/station_model.dart';
 import 'package:tigas_application/providers/station_provider.dart';
+import 'package:marquee/marquee.dart';
 
 class StationCard extends StatelessWidget {
   final String imagePath;
