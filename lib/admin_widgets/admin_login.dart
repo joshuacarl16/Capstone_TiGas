@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tigas_application/auth/firebase_auth.dart';
-import 'package:tigas_application/screens/register_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:tigas_application/styles/styles.dart';
 import 'package:tigas_application/screens/login_screen.dart';
