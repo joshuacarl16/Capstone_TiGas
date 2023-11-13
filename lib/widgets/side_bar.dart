@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 import 'package:tigas_application/auth/firebase_auth.dart';
 import 'package:tigas_application/admin/admin_dashboard.dart';
 
+import 'package:tigas_application/screens/contacts_screen.dart';
+
 class DrawerContent extends StatelessWidget {
   const DrawerContent({super.key});
 
@@ -58,6 +60,8 @@ class DrawerContent extends StatelessWidget {
       case 'About':
         break;
       case 'Contact':
+        Navigator.push(
+            context, MaterialPageRoute(builder: (context) => ContactPage()));
         break;
       case 'Settings':
         break;
