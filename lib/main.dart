@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:tigas_application/admin/admin_dashboardtest.dart';
 import 'package:tigas_application/auth/firebase_auth.dart';
 import 'package:tigas_application/firebase_options.dart';
 import 'package:tigas_application/providers/station_provider.dart';
@@ -44,7 +45,7 @@ class MyApp extends StatelessWidget {
             theme: ThemeData(
               colorScheme: ColorScheme.fromSeed(seedColor: Color(0xFF609966)),
             ),
-            home: LoadingScreen()),
+            home: AdminDashboard()),
       ),
     );
   }

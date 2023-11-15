@@ -129,17 +129,15 @@ class DeveloperDetailWidget extends StatelessWidget {
   }
 }
 
-
-
 class ContactPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-          icon: Icon(Icons.menu), // The menu icon
+          icon: Icon(Icons.arrow_back), // The menu icon
           onPressed: () {
-            // Logic to open drawer or sidebar
+            Navigator.pop(context);
           },
         ),
         backgroundColor: Colors.transparent, // Makes the AppBar transparent
@@ -158,7 +156,8 @@ class ContactPage extends StatelessWidget {
           children: <Widget>[
             Padding(
               padding: EdgeInsets.only(
-                top: MediaQuery.of(context).padding.top + 56, // Add AppBar height
+                top: MediaQuery.of(context).padding.top +
+                    56, // Add AppBar height
               ),
               child: Center(
                 child: Image.asset(

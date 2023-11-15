@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:tigas_application/admin/admin_dashboardtest.dart';
 import 'package:tigas_application/auth/firebase_auth.dart';
 import 'package:tigas_application/admin/admin_dashboard.dart';
 
@@ -55,7 +56,7 @@ class DrawerContent extends StatelessWidget {
     switch (item) {
       case 'Admin':
         Navigator.push(
-            context, MaterialPageRoute(builder: (context) => MainDashboard()));
+            context, MaterialPageRoute(builder: (context) => AdminDashboard()));
         break;
       case 'About':
         break;
