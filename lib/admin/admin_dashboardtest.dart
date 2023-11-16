@@ -121,6 +121,7 @@
 // }
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:tigas_application/admin_widgets/services_page.dart';
 import 'package:tigas_application/admin_widgets/price_services.dart';
 import 'package:tigas_application/admin_widgets/post_advertisements.dart';
@@ -143,6 +144,12 @@ class _AdminDashboardState extends State<AdminDashboard> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
+        leading: IconButton(
+          icon: Icon(Icons.menu), // Hamburger icon
+          onPressed: () {
+           Navigator.of(context).pop();
+          },
+        ),
         title: Image.asset(
           'assets/TiGas.png', // Your logo asset
           fit: BoxFit.contain,
@@ -150,6 +157,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
         ),
         backgroundColor: const Color(0xFF609966),
         elevation: 0,
+        
       ),
       body: Column(children: <Widget>[
         Container(

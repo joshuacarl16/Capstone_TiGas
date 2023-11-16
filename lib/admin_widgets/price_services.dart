@@ -198,9 +198,7 @@ class _ModifyPriceState extends State<ModifyPrice> {
                         ElevatedButton.styleFrom(backgroundColor: Colors.blue),
                     child: Text('Update Prices'),
                   ),
-                  SizedBox(
-                    height: 20,
-                  ),
+                  SizedBox(height: 20,),
                   Column(
                     children: _selectedStation != null
                         ? _selectedStation!.gasTypeInfo!.entries.map((entry) {
@@ -229,8 +227,6 @@ class _ModifyPriceState extends State<ModifyPrice> {
                 ],
               ),
             ),
-            SizedBox(height: 20.0),
-
             // Service Availability Section
             // Container(
             //   padding: EdgeInsets.all(8.0),
