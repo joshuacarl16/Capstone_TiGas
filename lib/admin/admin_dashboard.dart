@@ -106,7 +106,7 @@ class _MainDashboardState extends State<MainDashboard> {
   int _selectedIndex = 0;
   final List<Widget> _screens = [
     PostAdvertisement(),
-    ModifyPriceServices(),
+    ModifyPrice(),
     EditStation()
   ];
 

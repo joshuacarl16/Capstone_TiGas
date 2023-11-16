@@ -7,12 +7,12 @@ import 'package:tigas_application/providers/station_provider.dart';
 import 'package:tigas_application/providers/url_manager.dart';
 import 'package:tigas_application/widgets/show_snackbar.dart';
 
-class ModifyPriceServices extends StatefulWidget {
+class ModifyPrice extends StatefulWidget {
   @override
-  _ModifyPriceServicesState createState() => _ModifyPriceServicesState();
+  _ModifyPriceState createState() => _ModifyPriceState();
 }
 
-class _ModifyPriceServicesState extends State<ModifyPriceServices> {
+class _ModifyPriceState extends State<ModifyPrice> {
   final TextEditingController _priceController = TextEditingController();
   String? _selectedGasType;
   Station? _selectedStation;

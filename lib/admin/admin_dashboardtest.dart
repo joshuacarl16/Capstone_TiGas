@@ -121,10 +121,11 @@
 // }
 
 import 'package:flutter/material.dart';
+import 'package:tigas_application/admin_widgets/services_page.dart';
 import 'package:tigas_application/admin_widgets/price_services.dart';
 import 'package:tigas_application/admin_widgets/post_advertisements.dart';
-import 'package:tigas_application/styles/styles.dart'; // Ensure this path is correct
-// Import the ModifyPriceServices page
+import 'package:tigas_application/styles/styles.dart'; 
+
 
 class AdminDashboard extends StatefulWidget {
   const AdminDashboard({super.key});
@@ -194,13 +195,13 @@ class _AdminDashboardState extends State<AdminDashboard> {
   Widget _buildPanel(String panelTitle) {
     switch (panelTitle) {
       case 'Services Availability':
-        return _buildServicesAvailabilityPanel();
+        return ModifyServices();  // This line is added to display ModifyServices
       case 'Price Change':
-        return ModifyPriceServices(); // Display the ModifyPriceServices widget
+        return ModifyPrice(); // Display the ModifyPrice widget
       case 'Post Advertisements':
         return PostAdvertisement(); // Display the PostAdvertisement widget
       default:
-        return _buildServicesAvailabilityPanel();
+        return ModifyServices(); // Default option, can be changed if needed
     }
   }
 
