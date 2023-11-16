@@ -122,6 +122,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:tigas_application/admin_widgets/price_services.dart';
+import 'package:tigas_application/admin_widgets/post_advertisements.dart';
 import 'package:tigas_application/styles/styles.dart'; // Ensure this path is correct
 // Import the ModifyPriceServices page
 
@@ -197,7 +198,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
       case 'Price Change':
         return ModifyPriceServices(); // Display the ModifyPriceServices widget
       case 'Post Advertisements':
-        return _buildPostAdvertisementsPanel();
+        return PostAdvertisement(); // Display the PostAdvertisement widget
       default:
         return _buildServicesAvailabilityPanel();
     }
