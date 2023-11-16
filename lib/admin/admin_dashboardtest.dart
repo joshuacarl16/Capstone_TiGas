@@ -120,102 +120,6 @@
 //   }
 // }
 
-// import 'package:flutter/material.dart';
-// import 'package:tigas_application/admin_widgets/price_services.dart';
-// import 'package:tigas_application/styles/styles.dart'; // Ensure this path is correct
-// // Import the ModifyPriceServices page
-
-// class AdminDashboard extends StatefulWidget {
-//   const AdminDashboard({super.key});
-
-//   @override
-//   State<AdminDashboard> createState() => _AdminDashboardState();
-// }
-
-// class _AdminDashboardState extends State<AdminDashboard> {
-//   String _selectedPanel = 'Services Availability';
-//   List<String> _panelOptions = ['Services Availability', 'Price Change', 'Post Advertisements'];
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(
-//         centerTitle: true,
-//         title: Image.asset(
-//           'assets/TiGas.png', // Your logo asset
-//           fit: BoxFit.contain,
-//           height: 140,
-//         ),
-//         backgroundColor: const Color(0xFF609966),
-//         elevation: 0,
-//       ),
-//       body: Column(children: <Widget>[
-//         Container(
-//           color: const Color(0xFF609966),
-//           padding: const EdgeInsets.all(16.0),
-//           child: Row(
-//             children: [
-//               Expanded(
-//                 child: DropdownButtonHideUnderline(
-//                   child: DropdownButton<String>(
-//                     isExpanded: true,
-//                     value: _selectedPanel,
-//                     iconSize: 30,
-//                     icon: const Icon(Icons.arrow_drop_down, color: Colors.black),
-//                     style: const TextStyle(color: Colors.black, fontSize: 16, fontWeight: FontWeight.bold),
-//                     onChanged: (String? newValue) {
-//                       setState(() {
-//                         _selectedPanel = newValue!;
-//                       });
-//                     },
-//                     items: _panelOptions.map<DropdownMenuItem<String>>((String value) {
-//                       return DropdownMenuItem<String>(
-//                         value: value,
-//                         child: Text(value),
-//                       );
-//                     }).toList(),
-//                   ),
-//                 ),
-//               ),
-//             ],
-//           ),
-//         ),
-//         Expanded(
-//           child: Container(
-//             padding: const EdgeInsets.all(16.0),
-//             child: _buildPanel(_selectedPanel),
-//           ),
-//         ),
-//       ]),
-//     );
-//   }
-
-//   Widget _buildPanel(String panelTitle) {
-//     switch (panelTitle) {
-//       case 'Services Availability':
-//         return _buildServicesAvailabilityPanel();
-//       case 'Price Change':
-//         return ModifyPriceServices(); // Display the ModifyPriceServices widget
-//       case 'Post Advertisements':
-//         return _buildPostAdvertisementsPanel();
-//       default:
-//         return _buildServicesAvailabilityPanel();
-//     }
-//   }
-
-//   Widget _buildServicesAvailabilityPanel() {
-//     return const Center(child: Text('Services Availability Panel'));
-//   }
-
-//   Widget _buildPriceChangePanel() {
-//     return const Center(child: Text('Price Change Panel'));
-//   }
-
-//   Widget _buildPostAdvertisementsPanel() {
-//     return const Center(child: Text('Post Advertisements Panel'));
-//   }
-// }
-
 import 'package:flutter/material.dart';
 import 'package:tigas_application/admin_widgets/price_services.dart';
 import 'package:tigas_application/styles/styles.dart'; // Ensure this path is correct
@@ -311,3 +215,4 @@ class _AdminDashboardState extends State<AdminDashboard> {
     return const Center(child: Text('Post Advertisements Panel'));
   }
 }
+
