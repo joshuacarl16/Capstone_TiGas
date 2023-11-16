@@ -232,42 +232,42 @@ class _ModifyPriceServicesState extends State<ModifyPriceServices> {
             SizedBox(height: 20.0),
 
             // Service Availability Section
-            Container(
-              padding: EdgeInsets.all(8.0),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(15.0),
-                border: Border.all(
-                  color: Colors.blue,
-                  width: 3.0,
-                ),
-              ),
-              child: Column(
-                children: [
-                  Text('Service Availability'),
-                  ...services.keys.map((String key) {
-                    return CheckboxListTile(
-                      title: Text(key),
-                      value: services[key],
-                      onChanged: (bool? value) {
-                        setState(() {
-                          services[key] = value!;
-                        });
-                      },
-                    );
-                  }).toList(),
-                  ElevatedButton(
-                    onPressed: () async {
-                      await updateServices();
-                      showSnackBar(context, 'Station Services Updated');
-                    },
-                    style:
-                        ElevatedButton.styleFrom(backgroundColor: Colors.blue),
-                    child: Text('Update Services'),
-                  ),
-                ],
-              ),
-            ),
+            // Container(
+            //   padding: EdgeInsets.all(8.0),
+            //   decoration: BoxDecoration(
+            //     color: Colors.white,
+            //     borderRadius: BorderRadius.circular(15.0),
+            //     border: Border.all(
+            //       color: Colors.blue,
+            //       width: 3.0,
+            //     ),
+            //   ),
+            //   child: Column(
+            //     children: [
+            //       Text('Service Availability'),
+            //       ...services.keys.map((String key) {
+            //         return CheckboxListTile(
+            //           title: Text(key),
+            //           value: services[key],
+            //           onChanged: (bool? value) {
+            //             setState(() {
+            //               services[key] = value!;
+            //             });
+            //           },
+            //         );
+            //       }).toList(),
+            //       ElevatedButton(
+            //         onPressed: () async {
+            //           await updateServices();
+            //           showSnackBar(context, 'Station Services Updated');
+            //         },
+            //         style:
+            //             ElevatedButton.styleFrom(backgroundColor: Colors.blue),
+            //         child: Text('Update Services'),
+            //       ),
+            //     ],
+            //   ),
+            // ),
           ],
         ),
       ),
