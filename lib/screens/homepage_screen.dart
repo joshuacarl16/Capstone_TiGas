@@ -306,9 +306,11 @@ class _HomePageState extends State<HomePage> {
                             setState(() {
                               sortByGasPrice = !sortByGasPrice;
                               if (sortByGasPrice == true) {
-                                showSnackBar(context, 'Sorting by price');
+                                showSnackBar(context, 'Sorting by price',
+                                    Duration(milliseconds: 500));
                               } else {
-                                showSnackBar(context, 'Sorting by distance');
+                                showSnackBar(context, 'Sorting by distance',
+                                    Duration(milliseconds: 500));
                               }
                             });
                           },

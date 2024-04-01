@@ -3,25 +3,29 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:tigas_application/gmaps/location_service.dart';
 import 'package:image/image.dart' as img;
 import 'package:tigas_application/models/station_model.dart';
 import 'package:tigas_application/models/user_location.dart';
+import 'package:tigas_application/screens/set_location.dart';
 import 'package:tigas_application/widgets/bottom_navbar.dart';
 import 'package:tigas_application/widgets/rate_station.dart';
 
-class GMaps extends StatefulWidget {
-  const GMaps({Key? key, required this.destination}) : super(key: key);
-
+class HPMap extends StatefulWidget {
+  const HPMap({Key? key, required this.destination, required this.selectedTab})
+      : super(key: key);
+  final int selectedTab;
   final String destination;
 
   @override
-  State<GMaps> createState() => GMapsState();
+  State<HPMap> createState() => HPMapState();
 }
 
-class GMapsState extends State<GMaps> {
+class HPMapState extends State<HPMap> {
   final Completer<GoogleMapController> _controller =
       Completer<GoogleMapController>();
   LatLngBounds? lastBounds;
@@ -34,6 +38,10 @@ class GMapsState extends State<GMaps> {
   Future<Station>? _station;
   LatLng? _startLocation;
   bool areStationsVisible = false;
+
+  bool userLocationSet = false;
+  LatLng? userSelectedLocation;
+  Position? currentUserPosition;
 
   Set<Polyline> _polylines = Set<Polyline>();
   int _polylineIdCounter = 1;
@@ -71,48 +79,18 @@ class GMapsState extends State<GMaps> {
       final byteData = await rootBundle.load(markerImages[i]);
       Uint8List resizedBytes;
       if (i == 0) {
-        resizedBytes = await resizeImage(byteData.buffer.asUint8List(), 40, 40);
+        resizedBytes =
+            await resizeImage(byteData.buffer.asUint8List(), 100, 100);
         customIcons.add(BitmapDescriptor.fromBytes(resizedBytes));
       } else if (i == 1) {
-        resizedBytes = await resizeImage(byteData.buffer.asUint8List(), 80,
-            80); // new size for current location icon
+        resizedBytes = await resizeImage(byteData.buffer.asUint8List(), 120,
+            120); // new size for current location icon
         currentLocationIcon = BitmapDescriptor.fromBytes(resizedBytes);
       }
     }
   }
 
   Future<void> fetchAndLoadGasStations() async {
-    if (areStationsVisible) {
-      setState(() {
-        gasStationMarkers = [];
-        areStationsVisible = false;
-      });
-      return;
-    }
-
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return const Dialog(
-          backgroundColor: Colors.white,
-          child: SizedBox(
-            height: 100,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                CircularProgressIndicator(),
-                Text(
-                  "Loading Stations",
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-
     List<Map<String, dynamic>> stations =
         await LocationService().getGasStations();
     List<Marker> stationMarkers = [];
@@ -122,13 +100,13 @@ class GMapsState extends State<GMaps> {
         markerId: MarkerId(station['place_id']),
         position: station['location'],
         infoWindow: InfoWindow(
-            title: station['name'], snippet: station['distance'].toString()),
+          title: station['name'],
+          snippet: station['distance'].toString(),
+        ),
         icon: customIcons[0],
       );
       stationMarkers.add(stationMarker);
     }
-
-    Navigator.pop(context);
 
     setState(() {
       gasStationMarkers = stationMarkers;
@@ -140,15 +118,21 @@ class GMapsState extends State<GMaps> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _station = getRoute(widget.destination);
+      if (widget.destination != null) {
+        _station = getRoute(widget.destination);
+      }
     });
     loadMarkers();
+    fetchAndLoadGasStations();
   }
 
   Set<Marker> _createMarker() {
     var markers = <Marker>{};
 
     markers.addAll(gasStationMarkers);
+    if (currentLocationMarker != null) {
+      markers.add(currentLocationMarker!);
+    }
     if (currentLocationMarker != null) {
       markers.add(currentLocationMarker!);
     }
@@ -174,6 +158,27 @@ class GMapsState extends State<GMaps> {
       infoWindow: InfoWindow(title: 'Current Location'),
       icon: currentLocationIcon ?? BitmapDescriptor.defaultMarker,
     );
+  }
+
+  Future<void> fetchCurrentUserLocation() async {
+    // Fetch location only if not set before
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        openAppSettings();
+      }
+    }
+    if (permission == LocationPermission.deniedForever) {
+      return Future.error('Location permissions permanently denied');
+    }
+    Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high);
+    UserLocation().updateLocation(position.latitude, position.longitude);
+    _startLocation = LatLng(position.latitude, position.longitude);
+
+    // Set the current location marker
+    setCurrentLocationMarker(position.latitude, position.longitude);
   }
 
   Future<Station> getRoute(String stationId) async {
@@ -217,17 +222,20 @@ class GMapsState extends State<GMaps> {
   ) async {
     final GoogleMapController controller = await _controller.future;
 
-    lastBounds = LatLngBounds(
+    LatLngBounds bounds = LatLngBounds(
       southwest: LatLng(boundsSw['lat'], boundsSw['lng']),
       northeast: LatLng(boundsNe['lat'], boundsNe['lng']),
     );
 
-    // Apply padding as needed
-    final double screenPadding = MediaQuery.of(context).size.width * 0.10;
+    // Set constant zoom level
+    const double zoomLevel = 13.0;
 
     controller.animateCamera(
-      CameraUpdate.newLatLngBounds(lastBounds!, screenPadding),
+      CameraUpdate.newLatLngZoom(LatLng(lat, lng), zoomLevel),
     );
+
+    setCurrentLocationMarker(lat, lng);
+    setState(() {});
   }
 
   double calculateZoomLevel(LatLngBounds bounds) {
@@ -287,27 +295,6 @@ class GMapsState extends State<GMaps> {
       builder: (BuildContext context, AsyncSnapshot<Station> snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
           return Scaffold(
-            appBar: AppBar(
-              centerTitle: true,
-              title: Image.asset(
-                'assets/TiGas.png',
-                fit: BoxFit.contain,
-                height: 140,
-              ),
-              backgroundColor: Color(0xFF609966),
-              elevation: 0,
-              leading: IconButton(
-                icon: Icon(Icons.arrow_back),
-                onPressed: () {
-                  Navigator.of(context).pushReplacement(
-                    MaterialPageRoute(
-                      builder: (context) => NavBar(selectedTab: 0),
-                    ),
-                  );
-                  showRatingDialog(context, snapshot.data!.id);
-                },
-              ),
-            ),
             body: Stack(
               children: [
                 GoogleMap(
@@ -316,7 +303,9 @@ class GMapsState extends State<GMaps> {
                   markers: _createMarker(),
                   polylines: _polylines,
                   initialCameraPosition: CameraPosition(
-                    target: _startLocation ?? LatLng(10.31306, 123.9128),
+                    target: _startLocation ??
+                        LatLng(10.31306,
+                            123.9128), // Default location if _startLocation is null
                     zoom: 13,
                   ),
                   onMapCreated: (GoogleMapController controller) {
@@ -324,20 +313,61 @@ class GMapsState extends State<GMaps> {
                   },
                 ),
                 Positioned(
-                  right: 10,
-                  bottom: 10,
-                  child: FloatingActionButton.extended(
-                    onPressed: () {
-                      fetchAndLoadGasStations();
+                  bottom: 16.0,
+                  right: 16.0,
+                  child: FloatingActionButton(
+                    onPressed: () async {
+                      Position position = await Geolocator.getCurrentPosition(
+                        desiredAccuracy: LocationAccuracy.high,
+                      );
+                      currentUserPosition = position;
+                      UserLocation().updateLocation(
+                          position.latitude, position.longitude);
+                      _goToPlace(
+                        position.latitude,
+                        position.longitude,
+                        {'lat': position.latitude, 'lng': position.longitude},
+                        {'lat': position.latitude, 'lng': position.longitude},
+                      );
+                      setState(() {});
                     },
-                    label: Text(areStationsVisible
-                        ? 'Hide Gas Stations'
-                        : 'Show Gas Stations'),
-                    icon: FaIcon(FontAwesomeIcons.locationDot),
-                    backgroundColor:
-                        areStationsVisible ? Colors.blue : Colors.green[600],
+                    child: Icon(Icons.my_location),
+                    backgroundColor: Color(0xFF609966),
                   ),
-                )
+                ),
+                Positioned(
+                  bottom: 84.0,
+                  right: 16.0,
+                  child: FloatingActionButton(
+                    onPressed: () async {
+                      final selectedLocation = await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: ((context) => SetLocationScreen()),
+                        ),
+                      );
+                      if (selectedLocation != null) {
+                        List<Location> locations =
+                            await locationFromAddress(selectedLocation);
+                        if (locations.isNotEmpty) {
+                          Location location = locations.first;
+                          double lat = location.latitude;
+                          double lng = location.longitude;
+                          setState(() {
+                            userSelectedLocation = LatLng(lat, lng);
+                            location = location;
+                            userLocationSet = true;
+                          });
+
+                          _goToPlace(lat, lng, {'lat': lat, 'lng': lng},
+                              {'lat': lat, 'lng': lng});
+                        }
+                      }
+                    },
+                    child: Icon(Icons.pin_drop_outlined),
+                    backgroundColor: Color.fromARGB(255, 8, 146, 238),
+                  ),
+                ),
               ],
             ),
           );

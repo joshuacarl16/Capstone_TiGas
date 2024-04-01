@@ -161,7 +161,7 @@ class ContactPage extends StatelessWidget {
               ),
               child: Center(
                 child: Image.asset(
-                  "assets/Tigas.png",
+                  "assets/TiGas.png",
                   width: 150, // Increase the width for a bigger logo
                   height: 100, // Increase the height accordingly
                 ),

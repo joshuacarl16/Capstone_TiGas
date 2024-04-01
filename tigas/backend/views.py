@@ -5,6 +5,7 @@ from rest_framework import status
 from .models import Review, Station, Advertisement
 from .serializers import ReviewSerializer, StationSerializer, AdvertisementSerializer
 
+
 @api_view(['GET'])
 def getStations(request):
     stations = Station.objects.all()
