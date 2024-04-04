@@ -71,7 +71,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               child: Text(
                                 "Log In",
                                 style: GoogleFonts.inter(
-                                  fontSize: screenHeight * 0.06,
+                                  fontSize: 40,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.grey,
                                 ),
@@ -130,7 +130,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                       child: Text(
                                         'LOGIN',
                                         style: TextStyle(
-                                          fontSize: screenHeight * 0.025,
+                                          fontSize: 20,
                                         ),
                                       ),
                                     ),
@@ -168,7 +168,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                       ],
                                     ),
                                   ),
-                                  SizedBox(height: screenHeight * 0.01),
+                                  // SizedBox(height: screenHeight * 0.01),
                                   Center(
                                     child: TextButton(
                                       onPressed: () {
@@ -183,8 +183,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                       ),
                                     ),
                                   ),
-                                  SizedBox(height: screenHeight * 0.02),
-                                  SizedBox(height: screenHeight * 0.01),
+                                  // SizedBox(height: screenHeight * 0.02),
+                                  // SizedBox(height: screenHeight * 0.01),
                                   Center(
                                     child: TextButton(
                                       onPressed: () {
