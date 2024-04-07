@@ -94,6 +94,7 @@ class LocationService {
           'name': result['name'],
           'location': latLng,
           'place_id': result['place_id'],
+          'address': result['vicinity'],
         });
 
         stationCount += 1;

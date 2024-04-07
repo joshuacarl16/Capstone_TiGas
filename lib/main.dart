@@ -45,7 +45,7 @@ class MyApp extends StatelessWidget {
             theme: ThemeData(
               colorScheme: ColorScheme.fromSeed(seedColor: Color(0xFF609966)),
             ),
-            home: AdminDashboard()),
+            home: LoadingScreen()),
       ),
     );
   }

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:salomon_bottom_bar/salomon_bottom_bar.dart';
 import 'package:tigas_application/screens/ads_screen.dart';
 import 'package:tigas_application/screens/homepage_screen.dart';
+import 'package:tigas_application/screens/map_screen.dart';
 import 'package:tigas_application/widgets/side_bar.dart';
 import 'package:tigas_application/widgets/station_selector.dart';
 
@@ -22,10 +23,14 @@ class _NavBarState extends State<NavBar> {
   final homePageScrollController = ScrollController();
   final commercialPageScrollController = ScrollController();
   late final List<Widget> screens = [
-    HomePage(selectedTab: 0, scrollController: homePageScrollController),
+    HPMap(
+      selectedTab: 0,
+      destination: '',
+    ),
+    HomePage(selectedTab: 2, scrollController: homePageScrollController),
     StationSelector(),
     CommercialPage(
-        selectedTab: 2, scrollController: commercialPageScrollController),
+        selectedTab: 4, scrollController: commercialPageScrollController),
   ];
 
   @override
@@ -67,6 +72,11 @@ class _NavBarState extends State<NavBar> {
                     curve: Curves.bounceInOut);
                 break;
               case 1:
+                homePageScrollController.animateTo(0.0,
+                    duration: Duration(milliseconds: 500),
+                    curve: Curves.bounceInOut);
+                break;
+              case 2:
                 commercialPageScrollController.animateTo(0.0,
                     duration: Duration(milliseconds: 500),
                     curve: Curves.easeInOut);
@@ -80,8 +90,13 @@ class _NavBarState extends State<NavBar> {
         },
         items: [
           SalomonBottomBarItem(
+            icon: Icon(Icons.map),
+            title: Text("Map"),
+            selectedColor: Color(0xFF175124),
+          ),
+          SalomonBottomBarItem(
             icon: Icon(Icons.local_gas_station),
-            title: Text("Home"),
+            title: Text("List"),
             selectedColor: Color(0xFF175124),
           ),
           SalomonBottomBarItem(

@@ -65,7 +65,7 @@ class GMapsState extends State<GMaps> {
   Future<void> loadMarkers() async {
     customIcons = List<BitmapDescriptor>.empty(growable: true);
 
-    final markerImages = ['assets/station.png', 'assets/currentloc.png'];
+    final markerImages = ['assets/stationlogo.png', 'assets/greencircle.png'];
 
     for (var i = 0; i < markerImages.length; i++) {
       final byteData = await rootBundle.load(markerImages[i]);
@@ -121,7 +121,8 @@ class GMapsState extends State<GMaps> {
       Marker stationMarker = Marker(
         markerId: MarkerId(station['place_id']),
         position: station['location'],
-        infoWindow: InfoWindow(title: station['name']),
+        infoWindow: InfoWindow(
+            title: station['name'], snippet: station['distance'].toString()),
         icon: customIcons[0],
       );
       stationMarkers.add(stationMarker);
@@ -262,7 +263,7 @@ class GMapsState extends State<GMaps> {
         Polyline(
             polylineId: PolylineId(polylineIdVal),
             width: 6,
-            color: Colors.purple[400]!,
+            color: Colors.green[300]!,
             points: points
                 .map(
                   (point) => LatLng(point.latitude, point.longitude),
@@ -322,21 +323,6 @@ class GMapsState extends State<GMaps> {
                     _controller.complete(controller);
                   },
                 ),
-                Positioned(
-                  right: 10,
-                  bottom: 10,
-                  child: FloatingActionButton.extended(
-                    onPressed: () {
-                      fetchAndLoadGasStations();
-                    },
-                    label: Text(areStationsVisible
-                        ? 'Hide Gas Stations'
-                        : 'Show Gas Stations'),
-                    icon: FaIcon(FontAwesomeIcons.locationDot),
-                    backgroundColor:
-                        areStationsVisible ? Colors.blue : Colors.green[600],
-                  ),
-                )
               ],
             ),
           );

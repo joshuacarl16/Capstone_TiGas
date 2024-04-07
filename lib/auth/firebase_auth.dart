@@ -1,11 +1,16 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:tigas_application/widgets/show_snackbar.dart';
+import 'package:firebase_database/firebase_database.dart';
 
 class FirebaseAuthMethods {
   final FirebaseAuth _auth;
-  FirebaseAuthMethods(this._auth);
+  late final DatabaseReference databaseRef;
 
+  FirebaseAuthMethods(this._auth);
+  // final FirebaseDatabase database = FirebaseDatabase.instanceFor(app: Firebase.app(), databaseURL: "https://tigas-2939a-default-rtdb.asia-southeast1.firebasedatabase.app/");
+  // databaseRef = database.ref();
   User get user => _auth.currentUser!;
 
   //state

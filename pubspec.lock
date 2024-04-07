@@ -5,10 +5,10 @@ packages:
     dependency: transitive
     description:
       name: _flutterfire_internals
-      sha256: "76c15c4167f820b74abcd8c6fc5e393e1ed5e1207a34e9b22953603e03b3ba6a"
+      sha256: "8942974ee5dc932427704ede5e0db8b5f2b8f22172964544b56e6bd37f6c3634"
       url: "https://pub.dev"
     source: hosted
-    version: "1.3.9"
+    version: "1.3.12"
   archive:
     dependency: transitive
     description:
@@ -285,10 +285,10 @@ packages:
     dependency: "direct main"
     description:
       name: firebase_core
-      sha256: "57bba167105d2315d243a4524939406df688f38a5b6d7a4159382bbbe43cdd00"
+      sha256: "45f3f9babfc6f56fb94c3cd11584cf3c9672868228373b699b94427010e01dc3"
       url: "https://pub.dev"
     source: hosted
-    version: "2.19.0"
+    version: "2.22.0"
   firebase_core_platform_interface:
     dependency: transitive
     description:
@@ -305,6 +305,30 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.8.1"
+  firebase_database:
+    dependency: "direct main"
+    description:
+      name: firebase_database
+      sha256: "5fa3f8e9b9094083642b74173bacf33e878f79b49b34c84818d2564337ed9982"
+      url: "https://pub.dev"
+    source: hosted
+    version: "10.3.4"
+  firebase_database_platform_interface:
+    dependency: transitive
+    description:
+      name: firebase_database_platform_interface
+      sha256: "5f877b1dd95a83eff8b5646f3218a1b4e6ce7c1c8ad3e125632d11e2257e4865"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.5+12"
+  firebase_database_web:
+    dependency: transitive
+    description:
+      name: firebase_database_web
+      sha256: "0bb137e196dbdb16e27c0f5d529b24a277ae97588daac833519276406d0e7580"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.3+12"
   flutter:
     dependency: "direct main"
     description: flutter
@@ -326,6 +350,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.2"
+  flutter_marquee:
+    dependency: "direct main"
+    description:
+      name: flutter_marquee
+      sha256: "9cdf9504bfb2745b46c5bfc871b4a56e4f32d82e62b931eebad77bf9af240023"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.1"
   flutter_plugin_android_lifecycle:
     dependency: transitive
     description:
