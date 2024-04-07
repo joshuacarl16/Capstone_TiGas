@@ -7,13 +7,16 @@ import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:provider/provider.dart';
 import 'package:tigas_application/gmaps/location_service.dart';
 import 'package:image/image.dart' as img;
 import 'package:tigas_application/models/station_model.dart';
 import 'package:tigas_application/models/user_location.dart';
+import 'package:tigas_application/providers/station_provider.dart';
 import 'package:tigas_application/screens/set_location.dart';
 import 'package:tigas_application/widgets/bottom_navbar.dart';
 import 'package:tigas_application/widgets/rate_station.dart';
+import 'package:tigas_application/widgets/station_info.dart';
 
 class HPMap extends StatefulWidget {
   const HPMap({Key? key, required this.destination, required this.selectedTab})
@@ -73,35 +76,111 @@ class HPMapState extends State<HPMap> {
   Future<void> loadMarkers() async {
     customIcons = List<BitmapDescriptor>.empty(growable: true);
 
-    final markerImages = ['assets/station.png', 'assets/currentloc.png'];
+    final markerImages = ['assets/stationlogo.png', 'assets/greencircle.png'];
 
     for (var i = 0; i < markerImages.length; i++) {
       final byteData = await rootBundle.load(markerImages[i]);
       Uint8List resizedBytes;
       if (i == 0) {
-        resizedBytes =
-            await resizeImage(byteData.buffer.asUint8List(), 100, 100);
+        resizedBytes = await resizeImage(byteData.buffer.asUint8List(), 70, 90);
         customIcons.add(BitmapDescriptor.fromBytes(resizedBytes));
       } else if (i == 1) {
-        resizedBytes = await resizeImage(byteData.buffer.asUint8List(), 120,
-            120); // new size for current location icon
+        resizedBytes = await resizeImage(byteData.buffer.asUint8List(), 80,
+            80); // new size for current location icon
         currentLocationIcon = BitmapDescriptor.fromBytes(resizedBytes);
       }
     }
   }
 
+  // Future<void> fetchAndLoadGasStations() async {
+  //   List<Map<String, dynamic>> stations =
+  //       await LocationService().getGasStations();
+  //   List<Marker> stationMarkers = [];
+
+  //   for (var station in stations) {
+  //     final placeId = station['place_id'] ?? '';
+  //     Marker stationMarker = Marker(
+  //       markerId: MarkerId(placeId.toString()),
+  //       position: station['location'],
+  //       infoWindow: InfoWindow(
+  //         title: station['name'],
+  //         snippet: station['address'].toString(),
+  //         onTap: () {
+  //           showDialog(
+  //             context: context,
+  //             builder: (BuildContext context) {
+  //               return AlertDialog(
+  //                 content: Text('${station}'),
+  //                 actions: <Widget>[
+  //                   FloatingActionButton(
+  //                     child: Text('Close'),
+  //                     onPressed: () {
+  //                       Navigator.of(context).pop();
+  //                     },
+  //                   ),
+  //                 ],
+  //               );
+  //             },
+  //           );
+  //         },
+  //       ),
+  //       icon: customIcons[0],
+  //     );
+  //     stationMarkers.add(stationMarker);
+  //   }
+
+  //   setState(() {
+  //     gasStationMarkers = stationMarkers;
+  //     areStationsVisible = true;
+  //   });
+  // }
+
   Future<void> fetchAndLoadGasStations() async {
-    List<Map<String, dynamic>> stations =
-        await LocationService().getGasStations();
+    // Access the StationProvider instance
+    final stationProvider =
+        Provider.of<StationProvider>(context, listen: false);
+
+    // Fetch stations
+    await stationProvider.fetchStations();
+
+    // Use stations from the provider
+    List<Station> stations = stationProvider.stations;
+
     List<Marker> stationMarkers = [];
+    final size = MediaQuery.of(context).size;
+    final unitHeightValue = size.height * 0.01;
+    final unitWidthValue = size.width * 0.01;
 
     for (var station in stations) {
+      final placeId = station.id.toString();
       Marker stationMarker = Marker(
-        markerId: MarkerId(station['place_id']),
-        position: station['location'],
+        markerId: MarkerId(placeId),
+        position: LatLng(station.latitude, station.longitude),
         infoWindow: InfoWindow(
-          title: station['name'],
-          snippet: station['distance'].toString(),
+          title: station.name,
+          snippet: station.address.toString(),
+          onTap: () {
+            showModalBottomSheet(
+                context: context,
+                backgroundColor: Colors.transparent,
+                builder: (BuildContext context) {
+                  return ClipRRect(
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(2 * unitHeightValue),
+                      topRight: Radius.circular(2 * unitHeightValue),
+                    ),
+                    child: Container(
+                        height: 55 * unitHeightValue,
+                        width: 100 * unitWidthValue,
+                        child: StationInfo(
+                          station: station,
+                          gasTypeInfo: station.gasTypeInfo ?? {},
+                          gasTypes: station.gasTypes ?? [],
+                          services: station.services ?? [],
+                        )),
+                  );
+                });
+          },
         ),
         icon: customIcons[0],
       );
@@ -133,9 +212,6 @@ class HPMapState extends State<HPMap> {
     if (currentLocationMarker != null) {
       markers.add(currentLocationMarker!);
     }
-    if (currentLocationMarker != null) {
-      markers.add(currentLocationMarker!);
-    }
     if (destinationMarker != null) {
       markers.add(destinationMarker!);
     }
@@ -161,7 +237,6 @@ class HPMapState extends State<HPMap> {
   }
 
   Future<void> fetchCurrentUserLocation() async {
-    // Fetch location only if not set before
     LocationPermission permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
@@ -177,7 +252,6 @@ class HPMapState extends State<HPMap> {
     UserLocation().updateLocation(position.latitude, position.longitude);
     _startLocation = LatLng(position.latitude, position.longitude);
 
-    // Set the current location marker
     setCurrentLocationMarker(position.latitude, position.longitude);
   }
 
@@ -317,6 +391,19 @@ class HPMapState extends State<HPMap> {
                   right: 16.0,
                   child: FloatingActionButton(
                     onPressed: () async {
+                      LocationPermission permission =
+                          await Geolocator.checkPermission();
+                      if (permission == LocationPermission.denied ||
+                          permission == LocationPermission.deniedForever) {
+                        permission = await Geolocator.requestPermission();
+                        if (permission == LocationPermission.denied) {
+                          openAppSettings();
+                        }
+                        if (permission == LocationPermission.deniedForever) {
+                          // Handle denied forever case
+                          return;
+                        }
+                      }
                       Position position = await Geolocator.getCurrentPosition(
                         desiredAccuracy: LocationAccuracy.high,
                       );

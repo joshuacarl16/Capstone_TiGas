@@ -96,7 +96,7 @@ class _HomePageState extends State<HomePage> {
       headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
         return <Widget>[
           SliverAppBar(
-            expandedHeight: 20 * unitHeightValue,
+            expandedHeight: 25 * unitHeightValue,
             automaticallyImplyLeading: false,
             floating: false,
             elevation: 0,

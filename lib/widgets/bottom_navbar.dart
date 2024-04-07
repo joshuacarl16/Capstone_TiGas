@@ -96,7 +96,7 @@ class _NavBarState extends State<NavBar> {
           ),
           SalomonBottomBarItem(
             icon: Icon(Icons.local_gas_station),
-            title: Text("Home"),
+            title: Text("List"),
             selectedColor: Color(0xFF175124),
           ),
           SalomonBottomBarItem(
