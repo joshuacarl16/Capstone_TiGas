@@ -85,8 +85,8 @@ class HPMapState extends State<HPMap> {
         resizedBytes = await resizeImage(byteData.buffer.asUint8List(), 70, 90);
         customIcons.add(BitmapDescriptor.fromBytes(resizedBytes));
       } else if (i == 1) {
-        resizedBytes = await resizeImage(byteData.buffer.asUint8List(), 80,
-            80); // new size for current location icon
+        resizedBytes = await resizeImage(byteData.buffer.asUint8List(), 60,
+            60); // new size for current location icon
         currentLocationIcon = BitmapDescriptor.fromBytes(resizedBytes);
       }
     }
@@ -136,14 +136,12 @@ class HPMapState extends State<HPMap> {
   // }
 
   Future<void> fetchAndLoadGasStations() async {
-    // Access the StationProvider instance
     final stationProvider =
         Provider.of<StationProvider>(context, listen: false);
 
     // Fetch stations
     await stationProvider.fetchStations();
 
-    // Use stations from the provider
     List<Station> stations = stationProvider.stations;
 
     List<Marker> stationMarkers = [];
@@ -202,6 +200,7 @@ class HPMapState extends State<HPMap> {
       }
     });
     loadMarkers();
+    fetchCurrentUserLocationPermission();
     fetchAndLoadGasStations();
   }
 
@@ -234,6 +233,24 @@ class HPMapState extends State<HPMap> {
       infoWindow: InfoWindow(title: 'Current Location'),
       icon: currentLocationIcon ?? BitmapDescriptor.defaultMarker,
     );
+  }
+
+  Future<void> fetchCurrentUserLocationPermission() async {
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        openAppSettings();
+      }
+    }
+    if (permission == LocationPermission.deniedForever) {
+      // Handle denied forever case
+      return Future.error('Location permissions permanently denied');
+    }
+    if (permission == LocationPermission.whileInUse ||
+        permission == LocationPermission.always) {
+      await fetchCurrentUserLocation();
+    }
   }
 
   Future<void> fetchCurrentUserLocation() async {

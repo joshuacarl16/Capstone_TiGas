@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:salomon_bottom_bar/salomon_bottom_bar.dart';
 import 'package:tigas_application/screens/ads_screen.dart';
 import 'package:tigas_application/screens/homepage_screen.dart';
-import 'package:tigas_application/screens/test_screen.dart';
+import 'package:tigas_application/screens/map_screen.dart';
 import 'package:tigas_application/widgets/side_bar.dart';
 import 'package:tigas_application/widgets/station_selector.dart';
 
