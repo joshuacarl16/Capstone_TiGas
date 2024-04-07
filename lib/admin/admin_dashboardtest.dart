@@ -125,7 +125,9 @@ import 'package:go_router/go_router.dart';
 import 'package:tigas_application/admin_widgets/services_page.dart';
 import 'package:tigas_application/admin_widgets/price_services.dart';
 import 'package:tigas_application/admin_widgets/post_advertisements.dart';
-import 'package:tigas_application/styles/styles.dart'; 
+import 'package:tigas_application/styles/styles.dart';
+
+import '../screens/loading_screen.dart'; 
 
 
 class AdminDashboard extends StatefulWidget {
@@ -145,9 +147,14 @@ class _AdminDashboardState extends State<AdminDashboard> {
       appBar: AppBar(
         centerTitle: true,
         leading: IconButton(
-          icon: Icon(Icons.menu), // Hamburger icon
+          icon: Icon(Icons.logout_outlined), // Hamburger icon
           onPressed: () {
-           Navigator.of(context).pop();
+             Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: ((context) => LoadingScreen()),
+            ),
+          );
           },
         ),
         title: Image.asset(
@@ -155,6 +162,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
           fit: BoxFit.contain,
           height: 140,
         ),
+        
         backgroundColor: const Color(0xFF609966),
         elevation: 0,
         
