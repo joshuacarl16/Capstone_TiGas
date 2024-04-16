@@ -17,6 +17,7 @@ import 'package:tigas_application/widgets/rate_station.dart';
 import 'package:timezone/timezone.dart' as tz;
 
 import '../models/reviews_model.dart';
+import '../screens/camera_screen.dart';
 
 class StationInfo extends StatefulWidget {
   final Station station;
@@ -160,6 +161,25 @@ class _StationInfoState extends State<StationInfo> {
                             borderRadius: BorderRadius.circular(30)),
                         backgroundColor: Colors.green[700]),
                   ),
+                  SizedBox(height: 10),
+  	              ElevatedButton.icon(
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => CameraScreen(
+                              selectedStation: widget.station,
+                            ),
+                          ),
+                        );
+                      },
+                      icon: FaIcon(FontAwesomeIcons.cameraRetro),
+                      label: Text('Update Price'),
+                      style: ElevatedButton.styleFrom(
+                        minimumSize: Size(double.infinity, 50),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30)),
+                        backgroundColor: Colors.green[700]),
+                    ),
                   SizedBox(height: unitWidthValue * 6),
                   Center(
                       child: _buildGasTypes(unitHeightValue, unitWidthValue)),
@@ -190,7 +210,7 @@ class _StationInfoState extends State<StationInfo> {
                       ),
                     ],
                   ),
-                  SizedBox(height: unitHeightValue * 10),
+                  SizedBox(height: unitHeightValue * 6),
                   ElevatedButton.icon(
                     onPressed: () {
                       showRatingDialog(context, widget.station.id);

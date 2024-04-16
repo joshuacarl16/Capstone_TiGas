@@ -28,9 +28,8 @@ class _NavBarState extends State<NavBar> {
       destination: '',
     ),
     HomePage(selectedTab: 2, scrollController: homePageScrollController),
-    StationSelector(),
     CommercialPage(
-        selectedTab: 4, scrollController: commercialPageScrollController),
+        selectedTab: 3, scrollController: commercialPageScrollController),
   ];
 
   @override
@@ -98,11 +97,6 @@ class _NavBarState extends State<NavBar> {
             icon: Icon(Icons.local_gas_station),
             title: Text("List"),
             selectedColor: Color(0xFF175124),
-          ),
-          SalomonBottomBarItem(
-            icon: Icon(Icons.camera),
-            title: Text("Camera"),
-            selectedColor: Colors.teal,
           ),
           SalomonBottomBarItem(
             icon: Icon(Icons.flag),

@@ -198,7 +198,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                       child: Text(
                                         "Login as Manager",
                                         style: GoogleFonts.inter(
-                                          fontSize: screenHeight * 0.022,
+                                          fontSize: 20,
                                           fontWeight: FontWeight.bold,
                                           color: Colors.black87,
                                         ),
