@@ -1,6 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:tigas_application/screens/loading_screen.dart';
+import 'package:tigas_application/screens/login_screen.dart';
 import 'package:tigas_application/widgets/show_snackbar.dart';
 import 'package:firebase_database/firebase_database.dart';
 
@@ -54,10 +56,13 @@ class FirebaseAuthMethods {
 
   //sign out
   Future<void> signOut(BuildContext context) async {
-    try {
-      await _auth.signOut();
-    } on FirebaseAuthException catch (e) {
-      showSnackBar(context, e.message!);
-    }
+    CircularProgressIndicator();
+    await FirebaseAuth.instance.signOut();
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => LoadingScreen(),
+      ),
+    );
   }
 }

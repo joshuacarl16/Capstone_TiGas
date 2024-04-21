@@ -11,7 +11,7 @@ import 'package:tigas_application/widgets/bottom_navbar.dart';
 import 'package:provider/provider.dart';
 import 'package:timezone/data/latest.dart' as tz;
 
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
@@ -51,16 +51,16 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class IsAuthenticated extends StatelessWidget {
-  const IsAuthenticated({super.key});
+// class IsAuthenticated extends StatelessWidget {
+//   const IsAuthenticated({super.key});
 
-  @override
-  Widget build(BuildContext context) {
-    final firebaseUser = context.watch<User?>();
+//   @override
+//   Widget build(BuildContext context) {
+//     final firebaseUser = context.watch<User?>();
 
-    if (firebaseUser != null) {
-      return NavBar(selectedTab: 0);
-    }
-    return LoginScreen();
-  }
-}
+//     if (firebaseUser != null) {
+//       return NavBar(selectedTab: 0);
+//     }
+//     return LoginScreen();
+//   }
+// }

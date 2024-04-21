@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -13,41 +14,63 @@ class DrawerContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Drawer(
-      child: ListView(
-        children: [
-          DrawerHeader(
-            decoration: BoxDecoration(color: Color(0xFF609966)),
-            child: Row(
-              children: [
-                Container(
-                  padding: EdgeInsets.all(4),
-                  decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 2)),
-                  child: CircleAvatar(
-                    backgroundImage: AssetImage('assets/applogo.jpg'),
-                    radius: 40,
-                  ),
+      child: FutureBuilder<DocumentSnapshot>(
+        future: FirebaseFirestore.instance
+            .collection('users')
+            .doc(FirebaseAuth.instance.currentUser!.uid)
+            .get(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            // Display a loading indicator while fetching data
+            return Center(child: Container(child: CircularProgressIndicator()));
+          }
+
+          if (snapshot.hasError) {
+            // Display an error message if data fetching fails
+            return Text('Error: ${snapshot.error}');
+          }
+
+          final displayName =
+              (snapshot.data!.data() as Map<String, dynamic>)?['displayname'] ??
+                  'Guest';
+
+          return ListView(
+            children: [
+              DrawerHeader(
+                decoration: BoxDecoration(color: Color(0xFF609966)),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.white, width: 2)),
+                      child: CircleAvatar(
+                        backgroundImage: AssetImage('assets/applogo.jpg'),
+                        radius: 40,
+                      ),
+                    ),
+                    SizedBox(width: 8),
+                    Text(
+                      displayName,
+                      style: TextStyle(fontSize: 18, color: Colors.white),
+                    )
+                  ],
                 ),
-                SizedBox(width: 8),
-                Text(
-                  FirebaseAuth.instance.currentUser!.displayName ?? '',
-                  style: TextStyle(fontSize: 18, color: Colors.white),
-                )
-              ],
-            ),
-          ),
-          ..._menuItems
-              .map(
-                (item) => ListTile(
-                  onTap: () {
-                    _navigateToPage(context, item);
-                  },
-                  title: Text(item),
-                ),
-              )
-              .toList(),
-        ],
+              ),
+              ..._menuItems
+                  .map(
+                    (item) => ListTile(
+                      onTap: () {
+                        _navigateToPage(context, item);
+                      },
+                      title: Text(item),
+                    ),
+                  )
+                  .toList(),
+            ],
+          );
+        },
       ),
     );
   }
