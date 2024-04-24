@@ -296,6 +296,7 @@ class _LoginScreenState extends State<LoginScreen> {
           email: email,
           password: password,
         );
+        context.read<FirebaseAuthMethods>().isLoggedIn = true;
         route();
       } on FirebaseAuthException catch (e) {
         if (e.code == 'user-not-found') {
@@ -310,6 +311,7 @@ class _LoginScreenState extends State<LoginScreen> {
   void signInAsGuest() async {
     try {
       await FirebaseAuth.instance.signInAnonymously();
+      context.read<FirebaseAuthMethods>().isLoggedIn = false;
       route();
     } on FirebaseAuthException catch (e) {
       showSnackBar(context, 'Failed to sign in anonymously: $e');

@@ -8,6 +8,7 @@ import 'package:firebase_database/firebase_database.dart';
 
 class FirebaseAuthMethods {
   final FirebaseAuth _auth;
+  bool isLoggedIn = false;
   late final DatabaseReference databaseRef;
 
   FirebaseAuthMethods(this._auth);

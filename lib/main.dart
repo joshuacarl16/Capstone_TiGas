@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -28,6 +29,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    FirebaseFirestore firestore = FirebaseFirestore.instance;
     return MultiProvider(
       providers: [
         Provider<FirebaseAuthMethods>(
@@ -36,6 +38,9 @@ class MyApp extends StatelessWidget {
         StreamProvider(
             create: (context) => context.read<FirebaseAuthMethods>().authState,
             initialData: null),
+        Provider<FirebaseFirestore>(
+          create: (_) => firestore,
+        ),
       ],
       child: ChangeNotifierProvider(
         create: (context) => StationProvider(),

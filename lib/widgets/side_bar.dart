@@ -2,10 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:tigas_application/admin/admin_dashboardtest.dart';
 import 'package:tigas_application/auth/firebase_auth.dart';
-import 'package:tigas_application/admin/admin_dashboard.dart';
-
 import 'package:tigas_application/screens/contacts_screen.dart';
 
 class DrawerContent extends StatelessWidget {
@@ -30,9 +27,9 @@ class DrawerContent extends StatelessWidget {
             return Text('Error: ${snapshot.error}');
           }
 
-          final displayName =
-              (snapshot.data!.data() as Map<String, dynamic>)?['displayname'] ??
-                  'Guest';
+          final displayName = (snapshot.data?.data()
+                  as Map<String, dynamic>?)?['displayname'] ??
+              'Guest';
 
           return ListView(
             children: [
@@ -77,10 +74,6 @@ class DrawerContent extends StatelessWidget {
 
   void _navigateToPage(BuildContext context, String item) {
     switch (item) {
-      case 'Admin':
-        Navigator.push(
-            context, MaterialPageRoute(builder: (context) => AdminDashboard()));
-        break;
       case 'About':
         break;
       case 'Contact':
@@ -122,7 +115,6 @@ class SidebarItems extends StatelessWidget {
 }
 
 final List<String> _menuItems = <String>[
-  'Admin',
   'About',
   'Contact',
   'Settings',
