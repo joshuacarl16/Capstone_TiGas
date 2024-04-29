@@ -364,7 +364,8 @@ class _HomePageState extends State<HomePage> {
                               topRight: Radius.circular(2 * unitHeightValue),
                             ),
                             child: Container(
-                                height: 55 * unitHeightValue,
+                                height:
+                                    MediaQuery.of(context).size.height * 0.45,
                                 width: 100 * unitWidthValue,
                                 child: StationInfo(
                                   station: station,

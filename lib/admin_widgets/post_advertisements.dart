@@ -241,7 +241,8 @@ class _PostAdvertisementState extends State<PostAdvertisement> {
                   }
                 },
                 style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
-                child: Text('Pick Image'),
+                child:
+                    Text('Pick Image', style: TextStyle(color: Colors.white)),
               ),
               SizedBox(height: 10),
               pickedImage == null
@@ -251,7 +252,8 @@ class _PostAdvertisementState extends State<PostAdvertisement> {
               ElevatedButton(
                 onPressed: uploadImage,
                 style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
-                child: Text('Upload Image'),
+                child:
+                    Text('Upload Image', style: TextStyle(color: Colors.white)),
               ),
             ],
           ),

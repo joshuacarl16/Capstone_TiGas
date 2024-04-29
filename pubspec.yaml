@@ -32,6 +32,7 @@ dependencies:
   cloud_firestore: ^4.17.0
   cloud_functions: ^4.5.1
   cupertino_icons: ^1.0.2
+  custom_info_window: ^1.0.1
   equatable: ^2.0.5
   firebase_auth: ^4.6.3
   firebase_core: ^2.14.0

@@ -30,6 +30,7 @@ class StationProvider with ChangeNotifier {
       var distance = await _locationService.calculateDistanceToStation(station);
       _distances[station.id] = distance;
     }
+    notifyListeners();
   }
 
   Future<void> fetchStations() async {

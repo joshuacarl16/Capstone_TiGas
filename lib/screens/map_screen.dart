@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:custom_info_window/custom_info_window.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
@@ -10,6 +11,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:tigas_application/gmaps/location_service.dart';
 import 'package:image/image.dart' as img;
+import 'package:tigas_application/infowindow/custom_window.dart';
 import 'package:tigas_application/models/station_model.dart';
 import 'package:tigas_application/models/user_location.dart';
 import 'package:tigas_application/providers/station_provider.dart';
@@ -49,6 +51,10 @@ class HPMapState extends State<HPMap> {
   Set<Polyline> _polylines = Set<Polyline>();
   int _polylineIdCounter = 1;
 
+  // CustomInfoWindowController controller = CustomInfoWindowController();
+  final CustomInfoWindowController _customInfoWindowController =
+      CustomInfoWindowController();
+
   showRatingDialog(BuildContext context, int stationId) {
     showDialog(
       context: context,
@@ -85,55 +91,11 @@ class HPMapState extends State<HPMap> {
         resizedBytes = await resizeImage(byteData.buffer.asUint8List(), 70, 90);
         customIcons.add(BitmapDescriptor.fromBytes(resizedBytes));
       } else if (i == 1) {
-        resizedBytes = await resizeImage(byteData.buffer.asUint8List(), 60,
-            60); // new size for current location icon
+        resizedBytes = await resizeImage(byteData.buffer.asUint8List(), 60, 60);
         currentLocationIcon = BitmapDescriptor.fromBytes(resizedBytes);
       }
     }
   }
-
-  // Future<void> fetchAndLoadGasStations() async {
-  //   List<Map<String, dynamic>> stations =
-  //       await LocationService().getGasStations();
-  //   List<Marker> stationMarkers = [];
-
-  //   for (var station in stations) {
-  //     final placeId = station['place_id'] ?? '';
-  //     Marker stationMarker = Marker(
-  //       markerId: MarkerId(placeId.toString()),
-  //       position: station['location'],
-  //       infoWindow: InfoWindow(
-  //         title: station['name'],
-  //         snippet: station['address'].toString(),
-  //         onTap: () {
-  //           showDialog(
-  //             context: context,
-  //             builder: (BuildContext context) {
-  //               return AlertDialog(
-  //                 content: Text('${station}'),
-  //                 actions: <Widget>[
-  //                   FloatingActionButton(
-  //                     child: Text('Close'),
-  //                     onPressed: () {
-  //                       Navigator.of(context).pop();
-  //                     },
-  //                   ),
-  //                 ],
-  //               );
-  //             },
-  //           );
-  //         },
-  //       ),
-  //       icon: customIcons[0],
-  //     );
-  //     stationMarkers.add(stationMarker);
-  //   }
-
-  //   setState(() {
-  //     gasStationMarkers = stationMarkers;
-  //     areStationsVisible = true;
-  //   });
-  // }
 
   Future<void> fetchAndLoadGasStations() async {
     final stationProvider =
@@ -145,41 +107,19 @@ class HPMapState extends State<HPMap> {
     List<Station> stations = stationProvider.stations;
 
     List<Marker> stationMarkers = [];
-    final size = MediaQuery.of(context).size;
-    final unitHeightValue = size.height * 0.01;
-    final unitWidthValue = size.width * 0.01;
 
     for (var station in stations) {
       final placeId = station.id.toString();
       Marker stationMarker = Marker(
         markerId: MarkerId(placeId),
         position: LatLng(station.latitude, station.longitude),
-        infoWindow: InfoWindow(
-          title: station.name,
-          snippet: station.address.toString(),
-          onTap: () {
-            showModalBottomSheet(
-                context: context,
-                backgroundColor: Colors.transparent,
-                builder: (BuildContext context) {
-                  return ClipRRect(
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(2 * unitHeightValue),
-                      topRight: Radius.circular(2 * unitHeightValue),
-                    ),
-                    child: Container(
-                        height: 55 * unitHeightValue,
-                        width: 100 * unitWidthValue,
-                        child: StationInfo(
-                          station: station,
-                          gasTypeInfo: station.gasTypeInfo ?? {},
-                          gasTypes: station.gasTypes ?? [],
-                          services: station.services ?? [],
-                        )),
-                  );
-                });
-          },
-        ),
+        onTap: () {
+          _customInfoWindowController.addInfoWindow!(
+              CustomWindow(
+                info: station,
+              ),
+              LatLng(station.latitude, station.longitude));
+        },
         icon: customIcons[0],
       );
       stationMarkers.add(stationMarker);
@@ -227,6 +167,7 @@ class HPMapState extends State<HPMap> {
   }
 
   void setCurrentLocationMarker(double latitude, double longitude) {
+    _customInfoWindowController.hideInfoWindow!();
     currentLocationMarker = Marker(
       markerId: MarkerId('currentLocation'),
       position: LatLng(latitude, longitude),
@@ -399,9 +340,23 @@ class HPMapState extends State<HPMap> {
                             123.9128), // Default location if _startLocation is null
                     zoom: 13,
                   ),
+                  onTap: (position) {
+                    _customInfoWindowController.hideInfoWindow!();
+                  },
+                  onCameraMove: (position) {
+                    _customInfoWindowController.onCameraMove!();
+                  },
                   onMapCreated: (GoogleMapController controller) {
                     _controller.complete(controller);
+                    _customInfoWindowController.googleMapController =
+                        controller;
                   },
+                ),
+                CustomInfoWindow(
+                  controller: _customInfoWindowController,
+                  height: 70,
+                  width: 140,
+                  offset: 60,
                 ),
                 Positioned(
                   bottom: 16.0,
@@ -444,6 +399,7 @@ class HPMapState extends State<HPMap> {
                   right: 16.0,
                   child: FloatingActionButton(
                     onPressed: () async {
+                      _customInfoWindowController.hideInfoWindow!();
                       final selectedLocation = await Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -468,8 +424,8 @@ class HPMapState extends State<HPMap> {
                         }
                       }
                     },
-                    child: Icon(Icons.pin_drop_outlined),
                     backgroundColor: Color.fromARGB(255, 8, 146, 238),
+                    child: Icon(Icons.pin_drop_outlined),
                   ),
                 ),
               ],

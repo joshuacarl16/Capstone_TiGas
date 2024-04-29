@@ -77,184 +77,187 @@ class _RegisScreenState extends State<RegisScreen> {
                                 screenWidth * 0.05,
                                 screenHeight * 0.025,
                               ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Center(
-                                    child: Text(
-                                      "Register",
-                                      style: GoogleFonts.inter(
-                                        fontSize: screenHeight * 0.06,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.grey,
-                                      ),
-                                    ),
-                                  ),
-                                  SizedBox(height: screenHeight * 0.04),
-                                  Padding(
-                                    padding: EdgeInsets.fromLTRB(
-                                      screenWidth * 0.03,
-                                      0,
-                                      0,
-                                      screenHeight * 0.02,
-                                    ),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        TextFormField(
-                                          style: TextStyle(
-                                            fontSize: screenHeight * 0.02,
-                                          ),
-                                          controller: emailController,
-                                          decoration: getEmailInputStyle(),
-                                          validator: (value) {
-                                            if (value!.length == 0) {
-                                              return "Email cannot be empty";
-                                            }
-                                            if (!RegExp(
-                                                    "^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+.[a-z]")
-                                                .hasMatch(value)) {
-                                              return ("Please enter a valid email");
-                                            } else {
-                                              return null;
-                                            }
-                                          },
-                                          onChanged: (value) {},
-                                          keyboardType:
-                                              TextInputType.emailAddress,
-                                        ),
-                                        SizedBox(height: screenHeight * 0.03),
-                                        TextFormField(
-                                          style: TextStyle(
-                                            fontSize: screenHeight * 0.02,
-                                          ),
-                                          controller: displayNameController,
-                                          decoration: InputDecoration(
-                                            labelText: 'Display Name',
-                                            hintText: 'farggaming',
-                                            prefixIcon: Icon(
-                                                Icons.account_circle_rounded),
-                                            border: OutlineInputBorder(),
-                                          ),
-                                        ),
-                                        SizedBox(height: screenHeight * 0.03),
-                                        TextFormField(
-                                          style: TextStyle(
-                                            fontSize: screenHeight * 0.02,
-                                          ),
-                                          controller: passwordController,
-                                          obscureText: true,
-                                          decoration: InputDecoration(
-                                            labelText: 'Password',
-                                            prefixIcon: Icon(Icons.lock),
-                                            border: OutlineInputBorder(),
-                                          ),
-                                          validator: (value) {
-                                            RegExp regex =
-                                                new RegExp(r'^.{6,}$');
-                                            if (value!.isEmpty) {
-                                              return "Password cannot be empty";
-                                            }
-                                            if (!regex.hasMatch(value)) {
-                                              return ("please enter valid password (min. 6 characters)");
-                                            } else {
-                                              return null;
-                                            }
-                                          },
-                                          onChanged: (value) {},
-                                        ),
-                                        SizedBox(height: screenHeight * 0.03),
-                                        TextFormField(
-                                          style: TextStyle(
-                                            fontSize: screenHeight * 0.02,
-                                          ),
-                                          controller: confirmPasswordController,
-                                          obscureText: true,
-                                          decoration: InputDecoration(
-                                            labelText: 'Confirm Password',
-                                            prefixIcon: Icon(Icons.lock),
-                                            border: OutlineInputBorder(),
-                                          ),
-                                          validator: (value) {
-                                            if (confirmPasswordController
-                                                    .text !=
-                                                passwordController.text) {
-                                              return "Password did not match";
-                                            } else {
-                                              return null;
-                                            }
-                                          },
-                                          onChanged: (value) {},
-                                        ),
-                                        SizedBox(height: screenHeight * 0.01),
-                                      ],
-                                    ),
-                                  ),
-                                  Center(
-                                    child: ElevatedButton(
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.green,
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(
-                                              screenHeight * 0.04),
-                                        ),
-                                        elevation: 3,
-                                        padding: EdgeInsets.symmetric(
-                                          horizontal: screenWidth * 0.28,
-                                          vertical: screenHeight * 0.025,
+                              child: SingleChildScrollView(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Center(
+                                      child: Text(
+                                        "Register",
+                                        style: GoogleFonts.inter(
+                                          fontSize: screenHeight * 0.06,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.grey,
                                         ),
                                       ),
-                                      onPressed: () {
-                                        signUp(
-                                            emailController.text,
-                                            passwordController.text,
-                                            displayNameController.text,
-                                            role);
-                                      },
-                                      child:
-                                          getRegisterButtonStyle(screenHeight),
                                     ),
-                                  ),
-                                  SizedBox(height: screenHeight * 0.02),
-                                  Padding(
-                                    padding: EdgeInsets.fromLTRB(
-                                      screenWidth * 0.045,
-                                      0,
-                                      0,
-                                      0,
+                                    SizedBox(height: screenHeight * 0.04),
+                                    Padding(
+                                      padding: EdgeInsets.fromLTRB(
+                                        screenWidth * 0.03,
+                                        0,
+                                        0,
+                                        screenHeight * 0.02,
+                                      ),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          TextFormField(
+                                            style: TextStyle(
+                                              fontSize: screenHeight * 0.02,
+                                            ),
+                                            controller: emailController,
+                                            decoration: getEmailInputStyle(),
+                                            validator: (value) {
+                                              if (value!.length == 0) {
+                                                return "Email cannot be empty";
+                                              }
+                                              if (!RegExp(
+                                                      "^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+.[a-z]")
+                                                  .hasMatch(value)) {
+                                                return ("Please enter a valid email");
+                                              } else {
+                                                return null;
+                                              }
+                                            },
+                                            onChanged: (value) {},
+                                            keyboardType:
+                                                TextInputType.emailAddress,
+                                          ),
+                                          SizedBox(height: screenHeight * 0.03),
+                                          TextFormField(
+                                            style: TextStyle(
+                                              fontSize: screenHeight * 0.02,
+                                            ),
+                                            controller: displayNameController,
+                                            decoration: InputDecoration(
+                                              labelText: 'Display Name',
+                                              hintText: 'farggaming',
+                                              prefixIcon: Icon(
+                                                  Icons.account_circle_rounded),
+                                              border: OutlineInputBorder(),
+                                            ),
+                                          ),
+                                          SizedBox(height: screenHeight * 0.03),
+                                          TextFormField(
+                                            style: TextStyle(
+                                              fontSize: screenHeight * 0.02,
+                                            ),
+                                            controller: passwordController,
+                                            obscureText: true,
+                                            decoration: InputDecoration(
+                                              labelText: 'Password',
+                                              prefixIcon: Icon(Icons.lock),
+                                              border: OutlineInputBorder(),
+                                            ),
+                                            validator: (value) {
+                                              RegExp regex =
+                                                  new RegExp(r'^.{6,}$');
+                                              if (value!.isEmpty) {
+                                                return "Password cannot be empty";
+                                              }
+                                              if (!regex.hasMatch(value)) {
+                                                return ("please enter valid password (min. 6 characters)");
+                                              } else {
+                                                return null;
+                                              }
+                                            },
+                                            onChanged: (value) {},
+                                          ),
+                                          SizedBox(height: screenHeight * 0.03),
+                                          TextFormField(
+                                            style: TextStyle(
+                                              fontSize: screenHeight * 0.02,
+                                            ),
+                                            controller:
+                                                confirmPasswordController,
+                                            obscureText: true,
+                                            decoration: InputDecoration(
+                                              labelText: 'Confirm Password',
+                                              prefixIcon: Icon(Icons.lock),
+                                              border: OutlineInputBorder(),
+                                            ),
+                                            validator: (value) {
+                                              if (confirmPasswordController
+                                                      .text !=
+                                                  passwordController.text) {
+                                                return "Password did not match";
+                                              } else {
+                                                return null;
+                                              }
+                                            },
+                                            onChanged: (value) {},
+                                          ),
+                                          SizedBox(height: screenHeight * 0.01),
+                                        ],
+                                      ),
                                     ),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Text(
-                                          "Already have an account?",
-                                          style: GoogleFonts.inter(
-                                            fontSize: screenHeight * 0.02,
-                                            color: Colors.grey[700],
+                                    Center(
+                                      child: ElevatedButton(
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.green,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(
+                                                screenHeight * 0.04),
+                                          ),
+                                          elevation: 3,
+                                          padding: EdgeInsets.symmetric(
+                                            horizontal: screenWidth * 0.28,
+                                            vertical: screenHeight * 0.025,
                                           ),
                                         ),
-                                        TextButton(
-                                          child: Text(
-                                            "Login here",
+                                        onPressed: () {
+                                          signUp(
+                                              emailController.text,
+                                              passwordController.text,
+                                              displayNameController.text,
+                                              role);
+                                        },
+                                        child: getRegisterButtonStyle(
+                                            screenHeight),
+                                      ),
+                                    ),
+                                    SizedBox(height: screenHeight * 0.02),
+                                    Padding(
+                                      padding: EdgeInsets.fromLTRB(
+                                        screenWidth * 0.045,
+                                        0,
+                                        0,
+                                        0,
+                                      ),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Text(
+                                            "Already have an account?",
                                             style: GoogleFonts.inter(
                                               fontSize: screenHeight * 0.02,
-                                              color: Colors.green,
+                                              color: Colors.grey[700],
                                             ),
                                           ),
-                                          onPressed: () => Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (context) =>
-                                                  LoginScreen(),
+                                          TextButton(
+                                            child: Text(
+                                              "Login here",
+                                              style: GoogleFonts.inter(
+                                                fontSize: screenHeight * 0.02,
+                                                color: Colors.green,
+                                              ),
+                                            ),
+                                            onPressed: () => Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    LoginScreen(),
+                                              ),
                                             ),
                                           ),
-                                        ),
-                                      ],
+                                        ],
+                                      ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
                             ),
                           ),
