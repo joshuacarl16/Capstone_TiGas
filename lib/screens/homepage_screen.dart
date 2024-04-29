@@ -129,7 +129,7 @@ class _HomePageState extends State<HomePage> {
                               }
                             },
                             decoration: InputDecoration(
-                              labelText: 'Current Location',
+                              labelText: 'Set Location',
                               filled: true,
                               fillColor: Colors.grey[300],
                             ),

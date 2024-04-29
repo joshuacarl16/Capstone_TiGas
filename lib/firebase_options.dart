@@ -69,7 +69,8 @@ class DefaultFirebaseOptions {
     messagingSenderId: '878287150120',
     projectId: 'tigas-2939a',
     storageBucket: 'tigas-2939a.appspot.com',
-    iosClientId: '878287150120-5b36t4c66qa0g33fo1j2en7r694q92u0.apps.googleusercontent.com',
+    iosClientId:
+        '878287150120-5b36t4c66qa0g33fo1j2en7r694q92u0.apps.googleusercontent.com',
     iosBundleId: 'com.example.tigasApplication',
   );
 }

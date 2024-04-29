@@ -7,6 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
+import 'package:tigas_application/auth/firebase_auth.dart';
 
 import 'package:tigas_application/gmaps/google_map.dart';
 import 'package:tigas_application/gmaps/location_service.dart';
@@ -153,8 +155,14 @@ class _StationInfoState extends State<StationInfo> {
                                 destination: widget.station.id.toString())),
                           ));
                     },
-                    icon: FaIcon(FontAwesomeIcons.car),
-                    label: Text('Get Route'),
+                    icon: FaIcon(
+                      FontAwesomeIcons.car,
+                      color: Colors.white,
+                    ),
+                    label: Text(
+                      'Get Route',
+                      style: TextStyle(color: Colors.white),
+                    ),
                     style: ElevatedButton.styleFrom(
                         minimumSize: Size(double.infinity, 50),
                         shape: RoundedRectangleBorder(
@@ -162,24 +170,57 @@ class _StationInfoState extends State<StationInfo> {
                         backgroundColor: Colors.green[700]),
                   ),
                   SizedBox(height: 10),
-  	              ElevatedButton.icon(
-                      onPressed: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => CameraScreen(
-                              selectedStation: widget.station,
-                            ),
-                          ),
-                        );
-                      },
-                      icon: FaIcon(FontAwesomeIcons.cameraRetro),
-                      label: Text('Update Price'),
-                      style: ElevatedButton.styleFrom(
+                  ElevatedButton.icon(
+                    onPressed: context.read<FirebaseAuthMethods>().isLoggedIn
+                        ? () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => CameraScreen(
+                                  selectedStation: widget.station,
+                                ),
+                              ),
+                            );
+                          }
+                        : () {
+                            showDialog(
+                              context: context,
+                              builder: (context) {
+                                return AlertDialog(
+                                  title: Text('Login Required'),
+                                  content: Text(
+                                      'You need to login to use this feature.'),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () {
+                                        context
+                                            .read<FirebaseAuthMethods>()
+                                            .signOut(context);
+                                      },
+                                      child: Text('Login'),
+                                    ),
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.pop(context);
+                                      },
+                                      child: Text('Cancel'),
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+                          },
+                    icon: FaIcon(FontAwesomeIcons.cameraRetro,
+                        color: Colors.white),
+                    label: Text(
+                      'Update Price',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    style: ElevatedButton.styleFrom(
                         minimumSize: Size(double.infinity, 50),
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(30)),
                         backgroundColor: Colors.green[700]),
-                    ),
+                  ),
                   SizedBox(height: unitWidthValue * 6),
                   Center(
                       child: _buildGasTypes(unitHeightValue, unitWidthValue)),
@@ -215,8 +256,14 @@ class _StationInfoState extends State<StationInfo> {
                     onPressed: () {
                       showRatingDialog(context, widget.station.id);
                     },
-                    icon: FaIcon(FontAwesomeIcons.comments),
-                    label: Text('Review This Station'),
+                    icon: FaIcon(
+                      FontAwesomeIcons.comments,
+                      color: Colors.white,
+                    ),
+                    label: Text(
+                      'Review This Station',
+                      style: TextStyle(color: Colors.white),
+                    ),
                     style: ElevatedButton.styleFrom(
                         minimumSize: Size(double.infinity, 50),
                         shape: RoundedRectangleBorder(

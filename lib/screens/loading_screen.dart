@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:tigas_application/main.dart';
+import 'package:tigas_application/screens/login_screen.dart';
 import 'dart:async';
 
 import 'package:tigas_application/styles/styles.dart';
@@ -39,7 +40,7 @@ class _LoadingScreenState extends State<LoadingScreen>
         context,
         PageRouteBuilder(
           pageBuilder: (context, animation, secondaryAnimation) =>
-              const IsAuthenticated(),
+              LoginScreen(),
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
             return FadeTransition(
               opacity: animation,
