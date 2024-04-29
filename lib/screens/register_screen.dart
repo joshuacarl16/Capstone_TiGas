@@ -187,7 +187,7 @@ class _RegisScreenState extends State<RegisScreen> {
                                           },
                                           onChanged: (value) {},
                                         ),
-                                        SizedBox(height: screenHeight * 0.03),
+                                        SizedBox(height: screenHeight * 0.01),
                                       ],
                                     ),
                                   ),
@@ -301,5 +301,6 @@ class _RegisScreenState extends State<RegisScreen> {
     });
     Navigator.pushReplacement(
         context, MaterialPageRoute(builder: (context) => LoginScreen()));
+    showSnackBar(context, 'Successfully registered');
   }
 }

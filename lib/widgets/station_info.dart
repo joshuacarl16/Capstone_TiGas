@@ -181,7 +181,34 @@ class _StationInfoState extends State<StationInfo> {
                               ),
                             );
                           }
-                        : null,
+                        : () {
+                            showDialog(
+                              context: context,
+                              builder: (context) {
+                                return AlertDialog(
+                                  title: Text('Login Required'),
+                                  content: Text(
+                                      'You need to login to use this feature.'),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () {
+                                        context
+                                            .read<FirebaseAuthMethods>()
+                                            .signOut(context);
+                                      },
+                                      child: Text('Login'),
+                                    ),
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.pop(context);
+                                      },
+                                      child: Text('Cancel'),
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+                          },
                     icon: FaIcon(FontAwesomeIcons.cameraRetro,
                         color: Colors.white),
                     label: Text(

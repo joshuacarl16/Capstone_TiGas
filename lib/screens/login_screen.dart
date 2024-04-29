@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tigas_application/admin/admin_dashboard.dart';
-import 'package:tigas_application/admin/admin_dashboardtest.dart';
+import 'package:tigas_application/admin/admin_dashboard.dart';
 import 'package:tigas_application/auth/firebase_auth.dart';
 import 'package:tigas_application/screens/register_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -169,8 +169,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                         child: Text(
                                           'LOGIN',
                                           style: TextStyle(
-                                            fontSize: 20,
-                                          ),
+                                              fontSize: 20,
+                                              color: Colors.white),
                                         ),
                                       ),
                                     ),
@@ -265,7 +265,14 @@ class _LoginScreenState extends State<LoginScreen> {
             .get()
             .then((DocumentSnapshot documentSnapshot) {
           if (documentSnapshot.exists) {
-            if (documentSnapshot.get('role') == "Admin") {
+            var userRole = documentSnapshot.get('role');
+            if (userRole == "Caltex" ||
+                userRole == "Shell" ||
+                userRole == "Jetti" ||
+                userRole == "Petron" ||
+                userRole == "Phoenix" ||
+                userRole == "Seaoil" ||
+                userRole == "Total") {
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(

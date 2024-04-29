@@ -1,7 +1,7 @@
-
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -40,6 +40,7 @@ class _PostAdvertisementState extends State<PostAdvertisement> {
   XFile? pickedImage;
   String? selectedId;
   DateTime? selectedDate;
+  TimeOfDay? selectedTime;
   final urlManager = UrlManager();
 
   Future<void> fetchAdvertisements() async {
@@ -53,7 +54,7 @@ class _PostAdvertisementState extends State<PostAdvertisement> {
 
       setState(() {
         postedAds = adsJson.map((json) {
-          return Advertisement(
+          Advertisement ad = Advertisement(
             id: json['id'],
             text: json['caption'],
             image: XFile("$url${json['image']}"),
@@ -63,6 +64,13 @@ class _PostAdvertisementState extends State<PostAdvertisement> {
                 : null,
             postedBy: json['posted_by'] ?? 'Unknown',
           );
+
+          if (ad.validUntil != null &&
+              ad.validUntil!.isBefore(DateTime.now())) {
+            deleteAdvertisement(ad.id);
+          }
+
+          return ad;
         }).toList();
       });
     } else {
@@ -73,7 +81,7 @@ class _PostAdvertisementState extends State<PostAdvertisement> {
   Future<void> uploadImage() async {
     if (pickedImage != null && _adController.text.isNotEmpty) {
       String url = await urlManager.getValidBaseUrl();
-      Uri uri = Uri.parse("$url/upload_image/"); //used for external device
+      Uri uri = Uri.parse("$url/upload_image/");
       var request = http.MultipartRequest('POST', uri);
       request.files.add(
         await http.MultipartFile.fromPath('image', pickedImage!.path),
@@ -82,11 +90,16 @@ class _PostAdvertisementState extends State<PostAdvertisement> {
       request.fields['caption'] = _adController.text;
 
       request.fields['valid_until'] = selectedDate != null
-          ? DateFormat('yyyy-MM-dd').format(selectedDate!)
+          ? DateFormat('yyyy-MM-dd HH:mm').format(selectedDate!)
           : '';
 
       final User? user = FirebaseAuth.instance.currentUser;
-      request.fields['posted_by'] = user?.displayName ?? 'Unknown';
+      if (user != null) {
+        String role = await getUserRole(user.uid);
+        request.fields['posted_by'] = role;
+      } else {
+        request.fields['posted_by'] = 'Unknown';
+      }
 
       var response = await request.send();
 
@@ -110,32 +123,33 @@ class _PostAdvertisementState extends State<PostAdvertisement> {
     }
   }
 
-  Future<void> deleteImage() async {
-    if (selectedId != null) {
+  Future<String> getUserRole(String uid) async {
+    return FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .get()
+        .then((snapshot) {
+      return snapshot.data()?['role'] ?? 'Unknown';
+    });
+  }
+
+  Future<void> deleteAdvertisement(int? id) async {
+    if (id != null) {
       String url = await urlManager.getValidBaseUrl();
-      Uri uri = Uri.parse(
-          "$url/images/${int.parse(selectedId!)}/delete"); //used for external device
+      Uri uri = Uri.parse("$url/images/$id/delete");
 
       var response = await http.delete(uri);
 
       if (response.statusCode == 200) {
-        // Check the status code for a success response
-        print("Deleted successfully");
-        showSnackBar(context, 'Image deleted');
-
-        setState(() {
-          postedAds.removeWhere((ad) => ad.id == selectedId);
-          selectedId = null;
-          fetchAdvertisements();
-        });
+        print("Advertisement $id deleted successfully");
+        fetchAdvertisements();
       } else {
-        print("Deletion failed");
-        showSnackBar(context, 'Image deletion failed');
+        print("Failed to delete advertisement $id");
       }
     }
   }
 
- @override
+  @override
   void initState() {
     super.initState();
     fetchAdvertisements();
@@ -144,7 +158,7 @@ class _PostAdvertisementState extends State<PostAdvertisement> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(0.0),  // Removed padding to fit the screen
+      padding: const EdgeInsets.all(0.0),
       child: SingleChildScrollView(
         child: Container(
           padding: EdgeInsets.all(8.0),
@@ -161,9 +175,9 @@ class _PostAdvertisementState extends State<PostAdvertisement> {
               Text(
                 'Post an Advertisement',
                 style: TextStyle(
-                  fontSize: 24.0,  // Increased font size
-                  fontWeight: FontWeight.bold,  // Made it bold
-                  fontFamily: 'Arial',  // Changed font to Arial
+                  fontSize: 24.0,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Arial',
                 ),
               ),
               TextFormField(
@@ -182,17 +196,32 @@ class _PostAdvertisementState extends State<PostAdvertisement> {
                     firstDate: DateTime(2000),
                     lastDate: DateTime(2100),
                   );
-                  if (picked != null && picked != selectedDate)
-                    setState(() {
-                      selectedDate = picked;
-                    });
+                  if (picked != null) {
+                    final TimeOfDay? pickedTime = await showTimePicker(
+                      context: context,
+                      initialTime: selectedTime ?? TimeOfDay.now(),
+                    );
+                    if (pickedTime != null) {
+                      setState(() {
+                        selectedDate = DateTime(
+                          picked.year,
+                          picked.month,
+                          picked.day,
+                          pickedTime.hour,
+                          pickedTime.minute,
+                        );
+                        selectedTime = pickedTime;
+                      });
+                    }
+                  }
                 },
                 child: AbsorbPointer(
                   child: TextFormField(
                     controller: TextEditingController(
-                        text: selectedDate != null
-                            ? DateFormat('yyy-MM-dd').format(selectedDate!)
-                            : ''),
+                      text: selectedDate != null
+                          ? DateFormat('yyyy-MM-dd HH:mm').format(selectedDate!)
+                          : '',
+                    ),
                     decoration: InputDecoration(
                       labelText: 'Valid Until',
                     ),
@@ -215,35 +244,14 @@ class _PostAdvertisementState extends State<PostAdvertisement> {
                 child: Text('Pick Image'),
               ),
               SizedBox(height: 10),
+              pickedImage == null
+                  ? Text('No image selected.')
+                  : Image.file(File(pickedImage!.path)),
+              SizedBox(height: 10),
               ElevatedButton(
                 onPressed: uploadImage,
                 style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
                 child: Text('Upload Image'),
-              ),
-              SizedBox(height: 10),
-              pickedImage == null
-                  ? Text('No image selected.')
-                  : Image.file(File(pickedImage!.path)),
-              SizedBox(height: 30),
-              Text('Delete an Advertisement'),
-              DropdownButton<String>(
-                value: selectedId,
-                onChanged: (String? newValue) {
-                  setState(() {
-                    selectedId = newValue;
-                  });
-                },
-                items: postedAds.map<DropdownMenuItem<String>>((Advertisement ad) {
-                  return DropdownMenuItem<String>(
-                    value: ad.id.toString(),
-                    child: Text(ad.id.toString()),
-                  );
-                }).toList(),
-              ),
-              ElevatedButton(
-                onPressed: deleteImage,
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                child: Text('Delete Image'),
               ),
             ],
           ),
