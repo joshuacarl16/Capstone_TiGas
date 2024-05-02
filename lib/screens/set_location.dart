@@ -45,6 +45,7 @@ class _SetLocationScreenState extends State<SetLocationScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Color(0xFF609966),
+        iconTheme: IconThemeData(color: Colors.white),
         // automaticallyImplyLeading: false,
       ),
       body: Padding(

@@ -390,7 +390,7 @@ class HPMapState extends State<HPMap> {
                       );
                       setState(() {});
                     },
-                    child: Icon(Icons.my_location),
+                    child: Icon(Icons.my_location, color: Colors.white),
                     backgroundColor: Color(0xFF609966),
                   ),
                 ),
@@ -424,8 +424,9 @@ class HPMapState extends State<HPMap> {
                         }
                       }
                     },
-                    backgroundColor: Color.fromARGB(255, 8, 146, 238),
-                    child: Icon(Icons.pin_drop_outlined),
+                    backgroundColor: Colors.white,
+                    child:
+                        Icon(Icons.pin_drop_outlined, color: Color(0xFF609966)),
                   ),
                 ),
               ],

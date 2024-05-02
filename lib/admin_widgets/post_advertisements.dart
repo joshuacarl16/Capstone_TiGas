@@ -38,10 +38,15 @@ class _PostAdvertisementState extends State<PostAdvertisement> {
   final TextEditingController _adController = TextEditingController();
   List<Advertisement> postedAds = [];
   XFile? pickedImage;
-  String? selectedId;
   DateTime? selectedDate;
   TimeOfDay? selectedTime;
   final urlManager = UrlManager();
+
+  @override
+  void initState() {
+    super.initState();
+    fetchAdvertisements();
+  }
 
   Future<void> fetchAdvertisements() async {
     String url = await urlManager.getValidBaseUrl();
@@ -54,7 +59,7 @@ class _PostAdvertisementState extends State<PostAdvertisement> {
 
       setState(() {
         postedAds = adsJson.map((json) {
-          Advertisement ad = Advertisement(
+          return Advertisement(
             id: json['id'],
             text: json['caption'],
             image: XFile("$url${json['image']}"),
@@ -64,13 +69,6 @@ class _PostAdvertisementState extends State<PostAdvertisement> {
                 : null,
             postedBy: json['posted_by'] ?? 'Unknown',
           );
-
-          if (ad.validUntil != null &&
-              ad.validUntil!.isBefore(DateTime.now())) {
-            deleteAdvertisement(ad.id);
-          }
-
-          return ad;
         }).toList();
       });
     } else {
@@ -110,10 +108,11 @@ class _PostAdvertisementState extends State<PostAdvertisement> {
 
         setState(() {
           postedAds.add(Advertisement(
-              text: _adController.text,
-              image: pickedImage!,
-              updated: updated,
-              postedBy: user?.displayName ?? 'Unknown'));
+            text: _adController.text,
+            image: pickedImage!,
+            updated: updated,
+            postedBy: user?.displayName ?? 'Unknown',
+          ));
           _adController.clear();
         });
         showSnackBar(context, 'Image uploaded');
@@ -133,61 +132,28 @@ class _PostAdvertisementState extends State<PostAdvertisement> {
     });
   }
 
-  Future<void> deleteAdvertisement(int? id) async {
-    if (id != null) {
-      String url = await urlManager.getValidBaseUrl();
-      Uri uri = Uri.parse("$url/images/$id/delete");
-
-      var response = await http.delete(uri);
-
-      if (response.statusCode == 200) {
-        print("Advertisement $id deleted successfully");
-        fetchAdvertisements();
-      } else {
-        print("Failed to delete advertisement $id");
-      }
-    }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    fetchAdvertisements();
-  }
-
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(0.0),
-      child: SingleChildScrollView(
-        child: Container(
-          padding: EdgeInsets.all(8.0),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(15.0),
-            border: Border.all(
-              color: Colors.green,
-              width: 3.0,
-            ),
-          ),
+    return Scaffold(
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: SingleChildScrollView(
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                'Post an Advertisement',
-                style: TextStyle(
-                  fontSize: 24.0,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: 'Arial',
-                ),
+                'Caption/Details',
+                style: TextStyle(fontWeight: FontWeight.bold),
               ),
+              SizedBox(height: 8),
               TextFormField(
                 controller: _adController,
                 maxLines: 3,
                 decoration: InputDecoration(
-                  labelText: 'Caption/Details',
+                  border: OutlineInputBorder(),
                 ),
               ),
-              SizedBox(height: 10),
+              SizedBox(height: 16),
               GestureDetector(
                 onTap: () async {
                   final DateTime? picked = await showDatePicker(
@@ -224,11 +190,13 @@ class _PostAdvertisementState extends State<PostAdvertisement> {
                     ),
                     decoration: InputDecoration(
                       labelText: 'Valid Until',
+                      suffixIcon: Icon(Icons.calendar_today),
+                      border: OutlineInputBorder(),
                     ),
                   ),
                 ),
               ),
-              SizedBox(height: 10),
+              SizedBox(height: 16),
               ElevatedButton(
                 onPressed: () async {
                   final ImagePicker _picker = ImagePicker();
@@ -240,20 +208,16 @@ class _PostAdvertisementState extends State<PostAdvertisement> {
                     });
                   }
                 },
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
-                child:
-                    Text('Pick Image', style: TextStyle(color: Colors.white)),
+                child: Text('Pick Image'),
               ),
-              SizedBox(height: 10),
+              SizedBox(height: 16),
               pickedImage == null
                   ? Text('No image selected.')
                   : Image.file(File(pickedImage!.path)),
-              SizedBox(height: 10),
+              SizedBox(height: 16),
               ElevatedButton(
                 onPressed: uploadImage,
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
-                child:
-                    Text('Upload Image', style: TextStyle(color: Colors.white)),
+                child: Text('Upload Image'),
               ),
             ],
           ),

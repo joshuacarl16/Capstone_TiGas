@@ -5,6 +5,8 @@ import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:provider/provider.dart';
+import 'package:tigas_application/auth/firebase_auth.dart';
 import 'package:tigas_application/gmaps/location_service.dart';
 import 'package:image/image.dart' as img;
 import 'package:tigas_application/models/station_model.dart';
@@ -294,17 +296,26 @@ class GMapsState extends State<GMaps> {
                 fit: BoxFit.contain,
                 height: 140,
               ),
+              iconTheme: IconThemeData(color: Colors.white),
               backgroundColor: Color(0xFF609966),
               elevation: 0,
               leading: IconButton(
                 icon: Icon(Icons.arrow_back),
                 onPressed: () {
-                  Navigator.of(context).pushReplacement(
-                    MaterialPageRoute(
-                      builder: (context) => NavBar(selectedTab: 0),
-                    ),
-                  );
-                  showRatingDialog(context, snapshot.data!.id);
+                  if (context.read<FirebaseAuthMethods>().isLoggedIn) {
+                    Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(
+                        builder: (context) => NavBar(selectedTab: 0),
+                      ),
+                    );
+                    showRatingDialog(context, snapshot.data!.id);
+                  } else {
+                    Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(
+                        builder: (context) => NavBar(selectedTab: 0),
+                      ),
+                    );
+                  }
                 },
               ),
             ),

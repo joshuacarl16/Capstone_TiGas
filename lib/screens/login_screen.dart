@@ -8,7 +8,6 @@ import 'package:tigas_application/auth/firebase_auth.dart';
 import 'package:tigas_application/screens/register_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:tigas_application/styles/styles.dart';
-import 'package:tigas_application/admin_widgets/admin_login.dart';
 import 'package:tigas_application/widgets/bottom_navbar.dart';
 import 'package:tigas_application/widgets/show_snackbar.dart';
 
@@ -100,9 +99,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                      Text("Email",
-                                          style:
-                                              getEmailTextStyle(screenHeight)),
+                                      // Text("Email",
+                                      //     style:
+                                      //         getEmailTextStyle(screenHeight)),
                                       SizedBox(height: screenHeight * 0.01),
                                       TextFormField(
                                         style: TextStyle(
@@ -129,9 +128,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                             TextInputType.emailAddress,
                                       ),
                                       SizedBox(height: screenHeight * 0.02),
-                                      Text("Password",
-                                          style: getPasswordTextStyle(
-                                              screenHeight)),
+                                      // Text("Password",
+                                      //     style: getPasswordTextStyle(
+                                      //         screenHeight)),
                                       SizedBox(height: screenHeight * 0.01),
                                       TextFormField(
                                         style: TextStyle(

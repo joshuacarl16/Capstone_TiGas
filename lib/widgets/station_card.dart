@@ -220,22 +220,20 @@ class _AutoScrollingGasTypesState extends State<AutoScrollingGasTypes> {
   }
 
   void startScrolling() {
-    const scrollDuration =
-        Duration(seconds: 30); // Adjust scrolling speed as needed
-    double scrollAmountPerTick =
-        1.0; // Adjust this to control the scroll amount
+    const scrollDuration = Duration(seconds: 30);
+    double scrollAmountPerTick = 1.0;
 
-    _scrollTimer = Timer.periodic(Duration(milliseconds: 20), (timer) {
+    _scrollTimer = Timer.periodic(const Duration(milliseconds: 30), (timer) {
       _scrollPosition += scrollAmountPerTick;
 
       if (_scrollController.position.maxScrollExtent ==
           _scrollController.offset) {
-        _scrollPosition = 0; // Reset scroll position if we reached the end
+        _scrollPosition = 0;
         _scrollController.jumpTo(_scrollPosition);
       } else {
         _scrollController.animateTo(
           _scrollPosition,
-          duration: Duration(milliseconds: 20),
+          duration: const Duration(milliseconds: 30),
           curve: Curves.linear,
         );
       }
@@ -278,21 +276,35 @@ class _AutoScrollingGasTypesState extends State<AutoScrollingGasTypes> {
     });
   }
 
-  Column _buildGasTypeInfo(String type, String price, double unitHeightValue,
-      double unitWidthValue) {
+  Column _buildGasTypeInfo(
+    String type,
+    String price,
+    double unitHeightValue,
+    double unitWidthValue,
+  ) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Text(
-          type,
-          style: GoogleFonts.catamaran(
-            fontSize: 2 * unitHeightValue,
-            fontWeight: FontWeight.bold,
+        Container(
+          padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+          decoration: BoxDecoration(
+            color: Colors.green[100],
+            borderRadius: BorderRadius.circular(8.0),
+          ),
+          child: Text(
+            type,
+            style: GoogleFonts.catamaran(
+              fontSize: 18.0,
+              fontWeight: FontWeight.bold,
+              color: Colors.green[900],
+            ),
           ),
         ),
+        SizedBox(height: 8.0),
         Text(
           price,
           style: TextStyle(
-            fontSize: 1.6 * unitHeightValue,
+            fontSize: 16.0,
             fontWeight: FontWeight.bold,
             color: Colors.grey[700],
           ),
@@ -303,8 +315,8 @@ class _AutoScrollingGasTypesState extends State<AutoScrollingGasTypes> {
 
   Container _buildDivider(double unitHeightValue) {
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 1 * unitHeightValue),
-      height: 7 * unitHeightValue,
+      margin: EdgeInsets.symmetric(horizontal: 0 * unitHeightValue),
+      height: 0 * unitHeightValue,
       child: VerticalDivider(
         color: Colors.black,
         indent: unitHeightValue,
@@ -313,4 +325,3 @@ class _AutoScrollingGasTypesState extends State<AutoScrollingGasTypes> {
     );
   }
 }
-//Cleanup

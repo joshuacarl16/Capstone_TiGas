@@ -57,6 +57,7 @@ class _NavBarState extends State<NavBar> {
         ),
         backgroundColor: Color(0xFF609966),
         elevation: 0,
+        iconTheme: IconThemeData(color: Colors.white),
       ),
       drawer: DrawerContent(),
       body: screens[widget.selectedTab],

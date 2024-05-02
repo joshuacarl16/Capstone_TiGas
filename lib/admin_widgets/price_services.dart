@@ -23,6 +23,7 @@ class _ModifyPriceAndServicesState extends State<ModifyPriceAndServices> {
 
   @override
   void initState() {
+    fetchAndLoadGasStations();
     super.initState();
     _selectedStation?.gasTypeInfo?.forEach((key, value) {
       _priceControllers[key] = TextEditingController(text: value);
@@ -35,6 +36,12 @@ class _ModifyPriceAndServicesState extends State<ModifyPriceAndServices> {
     "Oil": FaIcon(FontAwesomeIcons.oilCan, color: Colors.green[700]),
     "Restroom": FaIcon(FontAwesomeIcons.restroom, color: Colors.green[700]),
   };
+
+  Future<void> fetchAndLoadGasStations() async {
+    final stationProvider =
+        Provider.of<StationProvider>(context, listen: false);
+    await stationProvider.fetchStations();
+  }
 
   Future<void> updateGasPrice() async {
     if (_selectedStation != null) {
@@ -92,9 +99,9 @@ class _ModifyPriceAndServicesState extends State<ModifyPriceAndServices> {
         future: getUserRole(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError || snapshot.data == null) {
-            return Center(child: Text('Error fetching user role'));
+            return const Center(child: Text('Error fetching user role'));
           } else {
             String userRole = snapshot.data!;
             List<Station> filteredStations = stationProvider.stations
@@ -115,12 +122,12 @@ class _ModifyPriceAndServicesState extends State<ModifyPriceAndServices> {
                       ),
                     ),
                   ),
-                  SizedBox(height: 10),
-                  Divider(
+                  const SizedBox(height: 10),
+                  const Divider(
                     color: Colors.grey,
                     thickness: 2,
                   ),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
                   DropdownButton<Station>(
                     isExpanded: true,
                     value: _selectedStation,
@@ -153,19 +160,19 @@ class _ModifyPriceAndServicesState extends State<ModifyPriceAndServices> {
                       );
                     }).toList(),
                   ),
-                  SizedBox(height: 20),
-                  Divider(
+                  const SizedBox(height: 20),
+                  const Divider(
                     color: Colors.grey,
                     thickness: 2,
                   ),
-                  Center(
+                  const Center(
                       child: Text(
                     'Price Update',
                     style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontStyle: FontStyle.italic),
                   )),
-                  Divider(
+                  const Divider(
                     color: Colors.grey,
                     thickness: 2,
                   ),
@@ -178,16 +185,16 @@ class _ModifyPriceAndServicesState extends State<ModifyPriceAndServices> {
                           children: [
                             Text(
                               entry.key,
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            SizedBox(height: 5),
+                            const SizedBox(height: 5),
                             TextFormField(
                               controller: entry.value,
                               keyboardType: TextInputType.number,
-                              decoration: InputDecoration(
+                              decoration: const InputDecoration(
                                 border: OutlineInputBorder(),
                               ),
                             ),
@@ -195,34 +202,34 @@ class _ModifyPriceAndServicesState extends State<ModifyPriceAndServices> {
                         ),
                       );
                     }).toList(),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                   ElevatedButton(
                     onPressed: () async {
                       await updateGasPrice();
                       showSnackBar(context, 'Gas Prices Updated');
                     },
-                    child: Text(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green[400],
+                      padding: const EdgeInsets.symmetric(vertical: 15.0),
+                    ),
+                    child: const Text(
                       'Update Prices',
                       style: TextStyle(color: Colors.white),
                     ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green[400],
-                      padding: EdgeInsets.symmetric(vertical: 15.0),
-                    ),
                   ),
-                  SizedBox(height: 20),
-                  Divider(
+                  const SizedBox(height: 20),
+                  const Divider(
                     color: Colors.grey,
                     thickness: 2,
                   ),
-                  Center(
+                  const Center(
                       child: Text(
                     'Service Availability',
                     style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontStyle: FontStyle.italic),
                   )),
-                  Divider(
+                  const Divider(
                     color: Colors.grey,
                     thickness: 2,
                   ),
@@ -230,8 +237,8 @@ class _ModifyPriceAndServicesState extends State<ModifyPriceAndServices> {
                     return CheckboxListTile(
                       title: Row(
                         children: [
-                          servicesIcons[key] ?? SizedBox(),
-                          SizedBox(width: 8),
+                          servicesIcons[key] ?? const SizedBox(),
+                          const SizedBox(width: 8),
                           Text(key),
                         ],
                       ),
@@ -243,19 +250,19 @@ class _ModifyPriceAndServicesState extends State<ModifyPriceAndServices> {
                       },
                     );
                   }).toList(),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                   ElevatedButton(
                     onPressed: () async {
                       await updateServices();
                       showSnackBar(context, 'Services Updated');
                     },
-                    child: Text(
-                      'Update Services',
-                      style: TextStyle(color: Colors.white),
-                    ),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.blue[400],
-                      padding: EdgeInsets.symmetric(vertical: 15.0),
+                      padding: const EdgeInsets.symmetric(vertical: 15.0),
+                    ),
+                    child: const Text(
+                      'Update Services',
+                      style: TextStyle(color: Colors.white),
                     ),
                   ),
                 ],

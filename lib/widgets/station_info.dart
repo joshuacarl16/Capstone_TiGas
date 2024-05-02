@@ -15,6 +15,7 @@ import 'package:tigas_application/gmaps/location_service.dart';
 import 'package:tigas_application/models/station_model.dart';
 import 'package:intl/intl.dart';
 import 'package:tigas_application/providers/url_manager.dart';
+import 'package:tigas_application/screens/login_screen.dart';
 import 'package:tigas_application/widgets/rate_station.dart';
 import 'package:timezone/timezone.dart' as tz;
 
@@ -253,8 +254,37 @@ class _StationInfoState extends State<StationInfo> {
                   ),
                   SizedBox(height: unitHeightValue * 6),
                   ElevatedButton.icon(
-                    onPressed: () {
-                      showRatingDialog(context, widget.station.id);
+                    onPressed: () async {
+                      if (context.read<FirebaseAuthMethods>().isLoggedIn) {
+                        showRatingDialog(context, widget.station.id);
+                      } else {
+                        showDialog(
+                          context: context,
+                          builder: (context) {
+                            return AlertDialog(
+                              title: Text('Login Required'),
+                              content: Text(
+                                  'You need to login to use this feature.'),
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    context
+                                        .read<FirebaseAuthMethods>()
+                                        .signOut(context);
+                                  },
+                                  child: Text('Login'),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                  },
+                                  child: Text('Cancel'),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      }
                     },
                     icon: FaIcon(
                       FontAwesomeIcons.comments,
@@ -265,10 +295,12 @@ class _StationInfoState extends State<StationInfo> {
                       style: TextStyle(color: Colors.white),
                     ),
                     style: ElevatedButton.styleFrom(
-                        minimumSize: Size(double.infinity, 50),
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30)),
-                        backgroundColor: Colors.green[700]),
+                      minimumSize: Size(double.infinity, 50),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      backgroundColor: Colors.green[700],
+                    ),
                   ),
                   SizedBox(height: unitHeightValue * 6),
                   FutureBuilder<List<Review>>(
@@ -420,21 +452,35 @@ class _StationInfoState extends State<StationInfo> {
     );
   }
 
-  Column _buildGasTypeInfo(String type, String price, double unitHeightValue,
-      double unitWidthValue) {
+  Column _buildGasTypeInfo(
+    String type,
+    String price,
+    double unitHeightValue,
+    double unitWidthValue,
+  ) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Text(
-          type,
-          style: GoogleFonts.catamaran(
-            fontSize: 2 * unitHeightValue,
-            fontWeight: FontWeight.bold,
+        Container(
+          padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+          decoration: BoxDecoration(
+            color: Colors.green[100],
+            borderRadius: BorderRadius.circular(8.0),
+          ),
+          child: Text(
+            type,
+            style: GoogleFonts.catamaran(
+              fontSize: 18.0,
+              fontWeight: FontWeight.bold,
+              color: Colors.green[900],
+            ),
           ),
         ),
+        SizedBox(height: 8.0),
         Text(
           price,
           style: TextStyle(
-            fontSize: 1.6 * unitHeightValue,
+            fontSize: 16.0,
             fontWeight: FontWeight.bold,
             color: Colors.grey[700],
           ),
@@ -446,8 +492,8 @@ class _StationInfoState extends State<StationInfo> {
   Container _buildDivider(double unitHeightValue, double unitWidthValue) {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 1 * unitHeightValue),
-      height: 7 * unitHeightValue,
-      width: 7 * unitWidthValue,
+      height: 0 * unitHeightValue,
+      width: 0 * unitWidthValue,
       child: VerticalDivider(
         color: Colors.black,
         indent: unitHeightValue,

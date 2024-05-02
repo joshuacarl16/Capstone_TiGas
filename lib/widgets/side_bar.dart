@@ -18,12 +18,9 @@ class DrawerContent extends StatelessWidget {
             .get(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            // Display a loading indicator while fetching data
             return Center(child: Container(child: CircularProgressIndicator()));
           }
-
           if (snapshot.hasError) {
-            // Display an error message if data fetching fails
             return Text('Error: ${snapshot.error}');
           }
 
