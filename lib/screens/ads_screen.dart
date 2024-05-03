@@ -446,7 +446,7 @@ class _CommercialPageState extends State<CommercialPage> {
                 centerTitle: true,
                 collapseMode: CollapseMode.pin,
                 title: Text(
-                  'PARTNERS',
+                  'PROMOTIONS',
                   style: GoogleFonts.signika(fontWeight: FontWeight.bold),
                 ),
                 background: Image.asset(
