@@ -55,17 +55,3 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-
-// class IsAuthenticated extends StatelessWidget {
-//   const IsAuthenticated({super.key});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     final firebaseUser = context.watch<User?>();
-
-//     if (firebaseUser != null) {
-//       return NavBar(selectedTab: 0);
-//     }
-//     return LoginScreen();
-//   }
-// }

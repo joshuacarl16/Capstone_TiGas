@@ -129,23 +129,6 @@ class _ResultScreenState extends State<ResultScreen> {
                 ),
               ),
               SizedBox(height: 20),
-              // Row(
-              //   children: [
-              //     Text(
-              //       'Logs',
-              //       style: TextStyle(fontWeight: FontWeight.w600, fontSize: 20),
-              //     ),
-              //   ],
-              // ),
-              // Container(
-              //   height: 200,
-              //   child: ListView.builder(
-              //     itemCount: widget.processLogs.length,
-              //     itemBuilder: (context, index) {
-              //       return Text(widget.processLogs[index]);
-              //     },
-              //   ),
-              // ),
             ],
           ),
         ),
