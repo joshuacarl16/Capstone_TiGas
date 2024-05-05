@@ -38,5 +38,7 @@ urlpatterns = [
     path('reviews/<str:pk>/', views.getReview),
     path('reviews/delete/<str:pk>/', views.deleteReview),
     path('stations/<int:station_id>/reviews/', views.getStationReviews),
+    path('stations/<int:station_id>/prices/', views.getPrices),
+    path('stations/<int:station_id>/prices/submit/', views.submitPrices),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

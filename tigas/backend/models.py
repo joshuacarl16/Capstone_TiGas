@@ -43,3 +43,14 @@ class Review(models.Model):
     review = models.JSONField(null=True)
     comments = models.TextField(null=True)
 
+class Prices(models.Model):
+    station = models.ForeignKey(Station, on_delete=models.CASCADE, related_name='prices')
+    uploaded_by = models.CharField(max_length=255)
+    gasTypeInfo = models.JSONField(null=True)  
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-updated']
+
+    def __str__(self):
+        return f'Price {self.price} uploaded by {self.uploaded_by} for station {self.station.name}'
