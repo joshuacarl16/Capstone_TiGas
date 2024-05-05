@@ -1,12 +1,14 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:tigas_application/notification/notification_service.dart';
 
 import 'package:tigas_application/providers/url_manager.dart';
 import 'package:tigas_application/widgets/show_snackbar.dart';
@@ -44,8 +46,24 @@ class _PostAdvertisementState extends State<PostAdvertisement> {
 
   @override
   void initState() {
-    super.initState();
     fetchAdvertisements();
+    AwesomeNotifications().isNotificationAllowed().then((isAllowed) => {
+          if (!isAllowed)
+            {AwesomeNotifications().requestPermissionToSendNotifications()}
+        });
+    super.initState();
+  }
+
+  void showNotification(String role) {
+    AwesomeNotifications().createNotification(
+        content: NotificationContent(
+            id: 10,
+            channelKey: 'high_importance_channel',
+            actionType: ActionType.Default,
+            title: 'Tigas',
+            body: '$role just dropped a new promotion!',
+            displayOnBackground: true,
+            showWhen: true));
   }
 
   Future<void> fetchAdvertisements() async {
@@ -106,6 +124,8 @@ class _PostAdvertisementState extends State<PostAdvertisement> {
         var decodedData = jsonDecode(responseData);
         DateTime updated = DateTime.parse(decodedData['updated']);
 
+        String userRole = await getUserRole(user?.uid ?? '');
+
         setState(() {
           postedAds.add(Advertisement(
             text: _adController.text,
@@ -115,6 +135,7 @@ class _PostAdvertisementState extends State<PostAdvertisement> {
           ));
           _adController.clear();
         });
+        showNotification(userRole);
         showSnackBar(context, 'Image uploaded');
       } else {
         showSnackBar(context, 'Image upload failed');

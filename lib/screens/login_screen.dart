@@ -1,3 +1,4 @@
+import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -5,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:tigas_application/admin/admin_dashboard.dart';
 import 'package:tigas_application/admin/admin_dashboard.dart';
 import 'package:tigas_application/auth/firebase_auth.dart';
+import 'package:tigas_application/notification/notification_service.dart';
 import 'package:tigas_application/screens/register_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:tigas_application/styles/styles.dart';
