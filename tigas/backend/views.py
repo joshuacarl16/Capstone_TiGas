@@ -2,8 +2,8 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import status
-from .models import Review, Station, Advertisement
-from .serializers import ReviewSerializer, StationSerializer, AdvertisementSerializer
+from .models import Prices, Review, Station, Advertisement
+from .serializers import PricesSerializer, ReviewSerializer, StationSerializer, AdvertisementSerializer
 
 
 @api_view(['GET'])
@@ -150,3 +150,34 @@ def deleteReview(request, pk):
     except Review.DoesNotExist:
         return Response({'error': 'Review does not exist'}, status=status.HTTP_404_NOT_FOUND)
     
+@api_view(['GET'])
+def getPrices(request, station_id):
+    try:
+        prices = Prices.objects.filter(station_id=station_id)
+    except Prices.DoesNotExist:
+        return Response({'error': 'Prices not found for this station'}, status=status.HTTP_404_NOT_FOUND)
+
+    serializer = PricesSerializer(prices, many=True)
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
+@api_view(['POST'])
+def submitPrices(request, station_id):
+    try:
+        station = Station.objects.get(id=station_id)
+    except Station.DoesNotExist:
+        return Response({'error': 'Station does not exist'}, status=status.HTTP_404_NOT_FOUND)
+
+    uploaded_by = request.data.get('uploaded_by', 'User')
+    gasTypeInfo = request.data.get('gasTypeInfo', {})
+
+    prices_instance = Prices.objects.create(
+        station=station,
+        uploaded_by=uploaded_by,
+        gasTypeInfo=gasTypeInfo
+    )
+
+    serializer = PricesSerializer(prices_instance)
+    return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+
