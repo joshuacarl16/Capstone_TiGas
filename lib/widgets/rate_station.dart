@@ -29,7 +29,7 @@ class _RateDialogState extends State<RateDialog> {
   late double deviceHeight;
   late double deviceWidth;
   var ratingScreenController = PageController();
-  var _starPosition = 240.0;
+  var _starPosition = 220.0;
   double _starOffset = 0.0;
   var rating = 0;
   List<int> _selectedChipIndexes = [];
@@ -179,7 +179,7 @@ class _RateDialogState extends State<RateDialog> {
                         duration: Duration(milliseconds: 300),
                         curve: Curves.easeIn);
                     setState(() {
-                      _starPosition = 25;
+                      _starPosition = 0;
                       rating = index + 1;
                     });
                   },
@@ -207,14 +207,15 @@ class _RateDialogState extends State<RateDialog> {
 
   buildThanksNote() {
     String stationName = '';
-
+    String? stationImage = '';
     try {
       StationProvider stationProvider =
           Provider.of<StationProvider>(context, listen: false);
       Station? station =
           stationProvider.stations.firstWhere((s) => s.id == widget.stationId);
 
-      stationName = station.name;
+      stationName = station.name.toUpperCase();
+      stationImage = station.imagePath;
     } catch (e) {}
 
     return Column(
@@ -222,18 +223,22 @@ class _RateDialogState extends State<RateDialog> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text(
-          'Thank you for using',
+          'Thank you for using TiGas!',
+          style: TextStyle(fontSize: deviceHeight * 0.02),
+          textAlign: TextAlign.center,
+        ),
+        Text(
+          'How was $stationName\u0027s services?',
           style: TextStyle(
-            fontSize: deviceHeight * 0.03,
+            fontSize: deviceHeight * 0.026,
             color: Colors.green,
             fontWeight: FontWeight.bold,
           ),
         ),
-        Image.asset('assets/greenlogo.png',
-            height: deviceHeight * 0.06, width: deviceWidth * 0.3),
-        Text('How was $stationName\u0027s services?',
-            style: TextStyle(fontSize: deviceHeight * 0.02),
-            textAlign: TextAlign.center,),
+        SizedBox(height: deviceHeight * 0.02),
+        Image.asset(stationImage!,
+            height: deviceHeight * 0.09, width: deviceWidth * 0.6),
+        SizedBox(height: deviceHeight * 0.02),
       ],
     );
   }

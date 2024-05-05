@@ -100,7 +100,6 @@ class _UpdateTimestampState extends State<UpdateTimestamp> {
                         station.updated,
                         tz.getLocation('Asia/Manila'),
                       );
-
                       return Card(
                         color: Colors.grey[300],
                         margin: const EdgeInsets.all(8.0),
