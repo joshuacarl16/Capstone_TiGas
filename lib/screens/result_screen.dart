@@ -1,6 +1,8 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:convert';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
@@ -47,19 +49,81 @@ class _ResultScreenState extends State<ResultScreen> {
 
   Future<void> updateGasPrice() async {
     String baseUrl = await urlManager.getValidBaseUrl();
-    var url =
-        Uri.parse('$baseUrl/stations/${widget.selectedStation.id}/update/');
-    Map<String, String> newGasPrices = {};
-    _controllers.forEach((key, value) {
-      newGasPrices[key] = value.text;
+    var url = Uri.parse(
+        '$baseUrl/stations/${widget.selectedStation.id}/prices/submit/');
+
+    // Prepare a dictionary to accumulate all gas types and prices
+    Map<String, String> accumulatedGasInfo = {};
+
+    String? uploadedBy;
+    try {
+      DocumentSnapshot snapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(FirebaseAuth.instance.currentUser!.uid)
+          .get();
+
+      uploadedBy = (snapshot.data() as Map<String, dynamic>?)?['displayname'];
+    } catch (e) {
+      uploadedBy = 'Unknown';
+    }
+
+    // Loop through each gas type and price controller
+    _controllers.forEach((gasType, controller) {
+      String priceStr = controller.text;
+      try {
+        double priceValue =
+            double.parse(priceStr); // Parse price string to double
+        String formattedPriceStr = priceValue
+            .toStringAsFixed(2); // Format price to two decimal places as string
+        accumulatedGasInfo[gasType] =
+            formattedPriceStr; // Add to accumulated gas info
+      } catch (e) {
+        // Handle invalid price parsing
+        print('Invalid price for $gasType: $priceStr');
+      }
     });
 
-    var response = await http.patch(url,
-        body: json.encode({'gasTypeInfo': newGasPrices}),
-        headers: {"Content-Type": "application/json"});
+    // Prepare the request body
+    Map<String, dynamic> requestBody = {
+      'uploaded_by': uploadedBy, // Set the uploaded_by field as desired
+      'gasTypeInfo': accumulatedGasInfo,
+    };
 
-    if (response.statusCode != 200) {
-      throw Exception('Failed to update gas price');
+    try {
+      var response = await http.post(
+        url,
+        body: jsonEncode(requestBody),
+        headers: {"Content-Type": "application/json"},
+      );
+
+      if (response.statusCode == 201) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Submitted price update'),
+            duration: Duration(seconds: 3),
+          ),
+        );
+
+        // Navigate to NavBar screen after showing success message
+        Future.delayed(Duration(seconds: 3), () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: ((context) => NavBar(selectedTab: 1)),
+            ),
+          );
+        });
+      } else {
+        throw Exception('Failed to update gas price');
+      }
+    } catch (e) {
+      print('Error updating gas price: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to update gas price. Please try again.'),
+          duration: Duration(seconds: 3),
+        ),
+      );
     }
   }
 
@@ -80,26 +144,26 @@ class _ResultScreenState extends State<ResultScreen> {
                     Row(
                       children: [
                         Text(entry.key,
-                            style: TextStyle(
+                            style: const TextStyle(
                                 fontSize: 16, fontWeight: FontWeight.bold)),
                         Text(
                           ' (Current: ${widget.selectedStation.gasTypeInfo?[entry.key]})',
-                          style: TextStyle(
+                          style: const TextStyle(
                               fontSize: 12,
                               fontStyle: FontStyle.italic,
                               fontWeight: FontWeight.w500),
                         )
                       ],
                     ),
-                    SizedBox(height: 10),
+                    const SizedBox(height: 10),
                     TextFormField(
                       controller: entry.value,
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         labelText: 'Price',
                         border: OutlineInputBorder(),
                       ),
                     ),
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                   ],
                 );
               }).toList(),
@@ -107,12 +171,12 @@ class _ResultScreenState extends State<ResultScreen> {
                 onPressed: () async {
                   await updateGasPrice();
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
+                    const SnackBar(
                       content: Text('Submitted price update'),
                       duration: Duration(seconds: 3),
                     ),
                   );
-                  Future.delayed(Duration(seconds: 3), () {
+                  Future.delayed(const Duration(seconds: 3), () {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -123,12 +187,12 @@ class _ResultScreenState extends State<ResultScreen> {
                     );
                   });
                 },
-                child: Text('Update'),
+                child: const Text('Update'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.green[400],
                 ),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
             ],
           ),
         ),
