@@ -4,10 +4,13 @@ import 'dart:io';
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:tigas_application/notification/notif_services.dart';
 import 'package:tigas_application/notification/notification_service.dart';
 
 import 'package:tigas_application/providers/url_manager.dart';
@@ -43,27 +46,23 @@ class _PostAdvertisementState extends State<PostAdvertisement> {
   DateTime? selectedDate;
   TimeOfDay? selectedTime;
   final urlManager = UrlManager();
+  NotificationServices notificationServices = NotificationServices();
 
   @override
   void initState() {
     fetchAdvertisements();
-    AwesomeNotifications().isNotificationAllowed().then((isAllowed) => {
-          if (!isAllowed)
-            {AwesomeNotifications().requestPermissionToSendNotifications()}
-        });
     super.initState();
-  }
-
-  void showNotification(String role) {
-    AwesomeNotifications().createNotification(
-        content: NotificationContent(
-            id: 10,
-            channelKey: 'high_importance_channel',
-            actionType: ActionType.Default,
-            title: 'Tigas',
-            body: '$role just dropped a new promotion!',
-            displayOnBackground: true,
-            showWhen: true));
+    notificationServices.requestNotificationPermission();
+    notificationServices.forgroundMessage();
+    notificationServices.firebaseInit(context);
+    notificationServices.setupInteractMessage(context);
+    notificationServices.isTokenRefresh();
+    notificationServices.getDeviceToken().then((value){
+      if (kDebugMode) {
+        print('device token');
+        print(value);
+      }
+    });
   }
 
   Future<void> fetchAdvertisements() async {
@@ -110,6 +109,7 @@ class _PostAdvertisementState extends State<PostAdvertisement> {
           : '';
 
       final User? user = FirebaseAuth.instance.currentUser;
+      String userRole = await getUserRole(user?.uid ?? '');
       if (user != null) {
         String role = await getUserRole(user.uid);
         request.fields['posted_by'] = role;
@@ -124,8 +124,6 @@ class _PostAdvertisementState extends State<PostAdvertisement> {
         var decodedData = jsonDecode(responseData);
         DateTime updated = DateTime.parse(decodedData['updated']);
 
-        String userRole = await getUserRole(user?.uid ?? '');
-
         setState(() {
           postedAds.add(Advertisement(
             text: _adController.text,
@@ -135,12 +133,53 @@ class _PostAdvertisementState extends State<PostAdvertisement> {
           ));
           _adController.clear();
         });
-        showNotification(userRole);
+
+        notificationServices.getDeviceToken().then((value)async{
+            List<String> tokens = await getAllFCMTokens();
+            for (String token in tokens) {
+            var data = {
+              'to' : token,
+              'priority' : 'high',
+              'notification' : {
+                'title' : 'TiGAS' ,
+                'body' : '$userRole just dropped a new promotion!' ,
+            },
+              'android': {
+                'notification': {
+                  'notification_count': 23,
+                },
+              },
+              'data' : {
+                'type' : 'msj' ,
+                'id' : 'TiGAS'
+              }
+            };
+
+            await http.post(Uri.parse('https://fcm.googleapis.com/fcm/send'),
+            body: jsonEncode(data) ,
+              headers: {
+                'Content-Type': 'application/json; charset=UTF-8',
+                'Authorization' : 'key=AAAAzH3-XCg:APA91bGi2Tzb9q8B_X1sxp-_WUKmhPoiIxs5o7KNym8y9H8W67tf5r98Nl3FIcPJLbVl_OE0dFPXFHu-QiL_K6GHaI8-6IZGHDukylwV283KKIXpdFyhJVbsvVwFv94uYSsHMU_hXWOr'
+              }
+            ).then((value){
+              if (kDebugMode) {
+                print(value.body.toString());
+              }
+            }).onError((error, stackTrace){
+              if (kDebugMode) {
+                print(error);
+              }
+            });
+          }});
         showSnackBar(context, 'Image uploaded');
       } else {
         showSnackBar(context, 'Image upload failed');
       }
     }
+  }
+
+  Future<List<String>> getAllFCMTokens() async {
+    return ['dSw_3VCCTGmgveL7G3NBEU:APA91bF_Vf7bLn-XaLzPF4bh_HfTzE627IioyHXPAt7VFima9v1fl33eYPAdBJS3Mqa7oSMIgjONdJbUlVom48eqSnJK_fDToSiWq9DFGcQJlBtY2lT9irfsmGZnmJoqo9mdBZjOyM6A', 'e8ecAouqRqyvmjQbubMJ4c:APA91bGZFI4JTAe1gmjyJyL2jNEBxyfADm-j_q7unVVK-fZE0tULmuAlpkmerqO7V5GHDbfZ0Peb5U04TAFAaQDhRm49qQlghDhm9HUU8yOy9T1lXK_mupRR5eBdhopbq6JYRxjBEEsi'];
   }
 
   Future<String> getUserRole(String uid) async {
